@@ -18,6 +18,7 @@ export default function Report() {
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<string | null>(null);
+  const [smsNote, setSmsNote] = useState("");
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setF((s) => ({ ...s, [k]: e.target.value }));
 
@@ -31,7 +32,10 @@ export default function Report() {
       });
       const j = await res.json().catch(() => ({}));
       if (!res.ok) setErr(j.error || "Could not send");
-      else setDone(j.caseNumber);
+      else {
+        setDone(j.caseNumber);
+        setSmsNote(j.smsQueued ? `An SMS with this case number is on its way to ${f.phone}.` : "");
+      }
     } finally { setBusy(false); }
   }
 
@@ -44,6 +48,9 @@ export default function Report() {
           <h2>Case received</h2>
           <p className="sub">Write down this number or screenshot this page.</p>
           <div className="big-num">{done}</div>
+          {smsNote && (
+            <p style={{ fontSize: 13.5, color: "#157347", fontWeight: 600, margin: "10px 0 0" }}>{smsNote}</p>
+          )}
           <p style={{ fontSize: 13.5, color: "#5b6b86", margin: "10px 0 18px" }}>
             Keep it safe — it is your proof and your way to check progress.
           </p>

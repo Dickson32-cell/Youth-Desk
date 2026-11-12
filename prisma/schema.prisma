@@ -75,3 +75,14 @@ model Program {
   status      String   @default("OPEN") // OPEN | CLOSED
   createdAt   DateTime @default(now())
 }
+
+model SmsLog {
+  id          Int      @id @default(autoincrement())
+  kind        String   // CASE_CONFIRM
+  phone       String
+  caseNumber  String?
+  status      String   // SENT | FAILED | SKIPPED
+  providerRef String?
+  error       String?
+  createdAt   DateTime @default(now())
+}

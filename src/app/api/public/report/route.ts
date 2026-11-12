@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/db";
 import { nextCaseNumber } from "@/lib/auth";
+import { normalizeGhPhone, sendCaseSms, smsConfigured } from "@/lib/sms";
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
@@ -25,5 +26,13 @@ export async function POST(req: NextRequest) {
       status: "NEW",
     },
   });
-  return NextResponse.json({ ok: true, caseNumber, message: "Keep this number to track your case." });
+  // Confirmation SMS (case number + how to track) - after() keeps the reply fast
+  // and runs the send after the response is closed. Only when a valid phone exists.
+  const smsQueued = !!phone && smsConfigured() && !!normalizeGhPhone(phone);
+  if (smsQueued) {
+    after(async () => {
+      await sendCaseSms(caseNumber, phone);
+    });
+  }
+  return NextResponse.json({ ok: true, caseNumber, smsQueued, message: "Keep this number to track your case." });
 }
