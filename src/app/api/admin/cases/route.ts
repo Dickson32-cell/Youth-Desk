@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
     },
     orderBy: { createdAt: "desc" },
     take: 200,
+    include: { notes: { orderBy: { id: "asc" } } },
   });
   const counts = {
     all: await prisma.case.count(),
