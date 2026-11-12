@@ -21,7 +21,6 @@ export default function Home() {
             <a href="/report"><b>Report an issue</b><span>Walk-in or from your phone — anonymous or with your name. You receive a case number instantly.</span></a>
             <a href="/track"><b>Track your case</b><span>Enter your case number to see whether it is received, in progress, resolved, or forwarded.</span></a>
             <a href="/programs"><b>Opportunities</b><span>Training, jobs, scholarships and programmes announced by the desk.</span></a>
-            <a href="/login"><b>Officer sign in</b><span>For the Youth Desk officer only.</span></a>
           </div>
         </div>
       </main>

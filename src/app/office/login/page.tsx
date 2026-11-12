@@ -25,7 +25,7 @@ export default function Login() {
     <main className="main" style={{ maxWidth: 420, paddingTop: 40 }}>
       <form className="card" onSubmit={go}>
         <h2>Youth Desk sign in</h2>
-        <p className="sub">For the desk officer.</p>
+        <p className="sub">For the desk officer. This page is not linked from the public site — staff open this address directly.</p>
         {err && <div className="alert-err">{err}</div>}
         <label className="fld"><span className="cap">Username</span>
           <input type="text" value={u} onChange={(e) => setU(e.target.value)} autoComplete="username" required />

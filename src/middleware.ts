@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // PUBLIC: landing, login, public report/track/programs and their APIs.
-const PUBLIC = ["/", "/login", "/report", "/track", "/programs", "/api/auth/login", "/api/public"];
+const PUBLIC = ["/", "/report", "/track", "/programs", "/office/login", "/api/auth/login", "/api/public"];
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -11,7 +11,7 @@ export function middleware(req: NextRequest) {
   const token = req.cookies.get("youthdesk_session")?.value;
   if (!token || !token.includes(".")) {
     if (pathname.startsWith("/api/")) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/office/login", req.url));
   }
   return NextResponse.next();
 }
