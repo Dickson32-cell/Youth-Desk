@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// PUBLIC: landing, login, public report/track/programs and their APIs.
-const PUBLIC = ["/", "/report", "/track", "/programs", "/office/login", "/api/auth/login", "/api/public"];
+// PUBLIC: landing, login, public report/track/programs, printables (slip + referral form) and their APIs.
+const PUBLIC = ["/", "/report", "/track", "/programs", "/office/login", "/slip", "/forward", "/api/auth/login", "/api/public"];
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
