@@ -22,6 +22,15 @@ export default function ReportPack() {
   const [preparedBy, setPreparedBy] = useState("");
   const [err, setErr] = useState("");
 
+  // Management-review blocks collapse when the pack grows; printing always expands everything.
+  const [openIds, setOpenIds] = useState<Set<number>>(new Set());
+  const toggleCase = (id: number) =>
+    setOpenIds((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  const printPack = () => {
+    setOpenIds(new Set(cases.map((c) => c.id))); // expand all so the PDF keeps every detail
+    setTimeout(() => window.print(), 80);
+  };
+
   useEffect(() => {
     fetch("/api/admin/report")
       .then(async (r) => {
@@ -42,15 +51,6 @@ export default function ReportPack() {
 
   const resolvedRate = d.totals.all ? Math.round((d.totals.RESOLVED / d.totals.all) * 100) : 0;
   const month = new Date().toLocaleDateString("en-GB", { month: "long", year: "numeric" });
-
-  // Management-review blocks collapse when the pack grows; printing always expands everything.
-  const [openIds, setOpenIds] = useState<Set<number>>(new Set());
-  const toggleCase = (id: number) =>
-    setOpenIds((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
-  const printPack = () => {
-    setOpenIds(new Set(cases.map((c) => c.id))); // expand all so the PDF keeps every detail
-    setTimeout(() => window.print(), 80);
-  };
 
   return (
     <main>
