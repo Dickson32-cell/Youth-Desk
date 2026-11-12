@@ -7,7 +7,7 @@ const PUBLIC_TABS = [
   { href: "/", label: "Home", exact: true },
   { href: "/report", label: "Report" },
   { href: "/track", label: "Track" },
-  { href: "/programs", label: "Programs" },
+  { href: "/programs", label: "About" },
 ];
 
 const OFFICE_TABS = [
