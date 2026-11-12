@@ -14,6 +14,7 @@ export default function YouthRegister() {
   const [form, setForm] = useState({ name: "", phone: "", area: "", education: "", skills: "", ghanaCard: "", dateOfBirth: "" });
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
+  const [lastYouth, setLastYouth] = useState<{ id: number; serial: string; name: string; phone: string; area: string } | null>(null);
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) => setForm((s) => ({ ...s, [k]: e.target.value }));
 
   const load = useCallback(async (query: string) => {
@@ -33,7 +34,18 @@ export default function YouthRegister() {
     });
     const j = await res.json();
     if (!res.ok) setErr(j.error || "Could not save");
-    else { setMsg(`Registered ${j.youth.name} — serial ${j.youth.serial}`); setForm({ name: "", phone: "", area: "", education: "", skills: "", ghanaCard: "", dateOfBirth: "" }); load(q); }
+    else {
+      setMsg(`Registered ${j.youth.name} — serial ${j.youth.serial}`);
+      setLastYouth({ id: j.youth.id, serial: j.youth.serial, name: j.youth.name, phone: j.youth.phone || "", area: j.youth.area || "" });
+      setForm({ name: "", phone: "", area: "", education: "", skills: "", ghanaCard: "", dateOfBirth: "" });
+      load(q);
+    }
+  }
+
+  function takeComplaint() {
+    if (!lastYouth) return;
+    sessionStorage.setItem("youthcomplaint", JSON.stringify(lastYouth));
+    window.location.href = "/dashboard";
   }
 
   return (
@@ -69,7 +81,14 @@ export default function YouthRegister() {
               <button className="btn btn-primary w-full">Register this youth</button>
             </div>
           </form>
-          {msg && <div className="alert-ok">{msg}</div>}
+          {msg && (
+            <div className="alert-ok" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+              <span style={{ flex: 1 }}>{msg}</span>
+              {lastYouth && (
+                <button className="btn btn-primary btn-sm" onClick={takeComplaint}>Take their complaint</button>
+              )}
+            </div>
+          )}
           {err && <div className="alert-err">{err}</div>}
         </div>
 

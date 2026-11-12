@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import TopBar, {} from "@/components/Shell";
 
 type Case = {
@@ -15,6 +15,7 @@ type Case = {
   createdAt: string;
   updatedAt: string;
   notes: { id: number; body: string; author: string; createdAt: string }[];
+  attachments: { id: number; fileName: string; mimeType: string; size: number; createdAt: string }[];
 };
 
 const STATUSES = ["NEW", "IN_PROGRESS", "RESOLVED", "FORWARDED"] as const;
@@ -31,6 +32,14 @@ export default function Dashboard() {
   const [intakeBusy, setIntakeBusy] = useState(false);
   const [intakeErr, setIntakeErr] = useState("");
   const [intakeDone, setIntakeDone] = useState<{ caseNumber: string; smsQueued: boolean } | null>(null);
+  const [intakeFiles, setIntakeFiles] = useState<File[]>([]);
+  const [intakeYouth, setIntakeYouth] = useState<{ id: number; serial: string; name: string } | null>(null);
+  const onIntakeFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { prepareFilesForUpload } = await import("@/lib/imgPrepare");
+    const chosen = await prepareFilesForUpload(e.target.files || []);
+    setIntakeFiles((cur) => [...cur, ...chosen].slice(0, 5));
+    e.target.value = "";
+  };
   const intake = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setIntakeForm((s) => ({ ...s, [k]: e.target.value }));
 
@@ -53,6 +62,31 @@ export default function Dashboard() {
     const t = setTimeout(() => load(filter, q), 250);
     return () => clearTimeout(t);
   }, [q]); /* eslint-disable-line */
+
+  // "Take their complaint" hand-off from the walk-in youth register: the youth
+  // page stores the prefill and lands here with the intake modal already open.
+  useEffect(() => {
+    const raw = sessionStorage.getItem("youthcomplaint");
+    if (!raw) return;
+    sessionStorage.removeItem("youthcomplaint");
+    try {
+      const y = JSON.parse(raw);
+      setIntakeYouth({ id: y.id, serial: y.serial, name: y.name });
+      setIntakeForm((f) => ({ ...f, name: y.name || "", phone: y.phone || "", area: y.area || "" }));
+      setIntakeOpen(true);
+    } catch { /* ignore */ }
+  }, []); /* eslint-disable-line */
+
+  // Live queue: re-poll every 10 s so new cases appear without a manual reload,
+  // plus an instant refresh the moment the officer returns to this tab.
+  const reloadRef = useRef<() => void>(() => {});
+  reloadRef.current = () => load(filter, q);
+  useEffect(() => {
+    const t = setInterval(() => reloadRef.current(), 10000);
+    const onVis = () => { if (document.visibilityState === "visible") reloadRef.current(); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => { clearInterval(t); document.removeEventListener("visibilitychange", onVis); };
+  }, []);
 
   async function patch(id: number, body: object) {
     const res = await fetch("/api/admin/notes", {
@@ -151,6 +185,19 @@ export default function Dashboard() {
                 </div>
               )}
 
+              {open.attachments.length > 0 && (
+                <div style={{ marginBottom: 12 }}>
+                  <div className="sub">Attachments (evidence)</div>
+                  {open.attachments.map((a) => (
+                    <div key={a.id} className="note" style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ flex: 1, overflowWrap: "anywhere" }}>{a.fileName}</span>
+                      <span style={{ color: "#5b6b86", fontSize: 12 }}>{Math.round(a.size / 1024)} KB</span>
+                      <a href={`/api/attachments/${a.id}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">Open</a>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div className="noprint">
                 <div className="filters">
                   <button className="btn btn-sm btn-ghost" onClick={() => patch(open.id, { status: "IN_PROGRESS", note: "Started working on it." })}>Start working</button>
@@ -195,14 +242,18 @@ export default function Dashboard() {
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", marginTop: 14 }}>
                   <a href={`/slip/${intakeDone.caseNumber}`} target="_blank" rel="noreferrer" className="btn btn-ghost">Print case slip</a>
                   <a href={`/forward/${intakeDone.caseNumber}`} target="_blank" rel="noreferrer" className="btn btn-ghost">Referral form (MCD)</a>
-                  <button className="btn btn-ghost" onClick={() => { setIntakeDone(null); setIntakeForm({ name: "", phone: "", area: "", type: "EMPLOYMENT", description: "" }); }}>Log another</button>
+                  <button className="btn btn-ghost" onClick={() => { setIntakeDone(null); setIntakeForm({ name: "", phone: "", area: "", type: "EMPLOYMENT", description: "" }); setIntakeYouth(null); }}>Log another</button>
                   <button className="btn btn-primary" onClick={() => { setIntakeOpen(false); load(filter, q); }}>Done</button>
                 </div>
               </div>
             ) : (
               <>
                 <div className="case-head">
-                  <h2 style={{ fontSize: 16 }}>Log a walk-in case</h2>
+                  {intakeYouth ? (
+                    <h2 style={{ fontSize: 16 }}>Take complaint — {intakeYouth.serial} · {intakeYouth.name}</h2>
+                  ) : (
+                    <h2 style={{ fontSize: 16 }}>Log a walk-in case</h2>
+                  )}
                   <span className="sp" style={{ flex: 1 }} />
                   <button className="btn btn-ghost btn-sm" onClick={() => setIntakeOpen(false)}>Close</button>
                 </div>
@@ -211,10 +262,18 @@ export default function Dashboard() {
                   e.preventDefault();
                   setIntakeErr(""); setIntakeBusy(true);
                   try {
-                    const res = await fetch("/api/admin/cases", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(intakeForm) });
+                    const fd = new FormData();
+                    fd.append("name", intakeForm.name);
+                    fd.append("phone", intakeForm.phone);
+                    fd.append("area", intakeForm.area);
+                    fd.append("type", intakeForm.type);
+                    fd.append("description", intakeForm.description);
+                    if (intakeYouth) fd.append("youthId", String(intakeYouth.id));
+                    intakeFiles.forEach((fl) => fd.append("files", fl));
+                    const res = await fetch("/api/admin/cases", { method: "POST", body: fd });
                     const j = await res.json().catch(() => ({}));
                     if (!res.ok) setIntakeErr(j.error || "Could not save");
-                    else { setIntakeDone({ caseNumber: j.caseNumber, smsQueued: !!j.smsQueued }); load(filter, q); }
+                    else { setIntakeDone({ caseNumber: j.caseNumber, smsQueued: !!j.smsQueued }); setIntakeFiles([]); setIntakeYouth(null); load(filter, q); }
                   } finally { setIntakeBusy(false); }
                 }}>
                   <div className="form-grid">
@@ -242,6 +301,19 @@ export default function Dashboard() {
                   <label className="fld"><span className="cap">The complaint / request, as told to you *</span>
                     <textarea rows={4} value={intakeForm.description} onChange={intake("description")} required placeholder="Write what the youth asked for or complained about…" style={{ marginBottom: 10 }} />
                   </label>
+                  <label className="fld"><span className="cap">Photos or documents (optional, up to 5)</span>
+                    <input type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt,.mp3,.mp4" onChange={onIntakeFiles} />
+                  </label>
+                  {intakeFiles.length > 0 && (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, margin: "8px 0 10px" }}>
+                      {intakeFiles.map((fl, i) => (
+                        <span key={i} style={{ background: "#f4f7fc", border: "1px solid #ccd8ea", color: "#3c5170", padding: "4px 10px", borderRadius: 999, fontSize: 12.5, display: "inline-flex", gap: 6, alignItems: "center" }}>
+                          {fl.name.length > 26 ? fl.name.slice(0, 23) + "…" : fl.name} ({Math.round(fl.size / 1024)} KB)
+                          <button type="button" onClick={() => setIntakeFiles((c) => c.filter((_, k) => k !== i))} style={{ border: 0, background: "transparent", cursor: "pointer", fontWeight: 800, color: "#8a3a3a", padding: 0 }}>×</button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <button className="btn btn-primary w-full" disabled={intakeBusy}>{intakeBusy ? "Saving…" : "Log the case"}</button>
                 </form>
               </>

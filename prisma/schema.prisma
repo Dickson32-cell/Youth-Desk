@@ -55,6 +55,19 @@ model Case {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
   notes        CaseNote[]
+  attachments  Attachment[]
+}
+// Evidence files (photos/documents) attached by the youth or the officer.
+// Bytes live in this database - no external bucket - so uploads stay sealed.
+model Attachment {
+  id        Int      @id @default(autoincrement())
+  caseId    Int
+  fileName  String
+  mimeType  String
+  size      Int
+  data      Bytes
+  createdAt DateTime @default(now())
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
 }
 
 model CaseNote {

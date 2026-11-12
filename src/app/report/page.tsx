@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import TopBar from "@/components/Shell";
+import { prepareFilesForUpload } from "@/lib/imgPrepare";
 
 const TYPES = [
   ["EMPLOYMENT", "Job / employment issue"],
@@ -19,6 +20,13 @@ export default function Report() {
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<string | null>(null);
   const [smsNote, setSmsNote] = useState("");
+  const [upNote, setUpNote] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
+  const onFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const chosen = await prepareFilesForUpload(e.target.files || []);
+    setFiles((cur) => [...cur, ...chosen].slice(0, 5));
+    e.target.value = "";
+  };
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setF((s) => ({ ...s, [k]: e.target.value }));
 
@@ -26,15 +34,21 @@ export default function Report() {
     e.preventDefault();
     setErr(""); setBusy(true);
     try {
-      const res = await fetch("/api/public/report", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...f, anonymous: anon }),
-      });
+      const fd = new FormData();
+      fd.append("name", anon ? "" : f.name);
+      fd.append("phone", f.phone);
+      fd.append("area", f.area);
+      fd.append("type", f.type);
+      fd.append("description", f.description);
+      files.forEach((fl) => fd.append("files", fl));
+      const res = await fetch("/api/public/report", { method: "POST", body: fd });
+      if (res.status === 413) { setErr("A file is too large (max 4 MB). Remove the big file and try again."); return; }
       const j = await res.json().catch(() => ({}));
       if (!res.ok) setErr(j.error || "Could not send");
       else {
         setDone(j.caseNumber);
         setSmsNote(j.smsQueued ? `An SMS with this case number is on its way to ${f.phone}.` : "");
+        setUpNote(j.warning || "");
       }
     } finally { setBusy(false); }
   }
@@ -50,6 +64,9 @@ export default function Report() {
           <div className="big-num">{done}</div>
           {smsNote && (
             <p style={{ fontSize: 13.5, color: "#157347", fontWeight: 600, margin: "10px 0 0" }}>{smsNote}</p>
+          )}
+          {upNote && (
+            <p style={{ fontSize: 13, color: "#a2631f", fontWeight: 600, margin: "8px 0 0" }}>Note: {upNote} Your case was still received.</p>
           )}
           <p style={{ fontSize: 13.5, color: "#5b6b86", margin: "10px 0 18px" }}>
             Keep it safe — it is your proof and your way to check progress.
@@ -95,6 +112,19 @@ export default function Report() {
         <label className="fld"><span className="cap">Describe your issue</span>
           <textarea rows={5} value={f.description} onChange={set("description")} placeholder="Tell the officer what happened and what you ask for…" required />
         </label>
+        <label className="fld"><span className="cap">Photos or documents (optional, up to 5)</span>
+          <input type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt,.mp3,.mp4" onChange={onFiles} />
+        </label>
+        {files.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
+            {files.map((fl, i) => (
+              <span key={i} style={{ background: "#f4f7fc", border: "1px solid #ccd8ea", color: "#3c5170", padding: "4px 10px", borderRadius: 999, fontSize: 12.5, display: "inline-flex", gap: 6, alignItems: "center" }}>
+                {fl.name.length > 28 ? fl.name.slice(0, 25) + "…" : fl.name} ({Math.round(fl.size / 1024)} KB)
+                <button type="button" onClick={() => setFiles((c) => c.filter((_, k) => k !== i))} style={{ border: 0, background: "transparent", cursor: "pointer", fontWeight: 800, color: "#8a3a3a", padding: 0 }}>×</button>
+              </span>
+            ))}
+          </div>
+        )}
         <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, marginBottom: 16, cursor: "pointer" }}>
           <input type="checkbox" checked={anon} onChange={(e) => setAnon(e.target.checked)} style={{ width: 18, height: 18 }} />
           Send this anonymously

@@ -9,7 +9,10 @@ export default async function ReferralForm({ params }: { params: Promise<{ caseN
   const { caseNumber } = await params;
   const c = await prisma.case.findUnique({
     where: { caseNumber: caseNumber.toUpperCase() },
-    include: { notes: { orderBy: { id: "asc" } } },
+    include: {
+      notes: { orderBy: { id: "asc" } },
+      attachments: { select: { id: true, fileName: true }, orderBy: { id: "asc" } },
+    },
   });
   if (!c) notFound();
   const to = c.forwardedTo || "";
@@ -45,6 +48,7 @@ export default async function ReferralForm({ params }: { params: Promise<{ caseN
           <dt>Area / community</dt><dd>{c.area || "—"}</dd>
           <dt>Category</dt><dd>{c.type}</dd>
           <dt>Received on</dt><dd>{new Date(c.createdAt).toLocaleString()}</dd>
+          <dt>Evidence on file</dt><dd>{c.attachments.length > 0 ? `${c.attachments.length} file(s): ${c.attachments.map((a) => a.fileName).join(", ")}` : "None attached"}</dd>
         </div>
 
         <div style={{ fontSize: 11, color: "#5b6b86", letterSpacing: 1, margin: "14px 0 4px" }}>SUMMARY OF THE MATTER</div>
