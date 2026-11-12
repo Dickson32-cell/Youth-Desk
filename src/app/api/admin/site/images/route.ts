@@ -3,8 +3,6 @@ import { prisma } from "@/lib/db";
 import { verifySession, SESSION_COOKIE } from "@/lib/auth";
 import { isAllowedType } from "@/lib/attachments";
 
-export const runtime = "nodejs";
-
 // Officer-managed public images. slot: "hero" (homepage slideshow) | "about".
 export async function GET(req: NextRequest) {
   const s = verifySession(req.cookies.get(SESSION_COOKIE)?.value);
