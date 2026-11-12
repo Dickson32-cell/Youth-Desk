@@ -47,3 +47,6 @@ deps.log
 dev.log
 build.log
 *.log
+
+# local secrets (never commit)
+YOUTHDESK-CREDS-LOCAL.txt
