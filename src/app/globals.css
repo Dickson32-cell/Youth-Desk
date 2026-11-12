@@ -123,3 +123,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 [data-theme="dark"] .imgthumb { background: #17222f; border-color: #2a3c52; }
 [data-theme="dark"] .swatch { outline-color: #2a3c52; }
 [data-theme="dark"] .topbar { box-shadow: none; }
+
+/* ===== Hero with the slideshow BEHIND the text ===== */
+.landing-band.hero-w-bg { position: relative; padding-bottom: 46px; }
+.hero-bg { position: absolute; inset: 0; overflow: hidden; }
+.hero-bg .slideshow { height: 100%; max-width: none; max-height: none; margin: 0; border-radius: 0; box-shadow: none; }
+.hero-bg .slideshow .slide { height: 100%; width: 100%; }
+.hero-bg::after { content: ""; position: absolute; inset: 0; background: color-mix(in srgb, var(--navy) 62%, transparent); }
+.landing-band.hero-w-bg .hero { position: relative; z-index: 1; padding-top: 52px; padding-bottom: 8px; }

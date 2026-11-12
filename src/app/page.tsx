@@ -14,10 +14,13 @@ export default async function Home() {
   return (
     <>
       <TopBar />
-      <div className="landing-band">
-        <div style={{ maxWidth: 1100, margin: "0 auto" }} />
+      <div className={"landing-band" + (imgs.length > 0 ? " hero-w-bg" : "")}>
+        {imgs.length > 0 && (
+          <div className="hero-bg" aria-hidden="true">
+            <Slideshow images={imgs.map((i) => i.id)} alt="" />
+          </div>
+        )}
         <div className="hero" style={{ maxWidth: 1100, margin: "0 auto" }}>
-          {imgs.length > 0 && <Slideshow images={imgs.map((i) => i.id)} alt="Photos of the Assembly and its work" />}
           <h1>Youth Desk - Municipal Assembly</h1>
           <p>
             One place for the municipality&apos;s young people: report an issue, get a case number,
