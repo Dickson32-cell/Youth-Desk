@@ -147,7 +147,6 @@ export default function Dashboard() {
                 <div className="filters">
                   <button className="btn btn-sm btn-ghost" onClick={() => patch(open.id, { status: "IN_PROGRESS", note: "Started working on it." })}>Start working</button>
                   <button className="btn btn-sm btn-ghost" onClick={() => patch(open.id, { status: "RESOLVED" })}>Mark resolved</button>
-                  <button className="btn btn-ghost btn-primary" onClick={() => patch(open.id, { status: "RESOLVED" })} style={{ display: "none" }} />
                 </div>
                 <div className="filters">
                   <input id="fwd" type="text" placeholder="Forward to (department / agency)…" style={{ flex: 1 }} defaultValue={open.forwardedTo || ""} />
@@ -155,6 +154,13 @@ export default function Dashboard() {
                     const el = document.getElementById("fwd") as HTMLInputElement;
                     patch(open.id, { status: "FORWARDED", forwardedTo: el.value });
                   }}>Forward</button>
+                  <button className="btn btn-sm btn-danger" style={{ marginLeft: "auto" }} onClick={async () => {
+                    if (!window.confirm(`Delete case ${open.caseNumber}? This removes the report and its notes permanently (for inappropriate or junk entries).`)) return;
+                    const res = await fetch(`/api/admin/cases/${open.id}`, { method: "DELETE" });
+                    if (!res.ok) { const j = await res.json().catch(() => ({})); window.alert(j.error || "Could not delete"); return; }
+                    setOpen(null);
+                    load(filter, q);
+                  }}>Delete case</button>
                 </div>
                 <form onSubmit={(e) => {
                   e.preventDefault();
