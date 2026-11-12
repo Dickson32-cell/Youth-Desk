@@ -4,8 +4,6 @@ import { verifySession, SESSION_COOKIE, nextSerialKey, caseFormat } from "@/lib/
 import { normalizeGhPhone, sendCaseSms, smsConfigured } from "@/lib/sms";
 import { saveAttachments } from "@/lib/attachments";
 
-export const runtime = "nodejs"; // formData + Buffer reads need Node, not Edge
-
 export async function GET(req: NextRequest) {
   const s = verifySession(req.cookies.get(SESSION_COOKIE)?.value);
   if (!s) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

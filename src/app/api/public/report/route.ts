@@ -4,8 +4,6 @@ import { nextSerialKey, caseFormat } from "@/lib/auth";
 import { normalizeGhPhone, sendCaseSms, smsConfigured } from "@/lib/sms";
 import { saveAttachments } from "@/lib/attachments";
 
-export const runtime = "nodejs"; // formData + Buffer reads need Node, not Edge
-
 export async function POST(req: NextRequest) {
   const ct = req.headers.get("content-type") || "";
   const files: File[] = [];
