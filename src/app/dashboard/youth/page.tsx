@@ -42,9 +42,9 @@ export default function YouthRegister() {
     }
   }
 
-  function takeComplaint() {
-    if (!lastYouth) return;
-    sessionStorage.setItem("youthcomplaint", JSON.stringify(lastYouth));
+  function takeComplaint(y: { id: number; serial: string; name: string; phone: string; area: string } | null) {
+    if (!y) return;
+    sessionStorage.setItem("youthcomplaint", JSON.stringify(y));
     window.location.href = "/dashboard";
   }
 
@@ -85,7 +85,7 @@ export default function YouthRegister() {
             <div className="alert-ok" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
               <span style={{ flex: 1 }}>{msg}</span>
               {lastYouth && (
-                <button className="btn btn-primary btn-sm" onClick={takeComplaint}>Take their complaint</button>
+                <button className="btn btn-primary btn-sm" onClick={() => takeComplaint(lastYouth)}>Take their complaint</button>
               )}
             </div>
           )}
@@ -98,7 +98,7 @@ export default function YouthRegister() {
           </div>
           <table className="tbl">
             <thead>
-              <tr><th>Serial</th><th>Name</th><th>Area</th><th>Phone</th><th>Skills</th></tr>
+              <tr><th>Serial</th><th>Name</th><th>Area</th><th>Phone</th><th>Skills</th><th>Actions</th></tr>
             </thead>
             <tbody>
               {list.map((y) => (
@@ -108,9 +108,12 @@ export default function YouthRegister() {
                   <td>{y.area || "—"}</td>
                   <td>{y.phone || "—"}</td>
                   <td>{y.skills || "—"}</td>
+                  <td style={{ whiteSpace: "nowrap" }}>
+                    <button className="btn btn-sm btn-ghost" onClick={() => takeComplaint({ id: y.id, serial: y.serial, name: y.name, phone: y.phone || "", area: y.area || "" })}>Take complaint</button>
+                  </td>
                 </tr>
               ))}
-              {list.length === 0 && <tr><td colSpan={5} style={{ color: "#5b6b86" }}>No youth registered yet.</td></tr>}
+              {list.length === 0 && <tr><td colSpan={6} style={{ color: "#5b6b86" }}>No youth registered yet.</td></tr>}
             </tbody>
           </table>
         </div>
