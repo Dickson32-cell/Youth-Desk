@@ -155,6 +155,7 @@ export default function Dashboard() {
                 <div className="filters">
                   <button className="btn btn-sm btn-ghost" onClick={() => patch(open.id, { status: "IN_PROGRESS", note: "Started working on it." })}>Start working</button>
                   <button className="btn btn-sm btn-ghost" onClick={() => patch(open.id, { status: "RESOLVED" })}>Mark resolved</button>
+                  <a href={`/forward/${open.caseNumber}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">Referral form (MCD)</a>
                 </div>
                 <div className="filters">
                   <input id="fwd" type="text" placeholder="Forward to (department / agency)…" style={{ flex: 1 }} defaultValue={open.forwardedTo || ""} />
@@ -193,6 +194,7 @@ export default function Dashboard() {
                 <div className="big-num">{intakeDone.caseNumber}</div>
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", marginTop: 14 }}>
                   <a href={`/slip/${intakeDone.caseNumber}`} target="_blank" rel="noreferrer" className="btn btn-ghost">Print case slip</a>
+                  <a href={`/forward/${intakeDone.caseNumber}`} target="_blank" rel="noreferrer" className="btn btn-ghost">Referral form (MCD)</a>
                   <button className="btn btn-ghost" onClick={() => { setIntakeDone(null); setIntakeForm({ name: "", phone: "", area: "", type: "EMPLOYMENT", description: "" }); }}>Log another</button>
                   <button className="btn btn-primary" onClick={() => { setIntakeOpen(false); load(filter, q); }}>Done</button>
                 </div>
