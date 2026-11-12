@@ -124,6 +124,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 [data-theme="dark"] .swatch { outline-color: #2a3c52; }
 [data-theme="dark"] .topbar { box-shadow: none; }
 
+/* Collapsible Management-review case blocks (report pack) */
+.case-toggle { display: flex; gap: 10px; align-items: center; width: 100%; text-align: left; background: #f6f8fc; border: 1px solid var(--line); border-radius: 9px; padding: 9px 12px; cursor: pointer; font-family: inherit; margin-bottom: 4px; }
+.case-toggle:hover { border-color: #b6c4da; }
+[data-theme="dark"] .case-toggle { background: #131d29; border-color: #2a3c52; }
+
 /* Editable fields on the referral form: light hint on screen, invisible frame in print */
 .ref-input { color: #1a2b47; }
 @media print { .ref-input { background: transparent !important; border: none !important; } }

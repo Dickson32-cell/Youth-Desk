@@ -43,6 +43,15 @@ export default function ReportPack() {
   const resolvedRate = d.totals.all ? Math.round((d.totals.RESOLVED / d.totals.all) * 100) : 0;
   const month = new Date().toLocaleDateString("en-GB", { month: "long", year: "numeric" });
 
+  // Management-review blocks collapse when the pack grows; printing always expands everything.
+  const [openIds, setOpenIds] = useState<Set<number>>(new Set());
+  const toggleCase = (id: number) =>
+    setOpenIds((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  const printPack = () => {
+    setOpenIds(new Set(cases.map((c) => c.id))); // expand all so the PDF keeps every detail
+    setTimeout(() => window.print(), 80);
+  };
+
   return (
     <main>
       <TopBar mode="office" />
@@ -54,7 +63,7 @@ export default function ReportPack() {
         <div className="card noprint">
           <h2>Monthly report pack</h2>
           <p className="sub">For the MCD and the investor — download it as a PDF (choose “Save as PDF” in the print dialog) and submit it with the case register attached below.</p>
-          <button className="btn btn-primary" onClick={() => window.print()}>Download PDF</button>
+          <button className="btn btn-primary" onClick={printPack}>Download PDF</button>
         </div>
 
         <div className="card">
@@ -118,15 +127,34 @@ export default function ReportPack() {
         </div>
 
         <div className="card">
-          <h2>Case details for Management review</h2>
-          {cases.map((c) => (
+          <div className="case-head">
+            <h2 style={{ margin: 0 }}>Case details for Management review</h2>
+            <span className="sp" style={{ flex: 1 }} />
+            {cases.length > 0 && (
+              <span className="noprint" style={{ display: "inline-flex", gap: 8 }}>
+                <button className="btn btn-sm btn-ghost" onClick={() => setOpenIds(new Set(cases.map((c) => c.id)))}>Expand all</button>
+                <button className="btn btn-sm btn-ghost" onClick={() => setOpenIds(new Set())}>Minimize all</button>
+              </span>
+            )}
+          </div>
+          <p className="sub noprint">Each case starts minimized — tap a case to open its details. Printing expands every case automatically.</p>
+          {cases.map((c) => {
+            const isOpen = openIds.has(c.id);
+            return (
             <div key={c.id} className="case-detail">
-              <div className="case-head">
+              <button className="case-toggle" onClick={() => toggleCase(c.id)} title={isOpen ? "Minimize this case" : "Open this case"}>
                 <span className="cn">{c.caseNumber}</span>
                 <span className={"tag tag-" + c.status}>{c.status.replace("_", " ")}</span>
-                <span className="sp" style={{ flex: 1 }} />
-                <span style={{ fontSize: 12, color: "#5b6b86" }}>{new Date(c.createdAt).toLocaleString()}</span>
-              </div>
+                <span style={{ fontSize: 11.5, color: "#5b6b86" }}>{new Date(c.createdAt).toLocaleDateString()}</span>
+                <span style={{ flex: 1 }} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#3c5170" }}>{isOpen ? "Minimize ↑" : "Open details ↓"}</span>
+              </button>
+              {!isOpen ? (
+                <p style={{ fontSize: 12.5, color: "#5b6b86", padding: "0 2px 4px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {c.description.slice(0, 90)}{c.description.length > 90 ? "…" : ""}
+                </p>
+              ) : (
+              <>
               <div className="kv">
                 <dt>Reported by</dt><dd>{c.reporterName || "Anonymous"}</dd>
                 <dt>Contact phone</dt><dd>{c.phone || "—"}</dd>
@@ -152,8 +180,11 @@ export default function ReportPack() {
                   Evidence on file: {c.attachments.map((a) => a.fileName).join(", ")}
                 </p>
               )}
+              </>
+              )}
             </div>
-          ))}
+            );
+          })}
           {cases.length === 0 && <p style={{ fontSize: 13.5, color: "#5b6b86" }}>No cases to review yet.</p>}
         </div>
       </div>
