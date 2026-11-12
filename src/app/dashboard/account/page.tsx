@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import TopBar from "@/components/Shell";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function Account() {
   const [me, setMe] = useState<{ username: string; fullName: string } | null>(null);
@@ -47,13 +48,13 @@ export default function Account() {
           {err && <div className="alert-err">{err}</div>}
           <form onSubmit={save}>
             <label className="fld"><span className="cap">Current password *</span>
-              <input type="password" value={f.currentPassword} onChange={set("currentPassword")} autoComplete="current-password" required />
+              <PasswordInput value={f.currentPassword} onChange={set("currentPassword")} autoComplete="current-password" required ariaLabel="Current password" />
             </label>
             <label className="fld"><span className="cap">New password (at least 8 characters) *</span>
-              <input type="password" value={f.newPassword} onChange={set("newPassword")} autoComplete="new-password" required minLength={8} />
+              <PasswordInput value={f.newPassword} onChange={set("newPassword")} autoComplete="new-password" required minLength={8} ariaLabel="New password" />
             </label>
             <label className="fld"><span className="cap">Repeat new password *</span>
-              <input type="password" value={f.confirmPassword} onChange={set("confirmPassword")} autoComplete="new-password" required minLength={8} />
+              <PasswordInput value={f.confirmPassword} onChange={set("confirmPassword")} autoComplete="new-password" required minLength={8} ariaLabel="Repeat new password" />
             </label>
             <button className="btn btn-primary w-full" disabled={busy}>{busy ? "Saving…" : "Save new password"}</button>
           </form>

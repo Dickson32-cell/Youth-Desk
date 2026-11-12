@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function Login() {
   const r = useRouter();
@@ -31,7 +32,7 @@ export default function Login() {
           <input type="text" value={u} onChange={(e) => setU(e.target.value)} autoComplete="username" required />
         </label>
         <label className="fld"><span className="cap">Password</span>
-          <input type="password" value={p} onChange={(e) => setP(e.target.value)} autoComplete="current-password" required />
+          <PasswordInput value={p} onChange={(e) => setP(e.target.value)} autoComplete="current-password" required ariaLabel="Password" />
         </label>
         <button className="btn btn-primary w-full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
       </form>
