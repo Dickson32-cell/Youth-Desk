@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/db";
 import TopBar from "@/components/Shell";
 
+// Live municipal data: render per request (cacheComponents-compatible).
+export const instant = false;
+
 export default async function Programs() {
   const list = await prisma.program.findMany({
     where: { status: "OPEN" },

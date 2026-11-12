@@ -2,6 +2,9 @@ import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import PrintBtn from "@/components/PrintBtn";
 
+// Printable live case data: render per request (cacheComponents-compatible).
+export const instant = false;
+
 export default async function Slip({ params }: { params: Promise<{ caseNumber: string }> }) {
   const { caseNumber } = await params;
   const c = await prisma.case.findUnique({
