@@ -50,3 +50,6 @@ build.log
 
 # local secrets (never commit)
 YOUTHDESK-CREDS-LOCAL.txt
+
+.vercel
+.env*
