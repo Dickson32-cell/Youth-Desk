@@ -32,6 +32,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               `[data-theme=dark]:root{--navy:${primary};}`,
           }}
         />
+        <script
+          // Self-heal: a tab opened on an older deployment dies on vanished chunks
+          // (Next chunk-load error). One automatic reload per session clears it.
+          dangerouslySetInnerHTML={{
+            __html:
+              "window.addEventListener('error',function(e){try{var m=(e&&e.message)||'';" +
+              "if(/ChunkLoadError|Loading chunk|dynamically imported module|Failed to fetch dynamically/i.test(m)" +
+              "&&!window.__ydw_heal){window.__ydw_heal='1';sessionStorage.setItem('ydw_heal','1');location.reload();}}catch(_){}},true);" +
+              "window.addEventListener('unhandledrejection',function(e){try{var m=(e&&e.reason&&e.reason.message)||'as';" +
+              "if(/ChunkLoadError|Loading chunk|dynamically imported module|Failed to fetch dynamically/i.test(m)" +
+              "&&!sessionStorage.getItem('ydw_heal')){sessionStorage.setItem('ydw_heal','1');location.reload();}}catch(_){}},true);",
+          }}
+        />
       </head>
       <body>{children}</body>
     </html>
