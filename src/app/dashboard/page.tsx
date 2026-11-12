@@ -29,7 +29,7 @@ export default function Dashboard() {
 
   const load = useCallback(async (f: string, query: string) => {
     const res = await fetch(`/api/admin/cases?status=${f}&q=${encodeURIComponent(query)}`);
-    if (res.status === 401) { window.location.href = "/login"; return; }
+    if (res.status === 401) { window.location.href = "/office/login"; return; }
     const j = await res.json();
     setCases(j.cases || []);
     setCounts(j.counts || {});
@@ -61,20 +61,11 @@ export default function Dashboard() {
 
   return (
     <main>
-      <TopBar />
+      <TopBar mode="office" />
       <div className="main">
-        <div className="card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
-          <div>
-            <h2 style={{ fontSize: 17 }}>Case queue</h2>
-            <p className="sub" style={{ margin: 0 }}>Signed in as {me}. Pick a case, act on it, keep the note.</p>
-          </div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <a className="btn btn-ghost btn-sm" href="/dashboard/youth">Youth register</a>
-            <a className="btn btn-ghost btn-sm" href="/dashboard/report">Monthly report</a>
-            <button className="btn btn-ghost btn-sm" onClick={async () => { await fetch("/api/auth/logout", { method: "POST" }); window.location.href = "/login"; }}>
-              Sign out
-            </button>
-          </div>
+        <div className="card">
+          <h2 style={{ fontSize: 17 }}>Case queue</h2>
+          <p className="sub" style={{ margin: 0 }}>Signed in as {me}. Pick a case, act on it, keep the note. Use the menu to move between Cases, Youth and Reports.</p>
         </div>
 
         <div className="statrow">

@@ -18,7 +18,7 @@ export default function YouthRegister() {
 
   const load = useCallback(async (query: string) => {
     const res = await fetch("/api/admin/cases/youth?q=" + encodeURIComponent(query));
-    if (res.status === 401) { window.location.href = "/login"; return; }
+    if (res.status === 401) { window.location.href = "/office/login"; return; }
     setList((await res.json()).youth || []);
   }, []);
 
@@ -38,7 +38,7 @@ export default function YouthRegister() {
 
   return (
     <main>
-      <TopBar />
+      <TopBar mode="office" />
       <div className="main">
         <div className="card">
           <h2>Walk-in youth register</h2>

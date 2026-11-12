@@ -17,7 +17,7 @@ export default function ReportPack() {
   useEffect(() => {
     fetch("/api/admin/report")
       .then(async (r) => {
-        if (!r.ok) { window.location.href = "/login"; return null; }
+        if (!r.ok) { window.location.href = "/office/login"; return null; }
         return r.json();
       })
       .then((j) => (j ? setD(j) : setErr("Could not load")));
@@ -30,7 +30,7 @@ export default function ReportPack() {
 
   return (
     <main>
-      <TopBar />
+      <TopBar mode="office" />
       <div className="main">
         <div className="card noprint">
           <h2>Monthly report pack</h2>

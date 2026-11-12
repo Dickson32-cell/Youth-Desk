@@ -3,6 +3,7 @@ import TopBar from "@/components/Shell";
 export default function Home() {
   return (
     <>
+      <TopBar />
       <div className="landing-band">
         <div style={{ maxWidth: 1100, margin: "0 auto" }} />
         <div className="hero" style={{ maxWidth: 1100, margin: "0 auto" }}>
