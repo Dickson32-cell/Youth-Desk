@@ -86,3 +86,10 @@ model SmsLog {
   error       String?
   createdAt   DateTime @default(now())
 }
+
+// Server-side monotonic counters (serial-retire law: numbers are permanent
+// references once delivered on a slip or by SMS - never reissued).
+model Counter {
+  key String @id
+  n   Int    @default(0)
+}

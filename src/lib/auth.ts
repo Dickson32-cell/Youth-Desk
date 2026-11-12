@@ -33,6 +33,38 @@ export function verifySession(token: string | undefined | null): { u: string } |
   }
 }
 
+// Monotonic serial source: atomic Counter row (survives deletions).
+// On first use it seeds itself above any already-issued number, so an existing
+// register can never be rolled back to reissued numbers.
+export async function nextSerialKey(
+  p: { $queryRawUnsafe: (q: string, ...args: unknown[]) => Promise<unknown> },
+  key: string,
+  format: (n: number) => string,
+  isTaken: (candidate: string) => Promise<boolean>,
+): Promise<string> {
+  const rows = (await p.$queryRawUnsafe(
+    `INSERT INTO "Counter" ("key", "n") VALUES ($1, 1) ON CONFLICT ("key") DO UPDATE SET "n" = "Counter"."n" + 1 RETURNING "n"`,
+    key,
+  )) as { n: number }[];
+  let n = Number(rows[0]?.n || 1);
+  let candidate = format(n);
+  for (let guard = 0; guard < 50 && (await isTaken(candidate)); guard++) {
+    n += 1;
+    candidate = format(n);
+    await p.$queryRawUnsafe(`UPDATE "Counter" SET "n" = $1 WHERE "key" = $2`, n, key);
+  }
+  return candidate;
+}
+
+export function caseFormat(n: number): string {
+  return `YD-${new Date().getFullYear()}-${String(n).padStart(4, "0")}`;
+}
+
+export function youthFormat(n: number): string {
+  return `YTH-${String(n).padStart(5, "0")}`;
+}
+
+// Legacy helpers kept for type compatibility (no longer used for issuance).
 export function nextCaseNumber(latest?: string): string {
   const year = new Date().getFullYear();
   let n = 0;

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/db";
-import { nextCaseNumber } from "@/lib/auth";
+import { nextSerialKey, caseFormat } from "@/lib/auth";
 import { normalizeGhPhone, sendCaseSms, smsConfigured } from "@/lib/sms";
 
 export async function POST(req: NextRequest) {
@@ -13,8 +13,12 @@ export async function POST(req: NextRequest) {
   if (!description || description.length < 10)
     return NextResponse.json({ error: "Describe the issue (at least 10 characters)" }, { status: 400 });
   const anonymous = body.anonymous === true || !name;
-  const latest = await prisma.case.findFirst({ orderBy: { id: "desc" }, select: { caseNumber: true } });
-  const caseNumber = nextCaseNumber(latest?.caseNumber);
+  const caseNumber = await nextSerialKey(
+    prisma,
+    "case",
+    caseFormat,
+    async (candidate) => !!(await prisma.case.findUnique({ where: { caseNumber: candidate }, select: { id: true } })),
+  );
   await prisma.case.create({
     data: {
       caseNumber,

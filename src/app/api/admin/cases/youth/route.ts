@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { verifySession, SESSION_COOKIE, nextYouthSerial } from "@/lib/auth";
+import { verifySession, SESSION_COOKIE, nextSerialKey, youthFormat } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   const s = verifySession(req.cookies.get(SESSION_COOKIE)?.value);
@@ -27,8 +27,12 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const name = typeof body.name === "string" ? body.name.trim().slice(0, 80) : "";
   if (!name) return NextResponse.json({ error: "Name is required" }, { status: 400 });
-  const latest = await prisma.youth.findFirst({ orderBy: { id: "desc" }, select: { serial: true } });
-  const serial = nextYouthSerial(latest?.serial);
+  const serial = await nextSerialKey(
+    prisma,
+    "youth",
+    youthFormat,
+    async (candidate) => !!(await prisma.youth.findUnique({ where: { serial: candidate }, select: { id: true } })),
+  );
   const youth = await prisma.youth.create({
     data: {
       serial,
