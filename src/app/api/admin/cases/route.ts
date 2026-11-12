@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q")?.trim() || "";
   const cases = await prisma.case.findMany({
     where: {
-      ...(status ? { status } : {}),
+      ...(status && status !== "ALL" ? { status } : {}),
       ...(q ? { OR: [
         { caseNumber: { contains: q } },
         { description: { contains: q } },
