@@ -1,0 +1,76 @@
+// Youth Desk — Municipal Assembly youth affairs system.
+// Single office, private database. Officer-side case queue + youth register;
+// public report/track pages. Case numbers are permanent references (YD-YYYY-NNNN).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Officer {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String // bcrypt hash
+  fullName  String
+  role      String   @default("OFFICER") // OFFICER | ADMIN
+  createdAt DateTime @default(now())
+}
+
+model Area {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+}
+
+model Youth {
+  id         Int      @id @default(autoincrement())
+  serial     String   @unique
+  name       String
+  phone      String?
+  area       String?
+  dateOfBirth String?
+  education  String?
+  skills     String?
+  ghanaCard  String?
+  createdAt  DateTime @default(now())
+  cases      Case[]
+}
+
+model Case {
+  id           Int         @id @default(autoincrement())
+  caseNumber   String      @unique
+  reporterName String? // may be anonymised
+  phone        String? // optional callback
+  area         String?
+  type         String // EMPLOYMENT | TRAINING | GRIEVANCE | FINANCE | HEALTH | EDUCATION | SENSITIVE | OTHER
+  description  String
+  status       String      @default("NEW") // NEW | IN_PROGRESS | RESOLVED | FORWARDED
+  forwardedTo  String?
+  youthId      Int? // links a walk-in youth account
+  youth        Youth?     @relation(fields: [youthId], references: [id])
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  notes        CaseNote[]
+}
+
+model CaseNote {
+  id        Int      @id @default(autoincrement())
+  caseId    Int
+  body      String
+  author    String
+  createdAt DateTime @default(now())
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model Program {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  category    String @default("TRAINING") // TRAINING | JOB | SCHOLARSHIP | OPPORTUNITY
+  deadline    String?
+  status      String   @default("OPEN") // OPEN | CLOSED
+  createdAt   DateTime @default(now())
+}
