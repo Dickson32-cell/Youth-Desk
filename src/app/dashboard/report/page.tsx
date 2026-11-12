@@ -10,8 +10,10 @@ type Sum = {
   youth: number;
 };
 type CaseRow = {
-  id: number; caseNumber: string; createdAt: string; type: string; area: string | null;
-  status: string; reporterName: string | null; description: string; forwardedTo: string | null;
+  id: number; caseNumber: string; createdAt: string; updatedAt: string; type: string; area: string | null;
+  status: string; reporterName: string | null; phone: string | null; description: string; forwardedTo: string | null;
+  notes: { id: number; body: string; author: string; createdAt: string }[];
+  attachments: { id: number; fileName: string; size: number }[];
 };
 
 export default function ReportPack() {
@@ -95,19 +97,20 @@ export default function ReportPack() {
           <h2>Case register (every case this pack covers)</h2>
           <p className="sub">The register table, then each case in full for Management review.</p>
           <table className="tbl">
-            <thead><tr><th>Case</th><th>Received</th><th>Type</th><th>Area</th><th>Status</th><th>Reported by</th></tr></thead>
+            <thead><tr><th>Case</th><th>Received</th><th>Last update</th><th>Type</th><th>Area</th><th>Status</th><th>Reported by</th></tr></thead>
             <tbody>
               {cases.map((c) => (
                 <tr key={c.id}>
                   <td className="serial">{c.caseNumber}</td>
                   <td style={{ whiteSpace: "nowrap" }}>{new Date(c.createdAt).toLocaleDateString()}</td>
+                  <td style={{ whiteSpace: "nowrap" }}>{new Date(c.updatedAt).toLocaleDateString()}</td>
                   <td>{c.type}</td>
                   <td>{c.area || "—"}</td>
                   <td><span className={"tag tag-" + c.status}>{c.status.replace("_", " ")}</span></td>
                   <td>{c.reporterName || "Anonymous"}</td>
                 </tr>
               ))}
-              {cases.length === 0 && <tr><td colSpan={6} style={{ color: "#5b6b86" }}>No cases yet this period.</td></tr>}
+              {cases.length === 0 && <tr><td colSpan={7} style={{ color: "#5b6b86" }}>No cases yet this period.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -124,11 +127,29 @@ export default function ReportPack() {
               </div>
               <div className="kv">
                 <dt>Reported by</dt><dd>{c.reporterName || "Anonymous"}</dd>
+                <dt>Contact phone</dt><dd>{c.phone || "—"}</dd>
                 <dt>Area</dt><dd>{c.area || "—"}</dd>
                 <dt>Type</dt><dd>{c.type}</dd>
                 {c.forwardedTo && <><dt>Forwarded to</dt><dd>{c.forwardedTo}</dd></>}
+                <dt>Last update</dt><dd>{new Date(c.updatedAt).toLocaleString()}</dd>
               </div>
               <p style={{ fontSize: 13.5, lineHeight: 1.6, background: "#f7f9fd", borderRadius: 10, padding: "10px 12px" }}>{c.description}</p>
+              {c.notes.length > 0 && (
+                <>
+                  <div style={{ fontSize: 11, color: "#5b6b86", letterSpacing: 1, margin: "8px 0 4px" }}>OFFICER ACTIONS & RESOLUTION TRAIL</div>
+                  {c.notes.map((n) => (
+                    <div key={n.id} className="note">
+                      <div className="who">{n.author} · {new Date(n.createdAt).toLocaleString()}</div>
+                      {n.body}
+                    </div>
+                  ))}
+                </>
+              )}
+              {c.attachments.length > 0 && (
+                <p style={{ fontSize: 12, color: "#5b6b86", margin: "6px 0 0" }}>
+                  Evidence on file: {c.attachments.map((a) => a.fileName).join(", ")}
+                </p>
+              )}
             </div>
           ))}
           {cases.length === 0 && <p style={{ fontSize: 13.5, color: "#5b6b86" }}>No cases to review yet.</p>}

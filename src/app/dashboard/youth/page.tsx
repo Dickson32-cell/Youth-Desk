@@ -102,13 +102,13 @@ export default function YouthRegister() {
             </thead>
             <tbody>
               {list.map((y) => (
-                <tr key={y.id}>
+                <tr key={y.id} style={{ cursor: "pointer" }} title="Click to take this youth's complaint" onClick={() => takeComplaint({ id: y.id, serial: y.serial, name: y.name, phone: y.phone || "", area: y.area || "" })}>
                   <td className="serial">{y.serial}</td>
-                  <td>{y.name}</td>
+                  <td style={{ fontWeight: 600 }}>{y.name}</td>
                   <td>{y.area || "—"}</td>
                   <td>{y.phone || "—"}</td>
                   <td>{y.skills || "—"}</td>
-                  <td style={{ whiteSpace: "nowrap" }}>
+                  <td style={{ whiteSpace: "nowrap" }} onClick={(e) => e.stopPropagation()}>
                     <button className="btn btn-sm btn-ghost" onClick={() => takeComplaint({ id: y.id, serial: y.serial, name: y.name, phone: y.phone || "", area: y.area || "" })}>Take complaint</button>
                   </td>
                 </tr>
