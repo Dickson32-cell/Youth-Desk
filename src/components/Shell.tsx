@@ -24,6 +24,13 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
   const tabs = office ? OFFICE_TABS : PUBLIC_TABS;
   const [me, setMe] = useState("");
   const [dark, setDark] = useState(false);
+  const [brand, setBrand] = useState({ main: "Youth Desk NJSMA", sub: "NJSMA MUNICIPAL ASSEMBLY" });
+
+  // Brand words come from the layout (officer-edited); read once after mount.
+  useEffect(() => {
+    const html = document.documentElement;
+    setBrand({ main: html.getAttribute("data-brand-main") || "Youth Desk NJSMA", sub: html.getAttribute("data-brand-sub") || "NJSMA MUNICIPAL ASSEMBLY" });
+  }, []);
 
   // Public pages remember the visitor's light/dark choice; officer pages stay light
   // (the console and all printables are designed for paper-white surfaces).
@@ -71,8 +78,8 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
       <header className="topbar noprint">
         <div className="bar">
           <Link href={office ? "/dashboard" : "/"} className="brand">
-            <span className="logo-t">Youth Desk</span>
-            <span className="logo-s">{office ? "OFFICER CONSOLE" : "MUNICIPAL ASSEMBLY"}</span>
+            <span className="logo-t">{brand.main}</span>
+            <span className="logo-s">{office ? "OFFICER CONSOLE" : brand.sub}</span>
           </Link>
           <span className="sp" />
           <nav className="navlinks" aria-label="Primary">
@@ -117,7 +124,7 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
 }
 
 export function Footer() {
-  return <div className="footer">Youth Desk — Municipal Assembly. Every case gets a number; nothing is lost.</div>;
+  return <div className="footer">Youth Desk NJSMA. Every case gets a number; nothing is lost.</div>;
 }
 
 export default NavBar;

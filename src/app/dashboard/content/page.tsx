@@ -26,6 +26,7 @@ export default function ContentStudio() {
   const [busy, setBusy] = useState(false);
   const [newDept, setNewDept] = useState({ title: "", body: "" });
   const [newSvc, setNewSvc] = useState({ title: "", body: "" });
+  const [words, setWords] = useState<Record<string, string>>({});
 
   const note = (m: string) => { setMsg(m); setErr(""); };
   const fail = (m: string) => { setErr(m); setMsg(""); };
@@ -33,18 +34,20 @@ export default function ContentStudio() {
   const loadAll = useCallback(async () => {
     const r = await fetch("/api/admin/auth");
     if (!r.ok) { window.location.href = "/office/login"; return; }
-    const [h, a, d, s, t] = await Promise.all([
+    const [h, a, d, s, t, w] = await Promise.all([
       fetch("/api/admin/site/images?slot=hero").then((x) => x.json()).catch(() => null),
       fetch("/api/admin/site/images?slot=about").then((x) => x.json()).catch(() => null),
       fetch("/api/admin/site/items?kind=department").then((x) => x.json()).catch(() => null),
       fetch("/api/admin/site/items?kind=service").then((x) => x.json()).catch(() => null),
       fetch("/api/admin/site/theme").then((x) => x.json()).catch(() => null),
+      fetch("/api/admin/site/text").then((x) => x.json()).catch(() => null),
     ]);
     setHeroImgs(h?.images || []);
     setAboutImgs(a?.images || []);
     setDepartments(d?.items || []);
     setServices(s?.items || []);
     if (t?.theme) setTheme({ primary: t.theme.primary, accent: t.theme.accent });
+    setWords(w?.texts || {});
   }, []);
 
   useEffect(() => { loadAll(); }, [loadAll]);
@@ -97,6 +100,32 @@ export default function ContentStudio() {
       const j = await res.json().catch(() => ({}));
       if (!res.ok) fail(j.error || "Could not save colors");
       else note("Colors saved — the public site updates in a few seconds.");
+    } finally { setBusy(false); }
+  }
+
+  const W_FIELDS: [string, string][] = [
+    ["brand_main", "Top bar name (main)"],
+    ["brand_sub", "Top bar name (small, under it)"],
+    ["hero_title", "Main page heading"],
+    ["hero_sub", "Main page introduction"],
+    ["c1t", "Box 1 - title"], ["c1b", "Box 1 - description"],
+    ["c2t", "Box 2 - title"], ["c2b", "Box 2 - description"],
+    ["c3t", "Box 3 - title"], ["c3b", "Box 3 - description"],
+  ];
+  async function saveWords() {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/admin/site/text", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ texts: words }) });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) fail(j.error || "Could not save words");
+      else {
+        // Empty boxes mean "use the default": drop those overrides.
+        for (const k of Object.keys(words)) if (!words[k].trim()) {
+          await fetch(`/api/admin/site/text?key=${encodeURIComponent(k)}`, { method: "DELETE" });
+          setWords((s) => { const n = { ...s }; delete n[k]; return n; });
+        }
+        note("Main page words saved — reload the homepage to see them.");
+      }
     } finally { setBusy(false); }
   }
 
@@ -184,6 +213,17 @@ export default function ContentStudio() {
             </div>
           )}
           {services.length === 0 && <p style={{ fontSize: 13, color: "#5b6b86", marginTop: 8 }}>Nothing typed yet — the public page shows the placeholder list until you add the real services.</p>}
+        </div>
+
+        <div className="card">
+          <h2>Main page words</h2>
+          <p className="sub">Every word of the main page. Clear a box to go back to the default wording.</p>
+          {W_FIELDS.map(([key, cap]) => (
+            <label className="fld" key={key}><span className="cap">{cap}</span>
+              <input value={words[key] ?? ""} onChange={(e) => setWords((s) => ({ ...s, [key]: e.target.value }))} placeholder="default wording" />
+            </label>
+          ))}
+          <button className="btn btn-primary" disabled={busy} onClick={saveWords}>Save words</button>
         </div>
 
         <div className="card">

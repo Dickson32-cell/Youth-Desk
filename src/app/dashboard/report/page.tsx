@@ -48,7 +48,7 @@ export default function ReportPack() {
       <TopBar mode="office" />
       <div className="main">
         <div className="card print-only">
-          <h2 style={{ fontSize: 18 }}>Youth Desk — Municipal Assembly</h2>
+          <h2 style={{ fontSize: 18 }}>NJSMA Youth Desk</h2>
           <p className="sub" style={{ margin: 0 }}>Case report for {month} · prepared by {preparedBy || "the desk officer"} · generated {new Date().toLocaleString()}</p>
         </div>
         <div className="card noprint">
@@ -96,6 +96,7 @@ export default function ReportPack() {
         <div className="card">
           <h2>Case register (every case this pack covers)</h2>
           <p className="sub">The register table, then each case in full for Management review.</p>
+          <div className="tblwrap">
           <table className="tbl">
             <thead><tr><th>Case</th><th>Received</th><th>Last update</th><th>Type</th><th>Area</th><th>Status</th><th>Reported by</th></tr></thead>
             <tbody>
@@ -113,6 +114,7 @@ export default function ReportPack() {
               {cases.length === 0 && <tr><td colSpan={7} style={{ color: "#5b6b86" }}>No cases yet this period.</td></tr>}
             </tbody>
           </table>
+          </div>
         </div>
 
         <div className="card">

@@ -96,6 +96,7 @@ export default function YouthRegister() {
           <div className="filters">
             <input type="text" placeholder="Search name, serial, area…" value={q} onChange={(e) => setQ(e.target.value)} style={{ flex: 1 }} />
           </div>
+          <div className="tblwrap">
           <table className="tbl">
             <thead>
               <tr><th>Serial</th><th>Name</th><th>Area</th><th>Phone</th><th>Skills</th><th>Actions</th></tr>
@@ -116,6 +117,7 @@ export default function YouthRegister() {
               {list.length === 0 && <tr><td colSpan={6} style={{ color: "#5b6b86" }}>No youth registered yet.</td></tr>}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </main>

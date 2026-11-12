@@ -124,6 +124,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 [data-theme="dark"] .swatch { outline-color: #2a3c52; }
 [data-theme="dark"] .topbar { box-shadow: none; }
 
+/* Editable fields on the referral form: light hint on screen, invisible frame in print */
+.ref-input { color: #1a2b47; }
+@media print { .ref-input { background: transparent !important; border: none !important; } }
+
 /* ===== Hero with the slideshow BEHIND the text ===== */
 .landing-band.hero-w-bg { position: relative; padding-bottom: 46px; }
 .hero-bg { position: absolute; inset: 0; overflow: hidden; }
@@ -131,3 +135,15 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 .hero-bg .slideshow .slide { height: 100%; width: 100%; }
 .hero-bg::after { content: ""; position: absolute; inset: 0; background: color-mix(in srgb, var(--navy) 62%, transparent); }
 .landing-band.hero-w-bg .hero { position: relative; z-index: 1; padding-top: 52px; padding-bottom: 8px; }
+
+/* ===== Phone-friendly tables: case queue becomes cards, long tables scroll ===== */
+.case-cards { display: none; }
+.casecard { display: block; width: 100%; text-align: left; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; cursor: pointer; font-family: inherit; }
+.casecard .row1 { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px; }
+.casecard .serial { color: var(--navy); font-weight: 800; font-variant-numeric: tabular-nums; }
+.casecard .row2 { display: block; font-size: 13.5px; color: var(--ink); }
+.casecard .row3 { display: block; font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+.casecard:active { border-color: var(--navy); }
+[data-theme="dark"] .casecard { background: #17222f; border-color: #2a3c52; }
+[data-theme="dark"] .casecard .row2 { color: #dbe6f4; }
+@media (max-width: 639px) { .casetbl { display: none; } .case-cards { display: block; } .tblwrap { overflow-x: auto; -webkit-overflow-scrolling: touch; } .tblwrap .tbl { min-width: 620px; } }

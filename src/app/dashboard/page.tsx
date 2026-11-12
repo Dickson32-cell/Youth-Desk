@@ -132,7 +132,7 @@ export default function Dashboard() {
             <input type="text" placeholder="Search name, number, area…" value={q} onChange={(e) => setQ(e.target.value)} style={{ flex: 1 }} />
             <button className="btn btn-primary btn-sm noprint" onClick={() => { setIntakeDone(null); setIntakeErr(""); setIntakeForm({ name: "", phone: "", area: "", type: "EMPLOYMENT", description: "" }); setIntakeOpen(true); }}>+ New case</button>
           </div>
-          <table className="tbl">
+          <table className="tbl casetbl">
             <thead>
               <tr><th>Case</th><th>Area</th><th>Type</th><th>Status</th><th>Received</th></tr>
             </thead>
@@ -151,6 +151,19 @@ export default function Dashboard() {
               )}
             </tbody>
           </table>
+          <div className="case-cards">
+            {cases.map((c) => (
+              <button key={c.id} className="casecard" onClick={() => setOpen(c)}>
+                <span className="row1">
+                  <span className="serial">{c.caseNumber}</span>
+                  <span className={"tag tag-" + c.status}>{c.status.replace("_", " ")}</span>
+                </span>
+                <span className="row2">{c.type || "—"}{c.area ? " · " + c.area : ""}</span>
+                <span className="row3">Received {new Date(c.createdAt).toLocaleDateString()}</span>
+              </button>
+            ))}
+            {cases.length === 0 && <p style={{ fontSize: 13.5, color: "#5b6b86" }}>No cases under this filter yet.</p>}
+          </div>
         </div>
 
         {open && (

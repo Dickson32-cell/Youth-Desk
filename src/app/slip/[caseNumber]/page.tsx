@@ -17,11 +17,11 @@ export default async function Slip({ params }: { params: Promise<{ caseNumber: s
       <div className="card">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #1c3f6e", paddingBottom: 10, marginBottom: 14 }}>
           <div>
-            <div style={{ fontWeight: 800, fontSize: 18, color: "#122447" }}>MUNICIPAL YOUTH DESK</div>
+            <div style={{ fontWeight: 800, fontSize: 18, color: "#122447" }}>NJSMA YOUTH DESK</div>
             <div style={{ fontSize: 11, letterSpacing: 1, color: "#5b6b86" }}>CASE SLIP — KEEP THIS NUMBER</div>
           </div>
           <div style={{ fontSize: 11, color: "#5b6b86", lineHeight: 1.6, textAlign: "right" }}>
-            Municipal Assembly<br />Youth Desk Office<br />{new Date(c.createdAt).toLocaleString()}
+            NJSMA - Municipal Assembly<br />Youth Desk Office<br />{new Date(c.createdAt).toLocaleString()}
           </div>
         </div>
         <div style={{ textAlign: "center", margin: "14px 0 18px" }}>
@@ -51,7 +51,7 @@ export default async function Slip({ params }: { params: Promise<{ caseNumber: s
           <div>Date: ____________</div>
         </div>
         <p style={{ fontSize: 12, color: "#5b6b86", marginTop: 12 }}>
-          Track any time at the Youth Desk or with your reference number. Keep this slip.
+          NJSMA Youth Desk - track any time with your reference number. Keep this slip.
         </p>
       </div>
       <div className="noprint" style={{ textAlign: "center" }}>

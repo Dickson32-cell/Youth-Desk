@@ -21,7 +21,7 @@ export default async function ReferralForm({ params }: { params: Promise<{ caseN
       <div className="card">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #1c3f6e", paddingBottom: 10, marginBottom: 16 }}>
           <div>
-            <div style={{ fontWeight: 800, fontSize: 18, color: "#122447" }}>MUNICIPAL YOUTH DESK</div>
+            <div style={{ fontWeight: 800, fontSize: 18, color: "#122447" }}>NJSMA YOUTH DESK</div>
             <div style={{ fontSize: 11, letterSpacing: 1, color: "#5b6b86" }}>REFERRAL FORM — FOR NECESSARY ACTION</div>
           </div>
           <div style={{ fontSize: 11, color: "#5b6b86", lineHeight: 1.6, textAlign: "right" }}>
@@ -36,8 +36,10 @@ export default async function ReferralForm({ params }: { params: Promise<{ caseN
 
         <div className="card" style={{ background: "#f4f7fc", marginBottom: 14 }}>
           <div style={{ fontSize: 13, lineHeight: 1.7 }}>
-            <strong>TO:</strong> The {to ? <span style={{ fontWeight: 800 }}>{to}</span> : "________________________________"}<br />
-            <strong>FROM:</strong> The Youth Desk Officer, Municipal Youth Desk<br />
+            <strong>TO:</strong> The{" "}
+            <input className="ref-input" type="text" defaultValue={to} placeholder="type the department / office here"
+              style={{ fontWeight: 800, border: "none", borderBottom: "1px dashed #8ba0bd", font: "inherit", fontSize: 13, width: "auto", minWidth: 260, background: "transparent", padding: "0 2px" }} /><br />
+            <strong>FROM:</strong> The Youth Desk Officer, NJSMA Youth Desk<br />
             <strong>SUBJECT:</strong> Referral of case {c.caseNumber} for investigation and resolution
           </div>
         </div>
@@ -66,10 +68,8 @@ export default async function ReferralForm({ params }: { params: Promise<{ caseN
         )}
 
         <div style={{ fontSize: 11, color: "#5b6b86", letterSpacing: 1, margin: "12px 0 4px" }}>ACTION REQUESTED</div>
-        <div className="note">
-          The Youth Desk respectfully refers this matter to your office for the necessary investigation and
-          resolution. Kindly advise the Youth Desk of the outcome so the complainant can be updated.
-        </div>
+        <textarea className="ref-input" rows={3} defaultValue="The Youth Desk respectfully refers this matter to your office for the necessary investigation and resolution. Kindly advise the Youth Desk of the outcome so the complainant can be updated."
+          style={{ width: "100%", border: "none", borderBottom: "1px dashed #ccd8ea", font: "inherit", fontSize: 13, lineHeight: 1.6, background: "#f7f9fd", borderRadius: 8, padding: "10px 12px" }} />
 
         <div style={{ display: "flex", justifyContent: "space-between", gap: 24, marginTop: 26, paddingTop: 14, borderTop: "1px solid #ccd8ea", fontSize: 12 }}>
           <div style={{ flex: 1 }}>
