@@ -14,6 +14,7 @@ const OFFICE_TABS = [
   { href: "/dashboard", label: "Cases", exact: true },
   { href: "/dashboard/youth", label: "Youth" },
   { href: "/dashboard/report", label: "Reports" },
+  { href: "/dashboard/content", label: "Content" },
   { href: "/dashboard/account", label: "Account" },
 ];
 
@@ -22,6 +23,29 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
   const office = mode === "office";
   const tabs = office ? OFFICE_TABS : PUBLIC_TABS;
   const [me, setMe] = useState("");
+  const [dark, setDark] = useState(false);
+
+  // Public pages remember the visitor's light/dark choice; officer pages stay light
+  // (the console and all printables are designed for paper-white surfaces).
+  useEffect(() => {
+    const html = document.documentElement;
+    if (office) {
+      html.removeAttribute("data-theme");
+      setDark(false);
+      return;
+    }
+    const stored = localStorage.getItem("youthdesk-theme");
+    if (stored === "dark") { html.setAttribute("data-theme", "dark"); setDark(true); }
+    return () => { if (!office) { /* keep visitor choice between public pages */ } };
+  }, [office]);
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    if (next === "dark") { html.setAttribute("data-theme", "dark"); localStorage.setItem("youthdesk-theme", "dark"); setDark(true); }
+    else { html.removeAttribute("data-theme"); localStorage.setItem("youthdesk-theme", "light"); setDark(false); }
+    void html;
+  }
 
   useEffect(() => {
     if (!office) return;
@@ -58,6 +82,11 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
               </Link>
             ))}
           </nav>
+          {!office && (
+            <button className="themetoggle" onClick={toggleTheme} title={dark ? "Switch to light mode" : "Switch to dark mode"} aria-label="Toggle dark mode">
+              {dark ? "\u2600 Light" : "\u263E Dark"}
+            </button>
+          )}
           {office && (
             <span className="officer-chip">
               {me || "Officer"}

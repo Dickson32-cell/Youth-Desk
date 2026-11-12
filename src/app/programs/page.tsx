@@ -26,11 +26,22 @@ const SERVICES: [string, string][] = [
 ];
 
 export default async function Programs() {
-  const list = await prisma.program.findMany({
-    where: { status: "OPEN" },
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  });
+  const [deptItems, svcItems, aboutImgs, list] = await Promise.all([
+    prisma.siteItem.findMany({ where: { kind: "department" }, orderBy: { id: "asc" }, select: { id: true, title: true, body: true } }),
+    prisma.siteItem.findMany({ where: { kind: "service" }, orderBy: { id: "asc" }, select: { id: true, title: true, body: true } }),
+    prisma.siteImage.findMany({ where: { slot: "about" }, orderBy: { sort: "asc" }, select: { id: true } }),
+    prisma.program.findMany({
+      where: { status: "OPEN" },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    }),
+  ]);
+  const depts: [string, string][] = deptItems.length > 0
+    ? deptItems.map((d) => [d.title, d.body] as [string, string])
+    : DEPARTMENTS;
+  const svcs: [string, string][] = svcItems.length > 0
+    ? svcItems.map((d) => [d.title, d.body] as [string, string])
+    : SERVICES;
   return (
     <main>
       <TopBar on="programs" />
@@ -46,12 +57,20 @@ export default async function Programs() {
             The <b>Youth Desk</b> is the Assembly&apos;s front door for young people: one office where youth
             walk in, are heard, and their matters are taken up with the right department and followed to resolution.
           </p>
+          {aboutImgs.length > 0 && (
+            <div className="aboutgal">
+              {aboutImgs.map((im) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={im.id} src={`/api/media/${im.id}`} alt="Assembly" />
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="card">
           <h2>Departments of the Assembly</h2>
           <p className="sub">Each department handles its own service for the public; the Youth Desk links you to the right one.</p>
-          {DEPARTMENTS.map(([name, role]) => (
+          {depts.map(([name, role]) => (
             <div key={name} style={{ borderBottom: "1px solid #eef1f8", padding: "10px 0" }}>
               <b style={{ fontSize: 14.5 }}>{name}</b>
               <div style={{ fontSize: 13, color: "#5b6b86", lineHeight: 1.5 }}>{role}</div>
@@ -62,7 +81,7 @@ export default async function Programs() {
         <div className="card">
           <h2>Services we render</h2>
           <p className="sub">What the Youth Desk and the Assembly do for you.</p>
-          {SERVICES.map(([name, role]) => (
+          {svcs.map(([name, role]) => (
             <div key={name} style={{ borderBottom: "1px solid #eef1f8", padding: "10px 0" }}>
               <b style={{ fontSize: 14.5 }}>{name}</b>
               <div style={{ fontSize: 13, color: "#5b6b86", lineHeight: 1.5 }}>{role}</div>

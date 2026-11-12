@@ -89,6 +89,32 @@ model Program {
   createdAt   DateTime @default(now())
 }
 
+// Officer-managed public content (no-code appearance editor).
+model SiteImage {
+  id        Int      @id @default(autoincrement())
+  slot      String   // "hero" (homepage slideshow) | "about" (About gallery)
+  mimeType  String
+  size      Int
+  sort      Int      @default(0)
+  data      Bytes
+  createdAt DateTime @default(now())
+}
+
+model SiteItem {
+  id          Int      @id @default(autoincrement())
+  kind        String   // "department" | "service"
+  title       String
+  body        String
+  createdAt   DateTime @default(now())
+}
+
+// Single row (id = 1) driving the whole public color scheme.
+model SiteTheme {
+  id      Int    @id @default(1)
+  primary String // top bar, buttons, landing band
+  accent  String // highlights (active tab underline, accents)
+}
+
 model SmsLog {
   id          Int      @id @default(autoincrement())
   kind        String   // CASE_CONFIRM

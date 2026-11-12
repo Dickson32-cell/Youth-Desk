@@ -82,3 +82,44 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 @media print { .topbar, .tabbar, .noprint { display: none !important; } body { background: #fff; } .main { padding: 0; } .card { box-shadow: none; border: 1px solid #999; break-inside: avoid; } .tbl tr { break-inside: avoid; } .case-detail { break-inside: avoid; } }
 .print-only { display: none; }
 @media print { .print-only { display: block !important; } .card { break-inside: avoid; } }
+
+/* ===== Officer appearance editor + public theme toggle ===== */
+.slideshow { position: relative; max-width: 760px; margin: 0 auto 18px; border-radius: 14px; overflow: hidden; box-shadow: 0 12px 30px -18px rgba(6,20,40,.6); background: #0c1522; }
+.slideshow .slide { display: block; width: 100%; height: clamp(170px, 34vw, 320px); object-fit: cover; opacity: 0; transition: opacity .7s ease; position: absolute; inset: 0; }
+.slideshow .slide.on { opacity: 1; position: relative; }
+.slideshow .dots { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; justify-content: center; gap: 7px; }
+.slideshow .dot { width: 9px; height: 9px; border-radius: 50%; border: 0; background: rgba(255,255,255,.42); cursor: pointer; padding: 0; }
+.slideshow .dot.on { background: #fff; transform: scale(1.25); }
+.aboutgal { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.aboutgal img { width: clamp(120px, 30vw, 220px); height: clamp(84px, 20vw, 150px); object-fit: cover; border-radius: 10px; border: 1px solid #d7dfec; }
+.swatch { width: 34px; height: 34px; border-radius: 9px; border: 2px solid rgba(255,255,255,.5); outline: 1px solid #c6d2e4; cursor: pointer; margin: 0 5px 6px 0; padding: 0; }
+.swatch.on { outline: 2px solid #16324f; border-color: #fff; }
+.imgthumb { width: 150px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; position: relative; }
+.imgthumb img { display: block; width: 100%; height: 86px; object-fit: cover; }
+.imgthumb .ord { position: absolute; top: 5px; left: 5px; background: rgba(12,22,38,.66); color: #fff; font-size: 10.5px; font-weight: 800; border-radius: 999px; padding: 1px 7px; }
+.imgthumb .meta { display: block; font-size: 10.5px; color: var(--muted); padding: 4px 8px; }
+.imgthumb .btn { width: calc(100% - 8px); margin: 0 4px 6px; }
+.listrow { display: flex; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid #eef1f8; font-size: 13.5px; }
+.themetoggle { background: rgba(255,255,255,.12); border: none; color: #fff; font: inherit; font-size: 12.5px; font-weight: 700; min-height: 34px; padding: 5px 14px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+.themetoggle:hover { background: rgba(255,255,255,.22); }
+
+/* ===== Dark mode (public pages remember the choice; officer console stays light) ===== */
+[data-theme="dark"] body { background: #0e151e; color: #c9d5e6; }
+[data-theme="dark"] .card { background: #151f2b; border-color: #24354a; box-shadow: none; }
+[data-theme="dark"] .card h2 { color: #e7eff8; }
+[data-theme="dark"] .card .sub, [data-theme="dark"] .footer { color: #8fa3bd; }
+[data-theme="dark"] .choice a { background: #17222f; border-color: #2a3c52; color: #dbe6f4; box-shadow: none; }
+[data-theme="dark"] .choice a span { color: #93a7c2; }
+[data-theme="dark"] input[type="text"], [data-theme="dark"] input[type="password"], [data-theme="dark"] input[type="tel"], [data-theme="dark"] input[type="date"], [data-theme="dark"] input[type="email"], [data-theme="dark"] select, [data-theme="dark"] textarea { background: #101a26; border-color: #2c3f57; color: #dbe6f4; }
+[data-theme="dark"] .tbl th { background: #101a26; color: #9db2cc; border-bottom-color: #2a3c52; }
+[data-theme="dark"] .tbl td { border-bottom-color: #1e2c3d; }
+[data-theme="dark"] .tbl tbody tr:hover td { background: #17222f; }
+[data-theme="dark"] .note { background: #131d29; border-left-color: #2a3c52; color: #c9d5e6; }
+[data-theme="dark"] .alert-ok { background: #0f2a1d; color: #6fe0a6; }
+[data-theme="dark"] .alert-err { background: #2c1517; color: #ff9e95; }
+[data-theme="dark"] .kv dd { color: #dbe6f4; }
+[data-theme="dark"] .aboutgal img { border-color: #2a3c52; }
+[data-theme="dark"] .listrow { border-bottom-color: #1e2c3d; }
+[data-theme="dark"] .imgthumb { background: #17222f; border-color: #2a3c52; }
+[data-theme="dark"] .swatch { outline-color: #2a3c52; }
+[data-theme="dark"] .topbar { box-shadow: none; }
