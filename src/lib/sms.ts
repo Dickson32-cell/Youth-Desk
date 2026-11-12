@@ -32,6 +32,52 @@ export function caseSmsText(caseNumber: string): string {
   return t.length <= 160 ? t : t.slice(0, 160);
 }
 
+// Stage-update SMS templates (fixed, one per officer action):
+export function statusSmsText(caseNumber: string, status: "IN_PROGRESS" | "RESOLVED"): string {
+  if (status === "RESOLVED") {
+    return `Youth Desk: Update on case ${caseNumber}: your case has been resolved. Thank you for using the Youth Desk.`;
+  }
+  return `Youth Desk: Update on case ${caseNumber}: the officer has started working on your case. Track it any time on the website.`;
+}
+
+export async function sendStatusSms(caseNumber: string, phone: string | null, status: "IN_PROGRESS" | "RESOLVED"): Promise<void> {
+  const to = normalizeGhPhone(phone);
+  const base = { kind: "STATUS_" + status, caseNumber, phone: to || String(phone ?? "").slice(0, 20) };
+  if (!to) {
+    await prisma.smsLog.create({ data: { ...base, status: "SKIPPED", error: "no phone on file" } }).catch(() => {});
+    return;
+  }
+  if (!smsConfigured()) {
+    await prisma.smsLog.create({ data: { ...base, status: "SKIPPED", error: "not configured" } }).catch(() => {});
+    return;
+  }
+  try {
+    const res = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "api-key": String(process.env.ARKESEL_API_KEY), "Content-Type": "application/json", "User-Agent": UA },
+      body: JSON.stringify({
+        sender: process.env.ARKESEL_SENDER || "YOUTHDSK",
+        message: statusSmsText(caseNumber, status),
+        recipients: [to],
+      }),
+      signal: AbortSignal.timeout(20000),
+    });
+    const j = await res.json().catch(() => ({}));
+    await prisma.smsLog.create({
+      data: {
+        ...base,
+        status: res.ok ? "SENT" : "FAILED",
+        providerRef: JSON.stringify(j).slice(0, 220),
+        error: res.ok ? null : `HTTP ${res.status}`,
+      },
+    }).catch(() => {});
+  } catch (e) {
+    await prisma.smsLog.create({
+      data: { ...base, status: "FAILED", error: String(e).slice(0, 200) },
+    }).catch(() => {});
+  }
+}
+
 export async function sendCaseSms(caseNumber: string, phone: string): Promise<void> {
   const to = normalizeGhPhone(phone);
   const base = { kind: "CASE_CONFIRM", caseNumber, phone: to || String(phone ?? "").slice(0, 20) };

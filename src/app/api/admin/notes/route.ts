@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifySession, SESSION_COOKIE } from "@/lib/auth";
+import { normalizeGhPhone, sendStatusSms, smsConfigured } from "@/lib/sms";
 
 // PATCH a case: status / forwardedTo / add a note — one tidy endpoint
 export async function PATCH(req: NextRequest) {
@@ -21,6 +22,17 @@ export async function PATCH(req: NextRequest) {
   if (typeof body.note === "string" && body.note.trim()) {
     await prisma.caseNote.create({ data: { caseId: id, body: body.note.trim().slice(0, 1000), author: s.u } });
   }
+  // Automatic client SMS on stage changes: Start Working (IN_PROGRESS) and
+  // Mark Resolved (RESOLVED). Fires only when the status actually CHANGED and
+  // the case has a valid phone on file. Deferred with after() so the reply is fast.
+  const newStatus = data.status;
+  const statusChanged = !!newStatus && newStatus !== c.status;
+  const notify = statusChanged && (newStatus === "IN_PROGRESS" || newStatus === "RESOLVED");
+  if (notify) {
+    after(async () => {
+      await sendStatusSms(c.caseNumber, c.phone, newStatus);
+    });
+  }
   const updated = await prisma.case.findUnique({ where: { id }, include: { notes: { orderBy: { id: "asc" } } } });
-  return NextResponse.json({ ok: true, case: updated });
+  return NextResponse.json({ ok: true, case: updated, smsQueued: !!notify && smsConfigured() && !!normalizeGhPhone(c.phone) });
 }
