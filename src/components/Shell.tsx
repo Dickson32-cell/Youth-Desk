@@ -14,6 +14,7 @@ const OFFICE_TABS = [
   { href: "/dashboard", label: "Cases", exact: true },
   { href: "/dashboard/youth", label: "Youth" },
   { href: "/dashboard/report", label: "Reports" },
+  { href: "/dashboard/account", label: "Account" },
 ];
 
 export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office"; on?: string }) {
