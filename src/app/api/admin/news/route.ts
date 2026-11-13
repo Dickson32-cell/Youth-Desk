@@ -22,24 +22,27 @@ export async function POST(req: NextRequest) {
   if (!s) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const ct = req.headers.get("content-type") || "";
   let title = "", body = "";
+  let important = false;
   let files: File[] = [];
   if (ct.startsWith("multipart/form-data")) {
     const fd = await req.formData().catch(() => null);
     if (!fd) return NextResponse.json({ error: "Bad request" }, { status: 400 });
     title = String(fd.get("title") ?? "");
     body = String(fd.get("body") ?? "");
+    important = String(fd.get("important") ?? "") === "1";
     for (const v of fd.getAll("files")) if (v instanceof File) files.push(v);
   } else {
     const j = await req.json().catch(() => ({}));
     title = String(j.title ?? "");
     body = String(j.body ?? "");
+    important = j.important === true;
   }
   title = title.trim().slice(0, 120);
   body = body.trim().slice(0, 4000);
   if (!title || !body) return NextResponse.json({ error: "A title and the news text are required" }, { status: 400 });
   files = files.filter((f) => f.size > 0).slice(0, 3);
 
-  const created = await prisma.news.create({ data: { title, body, author: s.u } });
+  const created = await prisma.news.create({ data: { title, body, author: s.u, important } });
   const saved: { id: number }[] = [];
   let warning = "";
   let sort = 0;
@@ -68,6 +71,8 @@ export async function PATCH(req: NextRequest) {
   if (!news) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const ct = req.headers.get("content-type") || "";
   let title = "", body = "";
+  let important = false;
+  let importantSet = false;
   let addFiles: File[] = [];
   let removeIds: number[] = [];
   if (ct.startsWith("multipart/form-data")) {
@@ -75,18 +80,23 @@ export async function PATCH(req: NextRequest) {
     if (!fd) return NextResponse.json({ error: "Bad request" }, { status: 400 });
     title = String(fd.get("title") ?? "");
     body = String(fd.get("body") ?? "");
+    important = String(fd.get("important") ?? "") === "1";
+    importantSet = fd.get("important") !== null;
     for (const v of fd.getAll("files")) if (v instanceof File) addFiles.push(v);
     removeIds = [...fd.getAll("removeImages")].map((v) => Number(v) || 0).filter(Boolean);
   } else {
     const j = await req.json().catch(() => ({}));
     title = String(j.title ?? "");
     body = String(j.body ?? "");
+    important = j.important === true;
+    importantSet = "important" in j;
   }
-  const data: { title?: string; body?: string } = {};
+  const data: { title?: string; body?: string; important?: boolean } = {};
   const t = title.trim().slice(0, 120);
   const b = body.trim().slice(0, 4000);
   if (t) data.title = t;
   if (b) data.body = b;
+  if (importantSet) data.important = important;
   await prisma.news.update({ where: { id }, data });
   if (removeIds.length) {
     await prisma.newsImage.deleteMany({ where: { id: { in: removeIds }, newsId: id } });

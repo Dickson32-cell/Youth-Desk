@@ -20,7 +20,7 @@ export default function ContentStudio() {
   const [logoImgs, setLogoImgs] = useState<Img[]>([]);
   type NewsRow = { id: number; title: string; body: string; author: string; createdAt: string; images: { id: number; mimeType: string }[] };
   const [newsRows, setNewsRows] = useState<NewsRow[]>([]);
-  const [newsForm, setNewsForm] = useState<{ id: number | null; title: string; body: string }>({ id: null, title: "", body: "" });
+  const [newsForm, setNewsForm] = useState<{ id: number | null; title: string; body: string; important: boolean }>({ id: null, title: "", body: "", important: false });
   const [newsFiles, setNewsFiles] = useState<File[]>([]);
   const [newsRemove, setNewsRemove] = useState<number[]>([]);
   const [aboutImgs, setAboutImgs] = useState<Img[]>([]);
@@ -86,7 +86,7 @@ export default function ContentStudio() {
   }
 
   function resetNewsForm() {
-    setNewsForm({ id: null, title: "", body: "" });
+    setNewsForm({ id: null, title: "", body: "", important: false });
     setNewsFiles([]);
     setNewsRemove([]);
   }
@@ -98,8 +98,14 @@ export default function ContentStudio() {
       const fd = new FormData();
       fd.append("title", newsForm.title);
       fd.append("body", newsForm.body);
-      newsFiles.forEach((f) => fd.append("files", f));
+      fd.append("important", String(newsForm.important));
       newsRemove.forEach((rid) => fd.append("removeImages", String(rid)));
+      // Same law as the gallery: phone photos are downscaled in the browser
+      // (1600px/0.8) BEFORE upload, or 3 photos blow past the ~4.5 MB
+      // serverless body cap and the save dies with "Could not save".
+      const { prepareFilesForUpload } = await import("@/lib/imgPrepare");
+      const chosen = await prepareFilesForUpload(newsFiles);
+      chosen.forEach((f) => fd.append("files", f));
       const url = newsForm.id ? `/api/admin/news?id=${newsForm.id}` : "/api/admin/news";
       const res = await fetch(url, { method: newsForm.id ? "PATCH" : "POST", body: fd });
       const j = await res.json().catch(() => ({}));
@@ -116,7 +122,7 @@ export default function ContentStudio() {
   }
 
   function editNews(n: NewsRow) {
-    setNewsForm({ id: n.id, title: n.title, body: n.body });
+    setNewsForm({ id: n.id, title: n.title, body: n.body, important: !!(n as { important?: boolean }).important });
     setNewsFiles([]);
     setNewsRemove([]);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -258,6 +264,10 @@ export default function ContentStudio() {
                 {(newsRows.find((n) => n.id === newsForm.id)?.images || []).length === 0 && <span style={{ fontSize: 12.5, color: "#8fa2bd" }}>No images on this item.</span>}
               </div>
             )}
+            <label style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8, fontSize: 13.5, color: "#3c5170" }}>
+              <input type="checkbox" checked={newsForm.important} onChange={(e) => setNewsForm((f) => ({ ...f, important: e.target.checked }))} />
+              Mark as IMPORTANT — it scrolls in the newsflash ticker (main page + News page) and gets a badge
+            </label>
             <div style={{ display: "flex", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
               <button className="btn btn-primary" disabled={busy}>{busy ? "Saving…" : newsForm.id ? "Save news" : "Post news"}</button>
               {newsForm.id !== null && <button type="button" className="btn btn-ghost" onClick={resetNewsForm}>Cancel edit</button>}
@@ -276,7 +286,7 @@ export default function ContentStudio() {
                   )}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 13.5, color: "#12294a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{n.title}</div>
-                    <div style={{ fontSize: 11.5, color: "#8fa2bd" }}>{new Date(n.createdAt).toLocaleDateString("en-GB")} · by {n.author} · {n.images.length} image(s)</div>
+                    <div style={{ fontSize: 11.5, color: "#8fa2bd" }}>{new Date(n.createdAt).toLocaleDateString("en-GB")} · by {n.author} · {n.images.length} image(s){(n as { important?: boolean }).important ? " · IMPORTANT" : ""}</div>
                   </div>
                   <button className="btn btn-sm btn-ghost" onClick={() => editNews(n)}>Edit</button>
                   <button className="btn btn-sm btn-danger" onClick={() => delNews(n.id)}>Delete</button>

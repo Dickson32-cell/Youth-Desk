@@ -1,11 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 
-// Auto-advancing slideshow of officer-uploaded Assembly photos.
-// Fast-load discipline: the DOM carries at most TWO <img> elements at any time
-// (the visible slide + the upcoming one, pre-fetched so the next transition is
-// already loaded) instead of stacking every slide and racing for bandwidth.
-export default function Slideshow({ images, alt, priority = false }: { images: number[]; alt?: string; priority?: boolean }) {
+// Auto-advancing slideshow of officer-uploaded photos. Generic srcs let the
+// same component drive the homepage hero (/api/media) and news galleries
+// (/api/news-image). Fast-load: at most TWO <img> in the DOM (visible + next).
+export default function Slideshow({ images, alt, priority = false, srcPrefix = "/api/media" }: { images: number[]; alt?: string; priority?: boolean; srcPrefix?: string }) {
   const [cur, setCur] = useState(0);
   const many = images.length > 1;
 
@@ -19,14 +18,14 @@ export default function Slideshow({ images, alt, priority = false }: { images: n
   const visibleIds = many ? Array.from(new Set([images[cur], images[(cur + 1) % images.length]])) : [images[0]];
 
   return (
-    <div className="slideshow" role="img" aria-label={alt || "Assembly photo"}>
+    <div className="slideshow" role="img" aria-label={alt || "Photo"}>
       {visibleIds.map((id) => {
         const i = images.indexOf(id);
         return (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             key={id}
-            src={`/api/media/${id}`}
+            src={`${srcPrefix}/${id}`}
             alt=""
             className={"slide" + (i === cur ? " on" : "")}
             loading={i === 0 ? "eager" : "lazy"}
@@ -34,6 +33,7 @@ export default function Slideshow({ images, alt, priority = false }: { images: n
           />
         );
       })}
+      
       {many && (
         <div className="dots">
           {images.map((id, i) => (

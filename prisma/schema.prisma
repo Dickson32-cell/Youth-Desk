@@ -154,6 +154,7 @@ model News {
   title     String // <=120
   body      String // <=4000
   author    String // officer username
+  important Boolean     @default(false) // important announcements scroll in the newsflash ticker
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   images    NewsImage[]
