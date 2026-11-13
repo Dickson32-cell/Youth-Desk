@@ -11,14 +11,14 @@ import { verifySession, SESSION_COOKIE } from "@/lib/auth";
 
 function rangeOf(year: number, q: string): { createdAt?: { gte: Date; lt: Date } | undefined; label: string } {
   const validYear = Number.isInteger(year) && year >= 2020 && year <= 2100;
-  if (!validYear || q === "all" || q === "") return { createdAt: undefined, label: "All records" };
+  if (!validYear || q === "ALL" || q === "") return { createdAt: undefined, label: "All records" };
   const quarters: Record<string, { m0: number; mEnd: number; text: string }> = {
     Q1: { m0: 0, mEnd: 3, text: "1 Jan – 31 Mar" },
     Q2: { m0: 3, mEnd: 6, text: "1 Apr – 30 Jun" },
     Q3: { m0: 6, mEnd: 9, text: "1 Jul – 30 Sep" },
     Q4: { m0: 9, mEnd: 12, text: "1 Oct – 31 Dec" },
   };
-  if (q === "whole")
+  if (q === "WHOLE")
     return { createdAt: { gte: new Date(Date.UTC(year, 0, 1)), lt: new Date(Date.UTC(year + 1, 0, 1)) }, label: `Whole year ${year} · 1 Jan ${year} – 31 Dec ${year}` };
   const qq = quarters[q];
   if (!qq) return { createdAt: undefined, label: "All records" };
