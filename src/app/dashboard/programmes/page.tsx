@@ -145,6 +145,19 @@ export default function Programmes() {
           </div>
         )}
 
+
+        {rows.some((r) => r.note) && (
+          <div className="card print-only">
+            <h3 style={{ fontSize: 16 }}>Programme descriptions</h3>
+            {rows.filter((r) => r.note).map((r) => (
+              <div key={"pd-" + r.id} style={{ padding: "10px 0", borderBottom: "1px solid #e3e9f2" }}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: "#122447" }}>{r.title} — {r.department}</div>
+                <div style={{ whiteSpace: "pre-wrap", fontSize: 13, color: "#33383f", lineHeight: 1.6 }}>{r.note}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="card">
           <h3>Programme register</h3>
           {rows.length === 0 ? (
