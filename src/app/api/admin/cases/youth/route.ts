@@ -25,17 +25,30 @@ export async function DELETE(req: NextRequest) {
   const s = verifySession(req.cookies.get(SESSION_COOKIE)?.value);
   if (!s) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const id = Number(req.nextUrl.searchParams.get("id")) || 0;
+  const force = req.nextUrl.searchParams.get("force") === "1";
   const youth = await prisma.youth.findUnique({ where: { id }, select: { id: true, serial: true } });
   if (!youth) return NextResponse.json({ error: "Not found (already deleted?)" }, { status: 404 });
-  const linked = await prisma.case.count({ where: { youthId: id } });
-  if (linked > 0) {
+  const linkedRows = await prisma.case.findMany({
+    where: { youthId: id },
+    select: { id: true, caseNumber: true, description: true, status: true },
+    orderBy: { id: "asc" },
+  });
+  if (linkedRows.length > 0 && !force) {
+    // First press on a youth with history: show exactly what is linked and offer
+    // the combined delete as an explicit second step - the default stays safe.
     return NextResponse.json(
-      { error: `${youth.serial} has ${linked} linked case${linked === 1 ? "" : "s"}. Delete the case(s) from the case queue first — the record stays so the history is not lost.` },
+      {
+        error: `${youth.serial} has ${linkedRows.length} linked case${linkedRows.length === 1 ? "" : "s"}. Delete the case(s) from the case queue first — or confirm again to delete the case(s) AND the record together.`,
+        linkedCases: linkedRows.map((c) => ({ caseNumber: c.caseNumber, description: c.description.slice(0, 80), status: c.status })),
+      },
       { status: 409 },
     );
   }
-  await prisma.youth.delete({ where: { id } });
-  return NextResponse.json({ ok: true });
+  await prisma.$transaction(async (tx) => {
+    if (linkedRows.length > 0) await tx.case.deleteMany({ where: { youthId: id } });
+    await tx.youth.delete({ where: { id } });
+  });
+  return NextResponse.json({ ok: true, deletedCases: linkedRows.map((c) => c.caseNumber) });
 }
 
 export async function POST(req: NextRequest) {

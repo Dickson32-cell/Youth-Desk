@@ -118,8 +118,14 @@ export default function YouthRegister() {
                     <button className="btn btn-sm btn-ghost" onClick={() => takeComplaint({ id: y.id, serial: y.serial, name: y.name, phone: y.phone || "", area: y.area || "" })}>Take complaint</button>
                     <button className="btn btn-sm btn-danger" style={{ marginLeft: 6 }} onClick={async () => {
                       if (!window.confirm(`Delete ${y.serial} - ${y.name} from the walk-in register?`)) return;
-                      const res = await fetch(`/api/admin/cases/youth?id=${y.id}`, { method: "DELETE" });
-                      const j = await res.json().catch(() => ({}));
+                      let res = await fetch(`/api/admin/cases/youth?id=${y.id}`, { method: "DELETE" });
+                      let j = await res.json().catch(() => ({}));
+                      if (res.status === 409 && Array.isArray(j.linkedCases) && j.linkedCases.length > 0) {
+                        const list = j.linkedCases.map((lc: { caseNumber: string; description: string }) => `- ${lc.caseNumber}: ${lc.description}`).join("\n");
+                        if (!window.confirm(`${j.error}\n\nLinked case(s):\n${list}\n\nDelete these case(s) AND the register record together?`)) return;
+                        res = await fetch(`/api/admin/cases/youth?id=${y.id}&force=1`, { method: "DELETE" });
+                        j = await res.json().catch(() => ({}));
+                      }
                       if (res.ok) load(q);
                       else window.alert(j.error || "Could not delete");
                     }}>Delete</button>
