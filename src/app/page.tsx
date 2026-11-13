@@ -5,6 +5,7 @@ import NewsRemoveButton from "@/components/NewsRemoveButton";
 import TopBar from "@/components/Shell";
 import NewsTicker from "@/components/NewsTicker";
 import Slideshow from "@/components/Slideshow";
+import { getSeal } from "@/lib/seal";
 
 // Live municipal data: render per request (cacheComponents-compatible).
 export const instant = false;
@@ -13,6 +14,7 @@ export default async function Home() {
   // Officer-only inline controls: the officer who is signed in can remove news
   // directly from the main page; visitors never see the buttons.
   const officer = !!verifySession((await cookies()).get(SESSION_COOKIE)?.value);
+  const seal = await getSeal();
   const [imgs, words, newsRaw] = await Promise.all([
     prisma.siteImage.findMany({ where: { slot: "hero" }, orderBy: { sort: "asc" }, select: { id: true } }).catch(() => [] as { id: number }[]),
     prisma.siteText.findMany({ select: { key: true, value: true } }).catch(() => [] as { key: string; value: string }[]),
@@ -47,6 +49,11 @@ export default async function Home() {
           </div>
         )}
         <div className="hero" style={{ maxWidth: 1100, margin: "0 auto" }}>
+          {seal && (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={"/api/media/" + seal.id} alt="New Juaben South Municipal Assembly seal" width={104} height={104}
+              style={{ width: 104, height: 104, objectFit: "contain", display: "block", margin: "0 auto 10px", filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))", borderRadius: "50%" }} />
+          )}
           <h1>{heroTitle}</h1>
           <p>{heroSub}</p>
           <a href="/report" className="btn btn-primary" style={{ background: "#fff", color: "#1c3f6e" }}>Report an issue</a>
