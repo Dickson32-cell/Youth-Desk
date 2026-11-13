@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
     if (isNaN(md.getTime())) continue;
     const m0 = new Date(Date.UTC(md.getUTCFullYear(), md.getUTCMonth(), md.getUTCDate()));
     const diff = Math.round((m0.getTime() - t0d.getTime()) / 86400000);
-    if (diff !== 1) continue;
+    if (diff !== 1 && diff !== 0) continue; // day-before + due-day morning (never-twice keeps it single)
 
     const targets = await prisma.registration.findMany({
       where: { programId: prog.id, reminderSentAt: null, phone: { not: null } },

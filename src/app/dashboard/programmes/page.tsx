@@ -253,16 +253,15 @@ export default function Programmes() {
                           {r.status}
                         </button>
                       </td>
-                      <td className="noprint" style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                        <button type="button" className="btn btn-sm btn-ghost" onClick={() => { const d = window.prompt("Set the meeting date (e.g: 20 Dec 2026):", r.meetingDate || ""); if (d) setMeeting(r.id, d); }}>{r.meetingDate ? "Change date" : "Set date"}</button>
-                        {" "}
-                        <button type="button" className="btn btn-sm btn-primary" disabled={remBusy === r.id} onClick={() => sendReminder(r.id, r.title)} style={{ padding: "3px 10px", fontSize: 12 }}>
-                          {remBusy === r.id ? "Sending…" : "Remind all (" + (r.registrations - r.reminded) + " to go)"}
-                        </button>
-                        {" "}
-                        <button type="button" className="btn btn-sm btn-ghost" onClick={() => openRegistrants(r.id, r.title)}>{regFor && regFor.id === r.id ? "Hide list" : "Sign-ups"}</button>
-                        {" "}
-                        <button type="button" className="btn btn-danger" style={{ padding: "3px 10px", fontSize: 12 }} onClick={() => delPost(r.id)}>Delete</button>
+                      <td className="noprint" style={{ textAlign: "right" }}>
+                        <div style={{ display: "inline-flex", flexWrap: "wrap", gap: 6, justifyContent: "flex-end", maxWidth: 420 }}>
+                          <button type="button" className="btn btn-sm btn-ghost" onClick={() => { const d = window.prompt("Set the meeting date (e.g: 20 Dec 2026):", r.meetingDate || ""); if (d) setMeeting(r.id, d); }}>{r.meetingDate ? "Change date" : "Set date"}</button>
+                          <button type="button" className="btn btn-sm btn-primary" disabled={remBusy === r.id} onClick={() => sendReminder(r.id, r.title)} style={{ padding: "3px 10px", fontSize: 12 }}>
+                            {remBusy === r.id ? "Sending…" : "Remind all (" + (r.registrations - r.reminded) + " to go)"}
+                          </button>
+                          <button type="button" className="btn btn-sm btn-ghost" onClick={() => openRegistrants(r.id, r.title)}>{regFor && regFor.id === r.id ? "Hide list" : "Sign-ups"}</button>
+                          <button type="button" className="btn btn-danger" style={{ padding: "3px 10px", fontSize: 12 }} onClick={() => delPost(r.id)}>Delete</button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -384,6 +383,31 @@ export default function Programmes() {
             </div>
           </div>
         )}
+
+        <div className="card" style={{ marginTop: 16 }}>
+          <h3>Online programme registrations — recorded automatically</h3>
+          <p className="sub">Every youth who signs up on the main website appears here with their details. The counts feed the KPI tiles above (targeted = planned seats, reached = sign-ups).</p>
+          {posts !== null && posts.length === 0 && <p className="sub" style={{ marginTop: 6 }}>No published programmes yet.</p>}
+          {(posts || []).length > 0 && (
+            <div className="tblwrap" style={{ marginTop: 8 }}>
+              <table className="tbl" style={{ minWidth: 560 }}>
+                <thead><tr><th>#</th><th>Programme</th><th>Planned (target)</th><th>Sign-ups (reached)</th><th>Coverage</th><th>Where</th></tr></thead>
+                <tbody>
+                  {(posts || []).map((r, i) => (
+                    <tr key={"kpi" + r.id}>
+                      <td>{i + 1}</td>
+                      <td><b style={{ color: "#12294a" }}>{r.title}</b>{r.deadline ? <span style={{ fontSize: 12, color: "#8fa2bd" }}> &middot; closes {r.deadline}</span> : null}</td>
+                      <td>{r.seats ?? "\u2014"}</td>
+                      <td style={{ fontWeight: 700 }}>{r.registrations}</td>
+                      <td>{r.seats ? Math.min(100, Math.round((r.registrations / r.seats) * 100)) + "%" : "\u2014"}</td>
+                      <td>{r.venue || "\u2014"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
 
         <div className="card">
           <h3>Programme KPI register</h3>

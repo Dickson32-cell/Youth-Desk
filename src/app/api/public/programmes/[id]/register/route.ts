@@ -30,7 +30,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (phone) {
       after(() => sendProgramSms(id, name, phone, prog.title, prog.deadline, prog.venue));
     }
-    return NextResponse.json({ ok: true, name, smsQueued: !!phone, message: "You are registered. The desk will contact you with the next steps." });
+    return NextResponse.json({ ok: true, name, smsQueued: !!phone, message: "You are registered. The desk officer will contact you with the next steps." });
   } catch (e: unknown) {
     // unique (programId, phone) => already registered with that number
     const msg = String((e as Error)?.message || "");

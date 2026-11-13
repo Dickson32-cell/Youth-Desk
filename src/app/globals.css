@@ -227,3 +227,13 @@ tr.rownew > td { animation: rownewbg 2.5s ease; }
   .progcards { display: block; }
   .pubfields input, .pubfields select { max-width: 100%; }
 }
+
+/* ============ Officer console on TABLETS (640-1024px): bottom tab bar instead of the packed top links ============ */
+@media (max-width: 1024px) {
+  .topbar .navlinks { display: none; }
+  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: flex; background: var(--navy); box-shadow: 0 -2px 10px rgba(10,30,60,.25); padding-bottom: env(safe-area-inset-bottom); }
+  .tabbar .tab { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 52px; border: 0; background: transparent; color: #c9d7ea; font-family: inherit; font-weight: 700; font-size: 12.5px; cursor: pointer; border-top: 3px solid transparent; }
+  .tabbar .tab:hover { color: #fff; }
+  .tabbar .tab.on { color: #fff; background: rgba(255,255,255,.07); border-top-color: var(--gold); }
+  .main { padding-bottom: 96px; }
+}

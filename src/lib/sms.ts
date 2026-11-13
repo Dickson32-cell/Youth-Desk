@@ -42,7 +42,7 @@ export function programSmsText(programId: number, name: string, title: string, d
   let parts = [`Youth Desk: ${first}, you have registered for "${title}".`];
   if (deadline) parts.push(`Register by ${deadline}.`);
   if (venue) parts.push(`Venue: ${venue}.`);
-  parts.push("The desk will contact you with the next steps.");
+  parts.push("The desk officer will contact you with the next steps.");
   const t = parts.join(" ");
   return t.length <= 320 ? t : t.slice(0, 320);
 }
