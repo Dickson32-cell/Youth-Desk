@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { verifySession, SESSION_COOKIE } from "@/lib/auth";
+import { getSeal } from "@/lib/seal";
 import PrintBtn from "@/components/PrintBtn";
 
 // Printable live case data: render per request (cacheComponents-compatible).
@@ -23,13 +24,17 @@ export default async function Slip({ params }: { params: Promise<{ caseNumber: s
     include: { notes: { orderBy: { id: "asc" } } },
   });
   if (!c) notFound();
+  const seal = await getSeal();
   return (
     <main className="main" style={{ maxWidth: 620 }}>
       <div className="card">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #1c3f6e", paddingBottom: 10, marginBottom: 14 }}>
-          <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {seal ? <img src={"/api/media/" + seal.id} alt="NJSMA seal" style={{ width: 64, height: 64, objectFit: "contain" }} /> : null}
+            <div>
             <div style={{ fontWeight: 800, fontSize: 18, color: "#122447" }}>NJSMA YOUTH DESK</div>
             <div style={{ fontSize: 11, letterSpacing: 1, color: "#5b6b86" }}>CASE SLIP — KEEP THIS NUMBER</div>
+            </div>
           </div>
           <div style={{ fontSize: 11, color: "#5b6b86", lineHeight: 1.6, textAlign: "right" }}>
             NJSMA - Municipal Assembly<br />Youth Desk Office{officerName ? ` - ${officerName}` : ""}<br />{new Date(c.createdAt).toLocaleString()}

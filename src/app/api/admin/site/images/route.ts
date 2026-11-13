@@ -24,8 +24,8 @@ export async function POST(req: NextRequest) {
   const fd = await req.formData().catch(() => null);
   if (!fd) return NextResponse.json({ error: "Bad request" }, { status: 400 });
   const slotRaw = String(fd.get("slot") ?? "hero");
-  const iconSlots = new Set(["logo", "icon192", "icon512", "icon512m"]);
-  const slot: string = ["hero", "about", ...iconSlots].includes(slotRaw) ? slotRaw : "hero";
+  const iconSlots = new Set(["logo", "icon192", "icon512", "icon512m", "seal"]);
+  const slot: string = ["hero", "about", "seal", ...Array.from(iconSlots)].includes(slotRaw) ? slotRaw : "hero";
   const files = [...fd.getAll("files")].filter((v): v is File => v instanceof File && v.size > 0);
   if (files.length === 0) return NextResponse.json({ error: "Choose images to upload" }, { status: 400 });
   try {

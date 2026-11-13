@@ -1,3 +1,4 @@
+import { getSeal } from "@/lib/seal";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
@@ -11,6 +12,7 @@ export const instant = false;
 
 export default async function EvidenceSheet({ params }: { params: Promise<{ caseNumber: string }> }) {
   const { caseNumber } = await params;
+  const seal = await getSeal();
   const sj = verifySession((await cookies()).get(SESSION_COOKIE)?.value);
   if (!sj) redirect("/office/login");
   const num = decodeURIComponent(caseNumber).trim().toUpperCase();
@@ -23,7 +25,10 @@ export default async function EvidenceSheet({ params }: { params: Promise<{ case
   return (
     <main>
       <div className="card">
-        <h2>NJSMA YOUTH DESK — EVIDENCE SHEET</h2>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center" }}>
+          {seal ? <img src={"/api/media/" + seal.id} alt="NJSMA seal" width={56} height={56} style={{ objectFit: "contain" }} /> : null}
+          <h2>NJSMA YOUTH DESK — EVIDENCE SHEET</h2>
+        </div>
         <p className="sub" style={{ margin: "0 0 4px" }}>Case {c.caseNumber} · {c.type}{c.area ? ` · ${c.area}` : ""} · received {new Date(c.createdAt).toLocaleDateString("en-GB")} · {c.attachments.length} file(s)</p>
       </div>
       {c.attachments.map((a) => (

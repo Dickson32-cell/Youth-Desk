@@ -104,7 +104,10 @@ export default function ReportPack() {
       <TopBar mode="office" />
       <div className="main">
         <div className="card print-only">
-          <h2 style={{ fontSize: 18 }}>NJSMA Youth Desk</h2>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <h2 style={{ fontSize: 18, margin: 0 }}>NJSMA Youth Desk</h2>
+          <img src="/api/seal" alt="NJSMA seal" width={56} height={56} style={{ objectFit: "contain", marginLeft: "auto" }} />
+          </div>
           <p className="sub" style={{ margin: 0 }}>{packTitle}{d.period?.label ? ` · ${d.period.label}` : ""} · prepared by {preparedBy || "the desk officer"} · generated {new Date().toLocaleString()}</p>
         </div>
         <div className="card noprint">

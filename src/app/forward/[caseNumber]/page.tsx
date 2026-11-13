@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
+import { getSeal } from "@/lib/seal";
 import { verifySession, SESSION_COOKIE } from "@/lib/auth";
 import PrintBtn from "@/components/PrintBtn";
 
@@ -26,15 +27,19 @@ export default async function ReferralForm({ params }: { params: Promise<{ caseN
       attachments: { select: { id: true, fileName: true, mimeType: true }, orderBy: { id: "asc" } },
     },
   });
+  const seal = await getSeal();
   if (!c) notFound();
   const to = c.forwardedTo || "";
   return (
     <main className="main" style={{ maxWidth: 720 }}>
       <div className="card">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #1c3f6e", paddingBottom: 10, marginBottom: 16 }}>
-          <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {seal ? <img src={"/api/media/" + seal.id} alt="NJSMA seal" style={{ width: 64, height: 64, objectFit: "contain" }} /> : null}
+            <div>
             <div style={{ fontWeight: 800, fontSize: 18, color: "#122447" }}>NJSMA YOUTH DESK</div>
             <div style={{ fontSize: 11, letterSpacing: 1, color: "#5b6b86" }}>REFERRAL FORM — FOR NECESSARY ACTION</div>
+            </div>
           </div>
           <div style={{ fontSize: 11, color: "#5b6b86", lineHeight: 1.6, textAlign: "right" }}>
             Municipal Assembly<br />Youth Desk Office<br />Prepared {new Date().toLocaleDateString()}
