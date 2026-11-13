@@ -35,10 +35,16 @@ export function caseSmsText(caseNumber: string, trackKey: string): string {
 }
 
 // Programme-registration confirmation (fixed template): youth who registered
-// online for an open programme get the programme title + a contact line.
-export function programSmsText(programId: number, name: string, title: string): string {
+// online for an open programme get the programme title AND its details
+// (closing date, venue) so the SMS itself carries what they need to know.
+export function programSmsText(programId: number, name: string, title: string, deadline?: string | null, venue?: string | null): string {
   const first = String(name || "").trim().split(/\s+/)[0] || "there";
-  return `Youth Desk: ${first}, you have registered for "${title}". The desk will contact you with the next steps. Case/reference not needed.`;
+  let parts = [`Youth Desk: ${first}, you have registered for "${title}".`];
+  if (deadline) parts.push(`Register by ${deadline}.`);
+  if (venue) parts.push(`Venue: ${venue}.`);
+  parts.push("The desk will contact you with the next steps.");
+  const t = parts.join(" ");
+  return t.length <= 320 ? t : t.slice(0, 320);
 }
 
 // Stage-update SMS templates (fixed, one per officer action):
@@ -126,7 +132,7 @@ export async function sendCaseSms(caseNumber: string, phone: string, trackKey: s
 }
 
 // Fire-and-forget programme confirmation SMS (deferred via after()).
-export async function sendProgramSms(programId: number, name: string, phone: string, title: string): Promise<void> {
+export async function sendProgramSms(programId: number, name: string, phone: string, title: string, deadline?: string | null, venue?: string | null): Promise<void> {
   const to = normalizeGhPhone(phone);
   const base = { kind: "PROGRAM_CONFIRM", caseNumber: "PGM-" + programId, phone: to || String(phone ?? "").slice(0, 20) };
   if (!to) {

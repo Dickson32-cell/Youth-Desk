@@ -9,7 +9,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { id: raw } = await params;
   const id = parseInt(raw, 10);
   if (!id) return NextResponse.json({ error: "Bad programme" }, { status: 400 });
-  const prog = await prisma.program.findUnique({ where: { id }, select: { id: true, title: true, status: true } });
+  const prog = await prisma.program.findUnique({ where: { id }, select: { id: true, title: true, status: true, deadline: true, venue: true } });
   if (!prog) return NextResponse.json({ error: "Programme not found" }, { status: 404 });
   if (prog.status !== "OPEN") return NextResponse.json({ error: "Registration for this programme is closed." }, { status: 409 });
 
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       data: { programId: id, name, phone, area: area || null, note: note || null },
     });
     if (phone) {
-      after(() => sendProgramSms(id, name, phone, prog.title));
+      after(() => sendProgramSms(id, name, phone, prog.title, prog.deadline, prog.venue));
     }
     return NextResponse.json({ ok: true, name, smsQueued: !!phone, message: "You are registered. The desk will contact you with the next steps." });
   } catch (e: unknown) {
