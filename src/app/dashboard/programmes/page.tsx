@@ -43,7 +43,7 @@ export default function Programmes() {
   const [preparedBy, setPreparedBy] = useState("");
 
   // ---- (1) open-for-registration posts ----
-  const [posts, setPosts] = useState<PostRow[]>([]);
+  const [posts, setPosts] = useState<PostRow[] | null>(null); // null = loading (cold-start retry)
   const [showPostForm, setShowPostForm] = useState(false);
   const [pf, setPf] = useState({ title: "", category: "TRAINING", categoryOther: "", description: "", deadline: "", venue: "", seats: "", meetingDate: "" });
   const [remBusy, setRemBusy] = useState<number | null>(null);
@@ -59,11 +59,13 @@ export default function Programmes() {
   const [customType, setCustomType] = useState("");
   const [f, setF] = useState({ date: new Date().toISOString().slice(0, 10), department: "", title: "", type: "TRAINING", target: "", reached: "", budget: "", note: "" });
 
-  function loadPosts() {
+  function loadPosts(attempt = 0) {
+    // Neon cold start can swallow the first request; retry instead of
+    // showing a false "Nothing published yet".
     fetch("/api/admin/programmes-post")
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("http " + r.status))))
       .then((j) => setPosts(j.rows || []))
-      .catch(() => {});
+      .catch(() => { if (attempt < 3) setTimeout(() => loadPosts(attempt + 1), 4000); });
     fetch("/api/admin/programmes-post?full=1")
       .then((r) => r.json())
       .then((j) => setPubFull(j.rows || []))
@@ -214,7 +216,7 @@ export default function Programmes() {
             </form>
           )}
 
-          {posts.length > 0 && (
+          {posts !== null && posts.length > 0 && (
             <div style={{ marginTop: 14 }}>
               <div className="tblwrap progtbl-wrap">
               <table className="tbl progtbl" style={{ minWidth: 680 }}>
@@ -268,7 +270,7 @@ export default function Programmes() {
               </table>
             </div>
               <div className="progcards">
-                {posts.map((r) => (
+                {(posts || []).map((r) => (
                   <div className="progcard" key={"c" + r.id}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <b style={{ fontSize: 14, color: "#12294a", flex: 1, minWidth: 0 }}>{r.title}</b>
@@ -321,7 +323,8 @@ export default function Programmes() {
               )}
             </div>
           )}
-          {posts.length === 0 && <p className="sub" style={{ marginTop: 10 }}>Nothing published yet. Publish above for youth to sign up from their phones.</p>}
+          {posts === null && <p className="sub" style={{ marginTop: 10 }}>Loading programmes\u2026</p>}
+          {posts !== null && posts.length === 0 && <p className="sub" style={{ marginTop: 10 }}>Nothing published yet. Publish above for youth to sign up from their phones.</p>}
         </div>
 
         {/* ============ (2+3) KPI REGISTER ============ */}
