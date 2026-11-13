@@ -10,9 +10,20 @@ export async function GET(req: NextRequest) {
   if (!s) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const status = req.nextUrl.searchParams.get("status");
   const q = req.nextUrl.searchParams.get("q")?.trim() || "";
+  // Period filter for the quarterly Management report (from/to = ISO dates).
+  const fromP = req.nextUrl.searchParams.get("from");
+  const toP = req.nextUrl.searchParams.get("to");
+  const fromDate = fromP ? new Date(fromP) : null;
+  const toDate = toP && /^\d{4}-\d{2}-\d{2}/.test(toP) ? new Date(toP + "T23:59:59.999Z") : null;
   const cases = await prisma.case.findMany({
     where: {
       ...(status && status !== "ALL" ? { status } : {}),
+      ...((fromDate && !isNaN(fromDate.getTime())) || (toDate && !isNaN(toDate.getTime()))
+        ? { createdAt: {
+            ...(fromDate && !isNaN(fromDate.getTime()) ? { gte: fromDate } : {}),
+            ...(toDate && !isNaN(toDate.getTime()) ? { lt: toDate } : {}),
+          } }
+        : {}),
       ...(q ? { OR: [
         { caseNumber: { contains: q } },
         { description: { contains: q } },
