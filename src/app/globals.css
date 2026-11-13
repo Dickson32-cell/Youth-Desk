@@ -218,3 +218,12 @@ tr.rownew > td { animation: rownewbg 2.5s ease; }
   /* no stray page-break orphans */
   tr, .note, .case-detail { break-inside: avoid; }
 }
+
+/* ============ Programmes tab responsive cards (phone) ============ */
+.progcards { display: none; }
+.progcard { border: 1px solid #dbe6f3; border-radius: 12px; padding: 12px 14px; margin-top: 10px; background: #fff; }
+@media (max-width: 639px) {
+  .progtbl-wrap { display: none; }
+  .progcards { display: block; }
+  .pubfields input, .pubfields select { max-width: 100%; }
+}

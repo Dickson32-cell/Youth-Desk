@@ -195,17 +195,17 @@ export default function Programmes() {
           {showPostForm && (
             <form onSubmit={postProgramme}>
               <div className="filters" style={{ flexWrap: "wrap", rowGap: 8, marginTop: 10 }}>
-                <input required placeholder="Programme title" value={pf.title} onChange={(e) => setPf({ ...pf, title: e.target.value })} style={{ minWidth: 320 }} />
+                <input required placeholder="Programme title" value={pf.title} onChange={(e) => setPf({ ...pf, title: e.target.value })} style={{ flex: "1 1 300px", minWidth: 0 }} />
                 <select value={pf.category} onChange={(e) => setPf({ ...pf, category: e.target.value })}>
                   {TYPES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                 </select>
                 {pf.category === "OTHER" && (
-                  <input required placeholder="Type the kind of programme" value={pf.categoryOther} onChange={(e) => setPf({ ...pf, categoryOther: e.target.value })} style={{ width: 240, textTransform: "uppercase" }} />
+                  <input required placeholder="Type the kind of programme" value={pf.categoryOther} onChange={(e) => setPf({ ...pf, categoryOther: e.target.value })} style={{ flex: "0 0 195px", width: 195, textTransform: "uppercase", minWidth: 0 }} />
                 )}
-                <input placeholder="Closing date (optional, e.g: 30 Nov 2026)" value={pf.deadline} onChange={(e) => setPf({ ...pf, deadline: e.target.value })} style={{ minWidth: 220 }} />
-                <input placeholder="Venue / how to take part (optional)" value={pf.venue} onChange={(e) => setPf({ ...pf, venue: e.target.value })} style={{ minWidth: 260 }} />
-                <input type="number" min="1" placeholder="Planned seats (optional)" value={pf.seats} onChange={(e) => setPf({ ...pf, seats: e.target.value })} style={{ width: 170 }} />
-                <input placeholder="Meeting date (e.g: 20 Dec 2026, optional)" value={pf.meetingDate} onChange={(e) => setPf({ ...pf, meetingDate: e.target.value })} style={{ minWidth: 230 }} />
+                <input placeholder="Closing date (optional, e.g: 30 Nov 2026)" value={pf.deadline} onChange={(e) => setPf({ ...pf, deadline: e.target.value })} style={{ flex: "1 1 210px", minWidth: 0 }} />
+                <input placeholder="Venue / how to take part (optional)" value={pf.venue} onChange={(e) => setPf({ ...pf, venue: e.target.value })} style={{ flex: "1 1 250px", minWidth: 0 }} />
+                <input type="number" min="1" placeholder="Planned seats (optional)" value={pf.seats} onChange={(e) => setPf({ ...pf, seats: e.target.value })} style={{ flex: "0 0 155px", width: 155, minWidth: 0 }} />
+                <input placeholder="Meeting date (e.g: 20 Dec 2026, optional)" value={pf.meetingDate} onChange={(e) => setPf({ ...pf, meetingDate: e.target.value })} style={{ flex: "1 1 210px", minWidth: 0 }} />
               </div>
               <textarea required placeholder="Full details: what the programme offers, requirements, who can apply, how selection works." value={pf.description} onChange={(e) => setPf({ ...pf, description: e.target.value })} style={{ width: "100%", minHeight: 90, marginTop: 8 }} />
               <div className="row" style={{ marginTop: 10 }}>
@@ -216,8 +216,9 @@ export default function Programmes() {
 
           {posts.length > 0 && (
             <div style={{ marginTop: 14 }}>
-              <table>
-                <thead><tr><th>Programme</th><th>Type</th><th>Closing</th><th>Seats</th><th>Sign-ups</th><th>Status</th><th className="noprint"></th></tr></thead>
+              <div className="tblwrap progtbl-wrap">
+              <table className="tbl progtbl" style={{ minWidth: 680 }}>
+                <thead><tr><th>Programme</th><th>Type</th><th>Closing</th><th>Meeting</th><th>Sign-ups</th><th>Status</th><th className="noprint"></th></tr></thead>
                 <tbody>
                   {posts.map((r) => (
                     <tr key={r.id}>
@@ -228,7 +229,6 @@ export default function Programmes() {
                     </td>
                       <td>{catLabel(r.category)}</td>
                       <td>{r.deadline || "\u2014"}</td>
-                      <td>{r.seats ?? "\u2014"}</td>
                       <td style={{ minWidth: 110 }}>
                         {(() => {
                           const filled = r.registrations;
@@ -262,22 +262,45 @@ export default function Programmes() {
                         {" "}
                         <button type="button" className="btn btn-danger" style={{ padding: "3px 10px", fontSize: 12 }} onClick={() => delPost(r.id)}>Delete</button>
                       </td>
-                      <td className="noprint" style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                        <button type="button" className="btn btn-sm btn-ghost" onClick={() => openRegistrants(r.id, r.title)}>{regFor && regFor.id === r.id ? "Hide list" : "Sign-ups"}</button>
-                        {" "}
-                        <button type="button" className="btn btn-danger" style={{ padding: "3px 10px", fontSize: 12 }} onClick={() => delPost(r.id)}>Delete</button>
-                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
+              <div className="progcards">
+                {posts.map((r) => (
+                  <div className="progcard" key={"c" + r.id}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <b style={{ fontSize: 14, color: "#12294a", flex: 1, minWidth: 0 }}>{r.title}</b>
+                      <button type="button" className={"tag tag-" + (r.status === "OPEN" ? "NEW" : "RESOLVED")} style={{ cursor: "pointer", border: "none", font: "inherit", fontWeight: 800, flex: "0 0 auto" }} onClick={() => closeReopen(r.id, r.status === "OPEN" ? "close" : "reopen")}>
+                        {r.status}
+                      </button>
+                    </div>
+                    <div style={{ fontSize: 12, color: "#5b6b86", margin: "4px 0 2px" }}>Type: {catLabel(r.category)} &middot; Closing: {r.deadline || "\u2014"}</div>
+                    <div style={{ fontSize: 12, color: "#5b6b86" }}>Meeting: <b style={{ color: r.meetingDate ? "#0d6b3a" : "#8fa2bd" }}>{r.meetingDate || "not set"}</b>{r.venue ? <span> &middot; Venue: {r.venue}</span> : null}</div>
+                    <div style={{ fontWeight: 700, color: "#12294a", marginTop: 2 }}>{r.registrations}{r.seats ? " / " + r.seats : ""} signed up</div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+                      <button type="button" className="btn btn-sm btn-ghost" onClick={() => { const d = window.prompt("Set the meeting date (e.g: 20 Dec 2026):", r.meetingDate || ""); if (d) setMeeting(r.id, d); }}>{r.meetingDate ? "Change date" : "Set date"}</button>
+                      <button type="button" className="btn btn-sm btn-primary" disabled={remBusy === r.id} onClick={() => sendReminder(r.id, r.title)} style={{ padding: "3px 10px", fontSize: 12 }}>
+                        {remBusy === r.id ? "Sending…" : "Remind all (" + (r.registrations - r.reminded) + " to go)"}
+                      </button>
+                      <button type="button" className="btn btn-sm btn-ghost" onClick={() => openRegistrants(r.id, r.title)}>{regFor && regFor.id === r.id ? "Hide list" : "Sign-ups"}</button>
+                      <button type="button" className="btn btn-danger" style={{ padding: "3px 10px", fontSize: 12 }} onClick={() => delPost(r.id)}>Delete</button>
+                    </div>
+                    {regFor && regFor.id === r.id && (
+                      <p style={{ fontSize: 12, color: "#8fa2bd", margin: "6px 0 0" }}>The sign-up list opens here under the table view - scroll below the table.</p>
+                    )}
+                  </div>
+                ))}
+              </div>
               {regFor && (
                 <div style={{ marginTop: 12, borderTop: "1px solid #ccd8ea", paddingTop: 10 }}>
                   <h3>Sign-ups: {regFor.title}</h3>
                   {regs.length === 0 ? (
                     <p className="sub">No sign-ups yet - share the main website link.</p>
                   ) : (
-                    <table>
+                    <div className="tblwrap" style={{ marginTop: 4 }}>
+                    <table className="tbl" style={{ minWidth: 560 }}>
                       <thead><tr><th>When</th><th>Name</th><th>Phone</th><th>Area</th><th>Reminder</th><th>Note</th></tr></thead>
                       <tbody>
                         {regs.map((r) => (
@@ -286,11 +309,13 @@ export default function Programmes() {
                             <td>{r.name}</td>
                             <td>{r.phone || "\u2014"}</td>
                             <td>{r.area || "\u2014"}</td>
+                            <td>{r.reminderSentAt ? "\u2713" : "\u2014"}</td>
                             <td>{r.note || "\u2014"}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
+                    </div>
                   )}
                 </div>
               )}
@@ -341,7 +366,8 @@ export default function Programmes() {
         {byDept.length > 0 && (
           <div className="card">
             <h3>By department</h3>
-            <table>
+            <div className="tblwrap" style={{ marginTop: 8 }}>
+            <table className="tbl" style={{ minWidth: 560 }}>
               <thead><tr><th>Department</th><th>Programmes</th><th>Target</th><th>Reached</th><th>Coverage</th></tr></thead>
               <tbody>
                 {byDept.map((d) => (
@@ -352,6 +378,7 @@ export default function Programmes() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
 
@@ -360,7 +387,8 @@ export default function Programmes() {
           {rows.length === 0 ? (
             <p className="sub">No interventions logged yet. Use &quot;+ Log an intervention&quot; above after a programme happens.</p>
           ) : (
-            <table>
+            <div className="tblwrap" style={{ marginTop: 8 }}>
+            <table className="tbl" style={{ minWidth: 640 }}>
               <thead><tr><th>Date</th><th>Department</th><th>Programme</th><th>Type</th><th>Target</th><th>Reached</th><th className="noprint"></th></tr></thead>
               <tbody>
                 {rows.map((r) => (
@@ -375,6 +403,7 @@ export default function Programmes() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
 
