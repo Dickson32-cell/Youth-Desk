@@ -216,6 +216,9 @@ export default function Dashboard() {
                   <button className="btn btn-sm btn-ghost" onClick={() => patch(open.id, { status: "IN_PROGRESS", note: "Started working on it." })}>Start working</button>
                   <button className="btn btn-sm btn-ghost" onClick={() => patch(open.id, { status: "RESOLVED" })}>Mark resolved</button>
                   <a href={`/forward/${open.caseNumber}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">Referral form (MCD)</a>
+                  {(open.attachments || []).length > 0 && (
+                    <a href={`/evidence/${open.caseNumber}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">Evidence sheet (print)</a>
+                  )}
                 </div>
                 <div className="filters">
                   <input id="fwd" type="text" placeholder="Forward to (department / agency)…" style={{ flex: 1 }} defaultValue={open.forwardedTo || ""} />

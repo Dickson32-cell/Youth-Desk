@@ -94,8 +94,22 @@ export default async function ReferralForm({ params }: { params: Promise<{ caseN
             <div style={{ borderTop: "1px solid #8ba0bd", paddingTop: 4 }}>________________________ &nbsp; Date: ____________</div>
           </div>
         </div>
+
+        {c.attachments.length > 0 && (
+          <div style={{ marginTop: 22, pageBreakBefore: "always", breakBefore: "page" }}>
+            <div style={{ fontSize: 11, color: "#5b6b86", letterSpacing: 1, marginBottom: 8 }}>EVIDENCE ATTACHED TO THIS REFERRAL ({c.attachments.length} FILE{c.attachments.length === 1 ? "" : "S"})</div>
+            {c.attachments.map((a) => (
+              <div key={a.id} style={{ marginBottom: 18, pageBreakInside: "avoid" }}>
+                <div style={{ fontSize: 11.5, color: "#5b6b86", marginBottom: 4 }}>{a.fileName}</div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={`/api/attachments/${a.id}`} alt={a.fileName} style={{ width: "100%", height: "auto", border: "1px solid #ccd8ea", borderRadius: 8 }} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-      <div className="noprint" style={{ textAlign: "center" }}>
+      <div className="noprint" style={{ textAlign: "center", marginTop: 10 }}>
+        <p style={{ fontSize: 12.5, color: "#5b6b86", margin: "0 0 8px" }}>Type the department and the action requested above, then Print. {c.attachments.length > 0 ? `Evidence (${c.attachments.length} file${c.attachments.length === 1 ? "" : "s"}) prints on the pages after the referral form.` : ""}</p>
         <PrintBtn />
       </div>
     </main>

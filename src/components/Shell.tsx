@@ -25,11 +25,13 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
   const [me, setMe] = useState("");
   const [dark, setDark] = useState(false);
   const [brand, setBrand] = useState({ main: "Youth Desk NJSMA", sub: "NJSMA MUNICIPAL ASSEMBLY" });
+  const [logo, setLogo] = useState<string>("");
 
-  // Brand words come from the layout (officer-edited); read once after mount.
+  // Brand words + logo come from the layout (officer-edited); read once after mount.
   useEffect(() => {
     const html = document.documentElement;
     setBrand({ main: html.getAttribute("data-brand-main") || "Youth Desk NJSMA", sub: html.getAttribute("data-brand-sub") || "NJSMA MUNICIPAL ASSEMBLY" });
+    setLogo(html.getAttribute("data-logo-url") || "");
   }, []);
 
   // Public pages remember the visitor's light/dark choice; officer pages stay light
@@ -78,6 +80,7 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
       <header className="topbar noprint">
         <div className="bar">
           <Link href={office ? "/dashboard" : "/"} className="brand">
+            {logo && <img src={logo} alt="" className="logo-img" />}
             <span className="logo-t">{brand.main}</span>
             <span className="logo-s">{office ? "OFFICER CONSOLE" : brand.sub}</span>
           </Link>

@@ -17,6 +17,7 @@ const ACCENTS: [string, string][] = [
 
 export default function ContentStudio() {
   const [heroImgs, setHeroImgs] = useState<Img[]>([]);
+  const [logoImgs, setLogoImgs] = useState<Img[]>([]);
   const [aboutImgs, setAboutImgs] = useState<Img[]>([]);
   const [departments, setDepartments] = useState<Item[]>([]);
   const [services, setServices] = useState<Item[]>([]);
@@ -34,8 +35,9 @@ export default function ContentStudio() {
   const loadAll = useCallback(async () => {
     const r = await fetch("/api/admin/auth");
     if (!r.ok) { window.location.href = "/office/login"; return; }
-    const [h, a, d, s, t, w] = await Promise.all([
+    const [h, l, a, d, s, t, w] = await Promise.all([
       fetch("/api/admin/site/images?slot=hero").then((x) => x.json()).catch(() => null),
+      fetch("/api/admin/site/images?slot=logo").then((x) => x.json()).catch(() => null),
       fetch("/api/admin/site/images?slot=about").then((x) => x.json()).catch(() => null),
       fetch("/api/admin/site/items?kind=department").then((x) => x.json()).catch(() => null),
       fetch("/api/admin/site/items?kind=service").then((x) => x.json()).catch(() => null),
@@ -43,6 +45,7 @@ export default function ContentStudio() {
       fetch("/api/admin/site/text").then((x) => x.json()).catch(() => null),
     ]);
     setHeroImgs(h?.images || []);
+    setLogoImgs(l?.images || []);
     setAboutImgs(a?.images || []);
     setDepartments(d?.items || []);
     setServices(s?.items || []);
@@ -52,7 +55,7 @@ export default function ContentStudio() {
 
   useEffect(() => { loadAll(); }, [loadAll]);
 
-  async function upload(slot: "hero" | "about", target: HTMLInputElement) {
+  async function upload(slot: "hero" | "about" | "logo", target: HTMLInputElement) {
     const files = target.files;
     if (!files || files.length === 0) return;
     setBusy(true); setErr(""); setMsg("");
@@ -65,7 +68,7 @@ export default function ContentStudio() {
       const res = await fetch("/api/admin/site/images", { method: "POST", body: fd });
       const j = await res.json().catch(() => ({}));
       if (!res.ok) fail(j.error || "Upload failed");
-      else { note(`${slot === "hero" ? "Homepage slideshow" : "About gallery"} updated (+${j.count}).`); await loadAll(); }
+      else { note(`${slot === "hero" ? "Homepage slideshow" : slot === "logo" ? "Logo" : "About gallery"} updated (+${j.count}).`); await loadAll(); }
     } finally { setBusy(false); target.value = ""; }
   }
 
@@ -163,6 +166,24 @@ export default function ContentStudio() {
         {err && <div className="alert-err noprint">{err}</div>}
 
         {imgThumb("hero", heroImgs, "Homepage slideshow", "These photos appear on the main page, sliding one after the other.")}
+        <div className="card">
+          <h2>Desk logo</h2>
+          <p className="sub">Upload the Youth Desk NJSMA logo once (square image works best). It appears in the top-left corner of the officer console AND on the main web page.</p>
+          <label className="fld">
+            <span className="cap">{logoImgs.length > 0 ? "Replace the logo (the old one is removed)" : "Choose a logo file (JPG/PNG)"}</span>
+            <input type="file" accept="image/*" disabled={busy} onChange={(e) => upload("logo", e.target)} />
+          </label>
+          {logoImgs.length > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 10 }}>
+              <img src={`/api/media/${logoImgs[0].id}`} alt="Desk logo" style={{ width: 72, height: 72, borderRadius: 12, objectFit: "cover", border: "1px solid #ccd8ea" }} />
+              <div>
+                <div style={{ fontSize: 13, color: "#3c5170", fontWeight: 600 }}>Live on the site</div>
+                <button className="btn btn-sm btn-danger" style={{ marginTop: 6 }} onClick={() => delImage(logoImgs[0].id)}>Remove logo (site falls back to text)</button>
+              </div>
+            </div>
+          )}
+          {logoImgs.length === 0 && <p style={{ fontSize: 13, color: "#5b6b86", marginBottom: 0 }}>No logo yet — the consoles show the wordmark text only.</p>}
+        </div>
         {imgThumb("about", aboutImgs, "About page gallery", "These photos appear in a strip under the About the Assembly page.")}
 
         <div className="card">

@@ -46,6 +46,7 @@ export default function ReportPack() {
   const thisQ = "Q" + (Math.floor(now0.getUTCMonth() / 3) + 1);
   const [year, setYear] = useState(now0.getUTCFullYear());
   const [qSel, setQSel] = useState(thisQ); // Q1..Q4 | whole | all
+  const [includeEv, setIncludeEv] = useState(false); // print evidence photos inside the PDF
 
   // Management-review blocks collapse when the pack grows; printing always expands everything.
   const [openIds, setOpenIds] = useState<Set<number>>(new Set());
@@ -111,8 +112,8 @@ export default function ReportPack() {
           <p className="sub">Pick the period, then download it as a PDF (choose “Save as PDF” in the print dialog) and submit it with the case register attached below. Quarters follow the calendar: Q1 = Jan–Mar, Q2 = Apr–Jun, Q3 = Jul–Sep, Q4 = Oct–Dec.</p>
           <div className="filters" style={{ flexWrap: "wrap", rowGap: 8, marginTop: 8 }}>
             <select value={year} onChange={(e) => setYear(parseInt(e.target.value, 10))} style={{ minWidth: 110 }}>
-              {[...Array(now0.getUTCFullYear() - 2024 + 1)].map((_, i) => {
-                const y = 2025 + i;
+              {[...Array(16)].map((_, i) => {
+                const y = now0.getUTCFullYear() - 10 + i;
                 return <option key={y} value={y}>{y}</option>;
               })}
             </select>
@@ -122,8 +123,12 @@ export default function ReportPack() {
               <button key={qq} className={"btn btn-sm " + (qSel === qq ? "btn-primary" : "btn-ghost")} onClick={() => setQSel(qq)}>{qq} · {QUARTER_TEXT[qq]}</button>
             ))}
           </div>
-          <div style={{ marginTop: 10 }}>
+          <div style={{ marginTop: 10, display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
             <button className="btn btn-primary" onClick={printPack}>Download PDF</button>
+            <label style={{ fontSize: 13, color: "#3c5170", display: "inline-flex", gap: 6, alignItems: "center" }}>
+              <input type="checkbox" checked={includeEv} onChange={(e) => setIncludeEv(e.target.checked)} />
+              Print evidence photos in this report
+            </label>
           </div>
         </div>
 
@@ -255,9 +260,19 @@ export default function ReportPack() {
                 </>
               )}
               {c.attachments.length > 0 && (
-                <p style={{ fontSize: 12, color: "#5b6b86", margin: "6px 0 0" }}>
-                  Evidence on file: {c.attachments.map((a) => a.fileName).join(", ")}
-                </p>
+                <>
+                  <p style={{ fontSize: 12, color: "#5b6b86", margin: "6px 0 0" }}>
+                    Evidence on file: {c.attachments.map((a) => a.fileName).join(", ")}
+                  </p>
+                  {includeEv && (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 8, pageBreakInside: "avoid" }}>
+                      {c.attachments.map((a) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img key={a.id} src={`/api/attachments/${a.id}`} alt={a.fileName} style={{ width: 200, height: "auto", border: "1px solid #ccd8ea", borderRadius: 8 }} />
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
               </>
               )}
