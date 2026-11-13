@@ -4,6 +4,7 @@ import { verifySession, SESSION_COOKIE } from "@/lib/auth";
 import NewsRemoveButton from "@/components/NewsRemoveButton";
 import TopBar from "@/components/Shell";
 import NewsTicker from "@/components/NewsTicker";
+import ProgrammesOpen from "@/components/ProgrammesOpen";
 import Slideshow from "@/components/Slideshow";
 import { getSeal } from "@/lib/seal";
 
@@ -91,6 +92,7 @@ export default async function Home() {
           </div>
         </section>
       )}
+      <ProgrammesOpen />
       <main className="main">
         <div className="card">
           <h2>What you can do here</h2>

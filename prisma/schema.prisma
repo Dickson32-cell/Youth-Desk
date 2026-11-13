@@ -108,10 +108,33 @@ model Program {
   id          Int      @id @default(autoincrement())
   title       String
   description String
-  category    String @default("TRAINING") // TRAINING | JOB | SCHOLARSHIP | OPPORTUNITY
+  category    String @default("TRAINING") // TRAINING | APPRENTICESHIP | INTERNSHIP | MENTORSHIP | GRANT | MARKET | OTHER
   deadline    String?
-  status      String   @default("OPEN") // OPEN | CLOSED
+  status      String   @default("OPEN") // OPEN | CLOSED (CLOSED = registration closed)
+  venue       String?  // where / how to take part
+  seats       Int?     // planned participants (null = not stated)
+  postedBy    String   // officer username
   createdAt   DateTime @default(now())
+  registrations Registration[]
+
+  @@index([status])
+}
+
+// A youth signing up for an open programme. Money NEVER flows - this is an
+// interest/attendance registration so the desk can reach youth who cannot
+// walk to the office, and it feeds the KPI "reached" evidence.
+model Registration {
+  id        Int      @id @default(autoincrement())
+  programId Int
+  program   Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  name      String
+  phone     String?
+  area      String?
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@unique([programId, phone])
+  @@index([programId])
 }
 
 // Officer-managed public content (no-code appearance editor).

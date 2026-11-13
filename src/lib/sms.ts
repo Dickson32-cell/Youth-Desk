@@ -34,6 +34,13 @@ export function caseSmsText(caseNumber: string, trackKey: string): string {
   return t.length <= 320 ? t : t.slice(0, 320);
 }
 
+// Programme-registration confirmation (fixed template): youth who registered
+// online for an open programme get the programme title + a contact line.
+export function programSmsText(programId: number, name: string, title: string): string {
+  const first = String(name || "").trim().split(/\s+/)[0] || "there";
+  return `Youth Desk: ${first}, you have registered for "${title}". The desk will contact you with the next steps. Case/reference not needed.`;
+}
+
 // Stage-update SMS templates (fixed, one per officer action):
 export function statusSmsText(caseNumber: string, status: "IN_PROGRESS" | "RESOLVED"): string {
   if (status === "RESOLVED") {
@@ -117,3 +124,32 @@ export async function sendCaseSms(caseNumber: string, phone: string, trackKey: s
     }).catch(() => {});
   }
 }
+
+// Fire-and-forget programme confirmation SMS (deferred via after()).
+export async function sendProgramSms(programId: number, name: string, phone: string, title: string): Promise<void> {
+  const to = normalizeGhPhone(phone);
+  const base = { kind: "PROGRAM_CONFIRM", caseNumber: "PGM-" + programId, phone: to || String(phone ?? "").slice(0, 20) };
+  if (!to) {
+    await prisma.smsLog.create({ data: { ...base, status: "SKIPPED", error: "invalid phone" } }).catch(() => {});
+    return;
+  }
+  if (!smsConfigured()) {
+    await prisma.smsLog.create({ data: { ...base, status: "SKIPPED", error: "not configured" } }).catch(() => {});
+    return;
+  }
+  try {
+    const res = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "api-key": String(process.env.ARKESEL_API_KEY), "Content-Type": "application/json", "User-Agent": UA },
+      body: JSON.stringify({ sender: process.env.ARKESEL_SENDER || "YOUTHDSK", message: programSmsText(programId, name, title), recipients: [to] }),
+      signal: AbortSignal.timeout(20000),
+    });
+    const j = await res.json().catch(() => ({}));
+    await prisma.smsLog.create({
+      data: { ...base, status: res.ok ? "SENT" : "FAILED", providerRef: JSON.stringify(j).slice(0, 220), error: res.ok ? null : `HTTP ${res.status}` },
+    }).catch(() => {});
+  } catch (e) {
+    await prisma.smsLog.create({ data: { ...base, status: "FAILED", error: String(e).slice(0, 200) } }).catch(() => {});
+  }
+}
+
