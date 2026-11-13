@@ -32,6 +32,7 @@ const TYPES: [string, string][] = [
   ["MARKET", "Market linkage"],
   ["OTHER", "Other (type it)"],
 ];
+const catLabel = (c: string) => (c ? c[0] + c.slice(1).toLowerCase() : "—");
 
 export default function Programmes() {
   // ---- shared UI state ----
