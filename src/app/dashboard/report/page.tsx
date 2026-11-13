@@ -37,6 +37,8 @@ type CaseRow = {
   attachments: { id: number; fileName: string; mimeType?: string; size: number }[];
 };
 
+const TYPES_LBL = (t: string) => (["TRAINING", "APPRENTICESHIP", "INTERNSHIP", "MENTORSHIP", "GRANT", "MARKET", "OTHER"].includes(t) ? t.toLowerCase() : t[0] + t.slice(1).toLowerCase());
+
 export default function ReportPack() {
   const [d, setD] = useState<Sum | null>(null);
   const [cases, setCases] = useState<CaseRow[]>([]);
@@ -224,7 +226,7 @@ export default function ReportPack() {
                     <td>{new Date(r.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</td>
                     <td>{r.department}</td>
                     <td>{r.title}{r.note ? <div style={{ fontSize: 12, color: "#5b6b86" }}>{r.note}</div> : null}</td>
-                    <td>{r.type.toLowerCase()}</td>
+                    <td>{TYPES_LBL(r.type)}</td>
                     <td>{r.target}</td>
                     <td>{r.reached}</td>
                     <td>{r.target > 0 ? Math.round((r.reached / r.target) * 100) + "%" : "—"}</td>

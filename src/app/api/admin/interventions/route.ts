@@ -39,7 +39,8 @@ export async function POST(req: NextRequest) {
   if (!f) return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   const department = String(f.department || "").trim().slice(0, 80);
   const title = String(f.title || "").trim().slice(0, 120);
-  const type = ["TRAINING", "APPRENTICESHIP", "INTERNSHIP", "MENTORSHIP", "GRANT", "MARKET", "OTHER"].includes(String(f.type)) ? String(f.type) : "OTHER";
+  // fixed types win; anything else = the officer's typed category (≤24 chars)
+  const type = ["TRAINING", "APPRENTICESHIP", "INTERNSHIP", "MENTORSHIP", "GRANT", "MARKET", "OTHER"].includes(String(f.type)) ? String(f.type) : String(f.type || "").trim().slice(0, 24).toUpperCase();
   if (!department || !title) return NextResponse.json({ error: "Department and title are required" }, { status: 400 });
   if (!f.date) return NextResponse.json({ error: "Date is required" }, { status: 400 });
   const d = new Date(f.date);
