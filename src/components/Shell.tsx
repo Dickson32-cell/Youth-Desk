@@ -14,6 +14,7 @@ const PUBLIC_TABS = [
 const OFFICE_TABS = [
   { href: "/dashboard", label: "Cases", exact: true },
   { href: "/dashboard/youth", label: "Youth" },
+  { href: "/dashboard/programmes", label: "Programmes" },
   { href: "/dashboard/report", label: "Reports" },
   { href: "/dashboard/content", label: "Content" },
   { href: "/dashboard/account", label: "Account" },

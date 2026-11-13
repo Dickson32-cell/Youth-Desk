@@ -40,6 +40,9 @@ type CaseRow = {
 export default function ReportPack() {
   const [d, setD] = useState<Sum | null>(null);
   const [cases, setCases] = useState<CaseRow[]>([]);
+  const [ints, setInts] = useState<{ rows: IntRow[]; summary: { items: number; target: number; reached: number; budget: number }; byDept: { department: string; target: number; reached: number; items: number }[] } | null>(null);
+  type IntRow = { id: number; date: string; department: string; title: string; type: string; target: number; reached: number; budget: number | null; note: string | null; officer: string };
+  type IntState = { rows: IntRow[]; summary: { items: number; target: number; reached: number; budget: number }; byDept: { department: string; target: number; reached: number; items: number }[] };
   const [preparedBy, setPreparedBy] = useState("");
   const [err, setErr] = useState("");
   const now0 = new Date();
@@ -75,6 +78,9 @@ export default function ReportPack() {
     fetch(cf)
       .then(async (r) => (r.ok ? r.json() : null))
       .then((j) => (j ? setCases(j.cases || []) : null));
+    fetch("/api/admin/interventions" + (b ? `?from=${b.from}&to=${b.to}` : ""))
+      .then(async (r) => (r.ok ? r.json() : null))
+      .then((j) => (j ? setInts(j) : null));
   }, [year, qSel]);
 
   if (err) return <main className="main"><div className="alert-err">{err}</div></main>;
@@ -206,6 +212,35 @@ export default function ReportPack() {
           </div>
         </div>
 
+        {ints && ints.rows.length > 0 && (
+          <div className="card">
+            <h2 style={{ fontSize: 18 }}>Interventions &amp; youth programmes — KPI table</h2>
+            <p className="sub" style={{ margin: "0 0 10px" }}>Municipal programmes for young people the desk coordinates or monitors during this period. This is the desk's KPI register under the municipal Youth Desk mandate.</p>
+            <table>
+              <thead><tr><th>Date</th><th>Department</th><th>Programme</th><th>Type</th><th>Target</th><th>Reached</th><th>Coverage</th></tr></thead>
+              <tbody>
+                {ints.rows.map((r) => (
+                  <tr key={r.id}>
+                    <td>{new Date(r.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</td>
+                    <td>{r.department}</td>
+                    <td>{r.title}{r.note ? <div style={{ fontSize: 12, color: "#5b6b86" }}>{r.note}</div> : null}</td>
+                    <td>{r.type.toLowerCase()}</td>
+                    <td>{r.target}</td>
+                    <td>{r.reached}</td>
+                    <td>{r.target > 0 ? Math.round((r.reached / r.target) * 100) + "%" : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div style={{ display: "flex", gap: 18, flexWrap: "wrap", marginTop: 12, padding: "10px 12px", background: "#eef3fb", borderRadius: 8, fontWeight: 700, color: "#122447" }}>
+              <span>Programmes: {ints.summary.items}</span>
+              <span>Target: {ints.summary.target}</span>
+              <span>Youth reached: {ints.summary.reached}</span>
+              <span>Overall coverage: {ints.summary.target > 0 ? Math.round((ints.summary.reached / ints.summary.target) * 100) + "%" : "—"}</span>
+              {ints.summary.budget > 0 && <span>Committed: GHS {ints.summary.budget.toLocaleString()}</span>}
+            </div>
+          </div>
+        )}
         <div className="card">
           <div className="case-head">
             <h2 style={{ margin: 0 }}>Case details for Management review</h2>

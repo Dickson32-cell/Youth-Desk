@@ -84,6 +84,26 @@ model CaseNote {
   @@index([caseId])
 }
 
+
+// Municipality youth interventions / programmes the desk coordinates and
+// monitors (Trip-Report mandate: track municipal KPIs on commitments and
+// interventions towards young people). Feeds the Management report KPI table.
+model Intervention {
+  id         Int      @id @default(autoincrement())
+  date       DateTime @db.Date // when it happened / the reference date
+  department String // leading department (e.g. Social Welfare, NYA, Agric...)
+  title      String
+  type       String   @default("TRAINING") // TRAINING | APPRENTICESHIP | INTERNSHIP | MENTORSHIP | GRANT | MARKET | OTHER
+  target     Int      @default(0) // planned number of young people
+  reached    Int      @default(0) // actual young people reached
+  budget     Float?   // optional: amount committed (GHS)
+  note       String?
+  officer    String // username of the recording officer
+  createdAt  DateTime @default(now())
+
+  @@index([date])
+}
+
 model Program {
   id          Int      @id @default(autoincrement())
   title       String
