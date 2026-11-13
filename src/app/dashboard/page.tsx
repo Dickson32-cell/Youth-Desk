@@ -24,7 +24,7 @@ export default function Dashboard() {
   const [cases, setCases] = useState<Case[]>([]);
   const [notice, setNotice] = useState<string>(""); // NEW-case notification (officer)
   const [counts, setCounts] = useState<any>({ all: 0, NEW: 0, IN_PROGRESS: 0, RESOLVED: 0, FORWARDED: 0 });
-  const [filter, setFilter] = useState<string>("NEW");
+  const [filter, setFilter] = useState<string>(""); // ALL by default: a case never disappears from view after an action
   const [q, setQ] = useState("");
   const [open, setOpen] = useState<Case | null>(null);
   const [me, setMe] = useState("");
