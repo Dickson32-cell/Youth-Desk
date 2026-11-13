@@ -19,9 +19,9 @@ type Summary = { items: number; target: number; reached: number; budget: number 
 type ByDept = { department: string; target: number; reached: number; items: number };
 type PostRow = {
   id: number; title: string; description: string; category: string; deadline: string | null;
-  venue: string | null; seats: number | null; status: string; postedBy: string; registrations: number;
+  venue: string | null; seats: number | null; status: string; meetingDate: string | null; postedBy: string; registrations: number; reminded: number;
 };
-type RegRow = { id: number; name: string; phone: string | null; area: string | null; note: string | null; createdAt: string };
+type RegRow = { id: number; name: string; phone: string | null; area: string | null; note: string | null; createdAt: string; reminderSentAt: string | null };
 type PubFullRow = { id: number; title: string; description: string; category: string; deadline: string | null; venue: string | null; seats: number | null; status: string; registrations: RegRow[] };
 
 const TYPES: [string, string][] = [
@@ -45,7 +45,8 @@ export default function Programmes() {
   // ---- (1) open-for-registration posts ----
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [showPostForm, setShowPostForm] = useState(false);
-  const [pf, setPf] = useState({ title: "", category: "TRAINING", categoryOther: "", description: "", deadline: "", venue: "", seats: "" });
+  const [pf, setPf] = useState({ title: "", category: "TRAINING", categoryOther: "", description: "", deadline: "", venue: "", seats: "", meetingDate: "" });
+  const [remBusy, setRemBusy] = useState<number | null>(null);
   const [regFor, setRegFor] = useState<{ id: number; title: string } | null>(null);
   const [regs, setRegs] = useState<RegRow[]>([]);
   const [pubFull, setPubFull] = useState<PubFullRow[]>([]);
@@ -91,7 +92,7 @@ export default function Programmes() {
     const j = await res.json().catch(() => ({}));
     if (!res.ok) return fail(j.error || "Could not publish the programme.");
     setShowPostForm(false); setMsg("Published. It now shows on the main website under Programmes open for registration.");
-    setPf({ title: "", category: "TRAINING", categoryOther: "", description: "", deadline: "", venue: "", seats: "" });
+    setPf({ title: "", category: "TRAINING", categoryOther: "", description: "", deadline: "", venue: "", seats: "", meetingDate: "" });
     loadPosts(); setBusy(false);
   }
   async function closeReopen(id: number, action: string) {
@@ -106,6 +107,27 @@ export default function Programmes() {
     if (regFor && regFor.id === id) { setRegFor(null); setRegs([]); }
     setMsg("Published programme removed."); loadPosts();
   }
+  async function setMeeting(id: number, date: string) {
+    if (!date || !date.trim()) return;
+    const r = await fetch("/api/admin/programmes-post/reminder", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, meetingDate: date }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) return fail(j.error || "Could not save the meeting date.");
+    setMsg("Meeting date saved: " + date); loadPosts();
+  }
+  async function sendReminder(id: number, title: string) {
+    const r0 = await fetch("/api/admin/programmes-post?registrants=" + id);
+    const j0 = await r0.json().catch(() => ({}));
+    const withPhone = (j0.rows || []).filter((g: { phone: string | null }) => g.phone).length;
+    if (!withPhone) return fail("No registrant with a phone number yet.");
+    if (!confirm("Send the meeting-reminder SMS to " + withPhone + " registrant(s)? One SMS each, venue included.")) return;
+    setRemBusy(id); setErr(""); setMsg("");
+    const r = await fetch("/api/admin/programmes-post/reminder", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) return fail(j.error || "Could not send the reminders.");
+    setMsg("Reminder sent to " + j.sent + " of " + j.targets + " registrant(s). The venue is in the message.");
+    setRemBusy(null); loadPosts();
+  }
+
   function openRegistrants(id: number, title: string) {
     if (regFor && regFor.id === id) { setRegFor(null); setRegs([]); return; }
     setRegFor({ id, title });
@@ -183,6 +205,7 @@ export default function Programmes() {
                 <input placeholder="Closing date (optional, e.g: 30 Nov 2026)" value={pf.deadline} onChange={(e) => setPf({ ...pf, deadline: e.target.value })} style={{ minWidth: 220 }} />
                 <input placeholder="Venue / how to take part (optional)" value={pf.venue} onChange={(e) => setPf({ ...pf, venue: e.target.value })} style={{ minWidth: 260 }} />
                 <input type="number" min="1" placeholder="Planned seats (optional)" value={pf.seats} onChange={(e) => setPf({ ...pf, seats: e.target.value })} style={{ width: 170 }} />
+                <input placeholder="Meeting date (e.g: 20 Dec 2026, optional)" value={pf.meetingDate} onChange={(e) => setPf({ ...pf, meetingDate: e.target.value })} style={{ minWidth: 230 }} />
               </div>
               <textarea required placeholder="Full details: what the programme offers, requirements, who can apply, how selection works." value={pf.description} onChange={(e) => setPf({ ...pf, description: e.target.value })} style={{ width: "100%", minHeight: 90, marginTop: 8 }} />
               <div className="row" style={{ marginTop: 10 }}>
@@ -222,10 +245,22 @@ export default function Programmes() {
                           );
                         })()}
                       </td>
+                      <td>{r.meetingDate ? <span style={{ fontWeight: 700, color: "#0d6b3a" }}>{r.meetingDate}</span> : <span style={{ color: "#8fa2bd", fontSize: 12 }}>not set</span>}</td>
                       <td>
-                        <button type="button" className={"tag tag-" + (r.status === "OPEN" ? "NEW" : "RESOLVED")} style={{ cursor: "pointer" }} onClick={() => closeReopen(r.id, r.status === "OPEN" ? "close" : "reopen")} title="Tap to open or close registration">
+                        <button type="button" className={"tag tag-" + (r.status === "OPEN" ? "NEW" : "RESOLVED")} style={{ cursor: "pointer", border: "none", font: "inherit", fontWeight: 800 }} onClick={() => closeReopen(r.id, r.status === "OPEN" ? "close" : "reopen")} title="Tap to open or close registration">
                           {r.status}
                         </button>
+                      </td>
+                      <td className="noprint" style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                        <button type="button" className="btn btn-sm btn-ghost" onClick={() => { const d = window.prompt("Set the meeting date (e.g: 20 Dec 2026):", r.meetingDate || ""); if (d) setMeeting(r.id, d); }}>{r.meetingDate ? "Change date" : "Set date"}</button>
+                        {" "}
+                        <button type="button" className="btn btn-sm btn-primary" disabled={remBusy === r.id} onClick={() => sendReminder(r.id, r.title)} style={{ padding: "3px 10px", fontSize: 12 }}>
+                          {remBusy === r.id ? "Sending…" : "Remind all (" + (r.registrations - r.reminded) + " to go)"}
+                        </button>
+                        {" "}
+                        <button type="button" className="btn btn-sm btn-ghost" onClick={() => openRegistrants(r.id, r.title)}>{regFor && regFor.id === r.id ? "Hide list" : "Sign-ups"}</button>
+                        {" "}
+                        <button type="button" className="btn btn-danger" style={{ padding: "3px 10px", fontSize: 12 }} onClick={() => delPost(r.id)}>Delete</button>
                       </td>
                       <td className="noprint" style={{ textAlign: "right", whiteSpace: "nowrap" }}>
                         <button type="button" className="btn btn-sm btn-ghost" onClick={() => openRegistrants(r.id, r.title)}>{regFor && regFor.id === r.id ? "Hide list" : "Sign-ups"}</button>
@@ -243,7 +278,7 @@ export default function Programmes() {
                     <p className="sub">No sign-ups yet - share the main website link.</p>
                   ) : (
                     <table>
-                      <thead><tr><th>When</th><th>Name</th><th>Phone</th><th>Area</th><th>Note</th></tr></thead>
+                      <thead><tr><th>When</th><th>Name</th><th>Phone</th><th>Area</th><th>Reminder</th><th>Note</th></tr></thead>
                       <tbody>
                         {regs.map((r) => (
                           <tr key={r.id}>

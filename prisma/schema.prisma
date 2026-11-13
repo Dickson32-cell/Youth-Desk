@@ -113,6 +113,7 @@ model Program {
   status      String   @default("OPEN") // OPEN | CLOSED (CLOSED = registration closed)
   venue       String?  // where / how to take part
   seats       Int?     // planned participants (null = not stated)
+  meetingDate String?  // the scheduled meeting/starting date announced to registrants
   postedBy    String   // officer username
   createdAt   DateTime @default(now())
   registrations Registration[]
@@ -130,8 +131,9 @@ model Registration {
   name      String
   phone     String?
   area      String?
-  note      String?
-  createdAt DateTime @default(now())
+  note           String?
+  createdAt      DateTime @default(now())
+  reminderSentAt DateTime? // set when the meeting-reminder SMS went to THIS registrant
 
   @@unique([programId, phone])
   @@index([programId])

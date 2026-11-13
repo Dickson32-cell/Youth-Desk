@@ -28,41 +28,31 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  // ?full=1 : every published programme WITH its registered individuals (print PDF source)
-  if (req.nextUrl.searchParams.get("full") === "1") {
-    const rows = await prisma.program.findMany({
-      orderBy: { id: "desc" },
-      include: { registrations: { orderBy: { id: "asc" } }, _count: { select: { registrations: true } } },
-    });
-    return NextResponse.json({
-      ok: true,
-      rows: rows.map((r) => ({
-        id: r.id, title: r.title, description: r.description, category: r.category,
-        deadline: r.deadline, venue: r.venue, seats: r.seats, status: r.status,
-        registrations: r.registrations.map((g) => ({ id: g.id, name: g.name, phone: g.phone, area: g.area, note: g.note, createdAt: g.createdAt })),
-      })),
-    });
-  }
-
   const want = parseInt(req.nextUrl.searchParams.get("registrants") || "", 10);
   if (want) {
     const program = await prisma.program.findUnique({ where: { id: want }, select: { id: true, title: true } });
     if (!program) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    const rows = await prisma.registration.findMany({ where: { programId: want }, orderBy: { id: "desc" } });
+    const rows = await prisma.registration.findMany({ where: { programId: want }, orderBy: { id: "desc" }, select: { id: true, name: true, phone: true, area: true, note: true, createdAt: true, reminderSentAt: true } });
     return NextResponse.json({ ok: true, program, rows });
   }
 
-  const rows = await prisma.program.findMany({
-    orderBy: { id: "desc" },
-    include: { _count: { select: { registrations: true } } },
-  });
+  const [rows, remindedByProgram] = await Promise.all([
+    prisma.program.findMany({
+      orderBy: { id: "desc" },
+      include: { _count: { select: { registrations: true } } },
+    }),
+    prisma.registration.groupBy({ by: ["programId"], where: { reminderSentAt: { not: null } }, _count: { _all: true } }),
+  ]);
+  const remindedMap = new Map(remindedByProgram.map((g) => [g.programId, g._count._all]));
   return NextResponse.json({
     ok: true,
     rows: rows.map((r) => ({
       id: r.id, title: r.title, description: r.description, category: r.category,
       deadline: r.deadline, venue: r.venue, seats: r.seats, status: r.status,
+      meetingDate: r.meetingDate,
       postedBy: r.postedBy, createdAt: r.createdAt,
-     registrations: r._count.registrations,
+      registrations: r._count.registrations,
+      reminded: remindedMap.get(r.id) || 0,
     })),
   });
 }
