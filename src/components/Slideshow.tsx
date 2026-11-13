@@ -2,7 +2,10 @@
 import { useEffect, useState } from "react";
 
 // Auto-advancing slideshow of officer-uploaded Assembly photos.
-export default function Slideshow({ images, alt }: { images: number[]; alt?: string }) {
+// Fast-load discipline: the DOM carries at most TWO <img> elements at any time
+// (the visible slide + the upcoming one, pre-fetched so the next transition is
+// already loaded) instead of stacking every slide and racing for bandwidth.
+export default function Slideshow({ images, alt, priority = false }: { images: number[]; alt?: string; priority?: boolean }) {
   const [cur, setCur] = useState(0);
   const many = images.length > 1;
 
@@ -13,12 +16,24 @@ export default function Slideshow({ images, alt }: { images: number[]; alt?: str
   }, [images.length, many]);
 
   if (images.length === 0) return null;
+  const visibleIds = many ? Array.from(new Set([images[cur], images[(cur + 1) % images.length]])) : [images[0]];
+
   return (
     <div className="slideshow" role="img" aria-label={alt || "Assembly photo"}>
-      {images.map((id, i) => (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img key={id} src={`/api/media/${id}`} alt="" className={"slide" + (i === cur ? " on" : "")} />
-      ))}
+      {visibleIds.map((id) => {
+        const i = images.indexOf(id);
+        return (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={id}
+            src={`/api/media/${id}`}
+            alt=""
+            className={"slide" + (i === cur ? " on" : "")}
+            loading={i === 0 ? "eager" : "lazy"}
+            fetchPriority={i === 0 && priority ? "high" : undefined}
+          />
+        );
+      })}
       {many && (
         <div className="dots">
           {images.map((id, i) => (
