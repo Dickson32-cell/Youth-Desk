@@ -62,6 +62,36 @@ export default function ContentStudio() {
 
   useEffect(() => { loadAll(); }, [loadAll]);
 
+  async function uploadLogoWithIcons(target: HTMLInputElement) {
+    const files = target.files;
+    if (!files || files.length === 0) return;
+    setBusy(true); setErr(""); setMsg("");
+    try {
+      const { prepareFilesForUpload } = await import("@/lib/imgPrepare");
+      const prepared = await prepareFilesForUpload([files[0]]);
+      const fd = new FormData();
+      fd.append("slot", "logo");
+      fd.append("files", prepared[0]);
+      const res = await fetch("/api/admin/site/images", { method: "POST", body: fd });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) fail(j.error || "Logo upload failed");
+      else {
+        // Install-card / home-screen icon variants from the same artwork.
+        try {
+          const { f192, f512, f512m } = await makePwaIconVariants(prepared[0]);
+          for (const [slot, f] of [["icon192", f192], ["icon512", f512], ["icon512m", f512m]] as const) {
+            const ifd = new FormData();
+            ifd.append("slot", slot);
+            ifd.append("files", f);
+            await fetch("/api/admin/site/images", { method: "POST", body: ifd });
+          }
+        } catch { /* icon variants are best-effort; the manifest falls back to the built-in tile */ }
+        note("Logo saved - the console, the main page and the install this app icon all use it now.");
+        await loadAll();
+      }
+    } finally { setBusy(false); target.value = ""; }
+  }
+
   async function upload(slot: "hero" | "about" | "logo", target: HTMLInputElement) {
     const files = target.files;
     if (!files || files.length === 0) return;
@@ -89,6 +119,31 @@ export default function ContentStudio() {
     setNewsForm({ id: null, title: "", body: "", important: false });
     setNewsFiles([]);
     setNewsRemove([]);
+  }
+
+
+  async function makePwaIconVariants(file: File | Blob): Promise<{ f192: File; f512: File; f512m: File }> {
+    const bmp = await createImageBitmap(file);
+    const draw = (size: number, scale: number) => {
+      const cv = document.createElement("canvas");
+      cv.width = size; cv.height = size;
+      const cx = cv.getContext("2d")!;
+      cx.fillStyle = "#FFFFFF";
+      cx.fillRect(0, 0, size, size);
+      const side = Math.round(size * scale);
+      const ratio = Math.min(side / bmp.width, side / bmp.height);
+      const w = Math.round(bmp.width * ratio), h = Math.round(bmp.height * ratio);
+      cx.drawImage(bmp, (size - w) / 2, (size - h) / 2, w, h);
+      return cv;
+    };
+    const toFile = async (cv: HTMLCanvasElement, name: string) => {
+      const blob = await new Promise<Blob | null>((res) => cv.toBlob(res, "image/png"));
+      return new File([blob!], name, { type: "image/png" });
+    };
+    const f192 = await toFile(draw(192, 0.86), "icon-192.png");
+    const f512 = await toFile(draw(512, 0.86), "icon-512.png");
+    const f512m = await toFile(draw(512, 0.78), "icon-maskable-512.png");
+    return { f192, f512, f512m };
   }
 
   async function submitNews(e: React.FormEvent) {
@@ -221,7 +276,7 @@ export default function ContentStudio() {
           <p className="sub">Upload the Youth Desk NJSMA logo once (square image works best). It appears in the top-left corner of the officer console AND on the main web page.</p>
           <label className="fld">
             <span className="cap">{logoImgs.length > 0 ? "Replace the logo (the old one is removed)" : "Choose a logo file (JPG/PNG)"}</span>
-            <input type="file" accept="image/*" disabled={busy} onChange={(e) => upload("logo", e.target)} />
+            <input type="file" accept="image/*" disabled={busy} onChange={(e) => uploadLogoWithIcons(e.target)} />
           </label>
           {logoImgs.length > 0 && (
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 10 }}>
