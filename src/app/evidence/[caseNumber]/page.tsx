@@ -29,11 +29,11 @@ export default async function EvidenceSheet({ params }: { params: Promise<{ case
       {c.attachments.map((a) => (
         <div key={a.id} className="card evidence-page">
           <p className="sub" style={{ margin: "0 0 8px" }}>{a.fileName} · added {new Date(a.createdAt).toLocaleDateString("en-GB")}</p>
-          {String(a.mimeType).startsWith("image/") ? (
+            {String(a.mimeType).startsWith("image/") ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={`/api/attachments/${a.id}`} alt={a.fileName} style={{ width: "100%", height: "auto", border: "1px solid #ccd8ea", borderRadius: 8, pageBreakInside: "avoid" }} />
           ) : (
-            <p><a href={`/api/attachments/${a.id}`} target="_blank" rel="noreferrer">Download this file ({a.mimeType})</a></p>
+            <p><a href={`/view/${a.id}`} target="_blank" rel="noreferrer">View this document ({a.mimeType} — opens in the viewer / its app)</a></p>
           )}
         </div>
       ))}

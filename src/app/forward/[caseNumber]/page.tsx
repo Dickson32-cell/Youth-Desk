@@ -23,7 +23,7 @@ export default async function ReferralForm({ params }: { params: Promise<{ caseN
     where: { caseNumber: caseNumber.toUpperCase() },
     include: {
       notes: { orderBy: { id: "asc" } },
-      attachments: { select: { id: true, fileName: true }, orderBy: { id: "asc" } },
+      attachments: { select: { id: true, fileName: true, mimeType: true }, orderBy: { id: "asc" } },
     },
   });
   if (!c) notFound();
@@ -101,8 +101,14 @@ export default async function ReferralForm({ params }: { params: Promise<{ caseN
             {c.attachments.map((a) => (
               <div key={a.id} style={{ marginBottom: 18, pageBreakInside: "avoid" }}>
                 <div style={{ fontSize: 11.5, color: "#5b6b86", marginBottom: 4 }}>{a.fileName}</div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/api/attachments/${a.id}`} alt={a.fileName} style={{ width: "100%", height: "auto", border: "1px solid #ccd8ea", borderRadius: 8 }} />
+                {String(a.mimeType).startsWith("image/") ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={`/api/attachments/${a.id}`} alt={a.fileName} style={{ width: "100%", height: "auto", border: "1px solid #ccd8ea", borderRadius: 8 }} />
+                ) : (
+                  <div style={{ border: "1px dashed #ccd8ea", borderRadius: 8, padding: "10px 12px", fontSize: 12.5, color: "#5b6b86" }}>
+                    Attached document: <b>{a.fileName}</b> (Office file — printed separately / available in the system)
+                  </div>
+                )}
               </div>
             ))}
           </div>

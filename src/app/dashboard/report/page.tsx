@@ -34,7 +34,7 @@ type CaseRow = {
   id: number; caseNumber: string; createdAt: string; updatedAt: string; type: string; area: string | null;
   status: string; reporterName: string | null; phone: string | null; description: string; forwardedTo: string | null;
   notes: { id: number; body: string; author: string; createdAt: string }[];
-  attachments: { id: number; fileName: string; size: number }[];
+  attachments: { id: number; fileName: string; mimeType?: string; size: number }[];
 };
 
 export default function ReportPack() {
@@ -266,9 +266,12 @@ export default function ReportPack() {
                   </p>
                   {includeEv && (
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 8, pageBreakInside: "avoid" }}>
-                      {c.attachments.map((a) => (
+                      {c.attachments.filter((a) => a.mimeType?.startsWith("image/")).map((a) => (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img key={a.id} src={`/api/attachments/${a.id}`} alt={a.fileName} style={{ width: 200, height: "auto", border: "1px solid #ccd8ea", borderRadius: 8 }} />
+                      ))}
+                      {c.attachments.filter((a) => !a.mimeType?.startsWith("image/")).map((a) => (
+                        <span key={a.id} style={{ fontSize: 11.5, color: "#5b6b86", border: "1px dashed #ccd8ea", borderRadius: 8, padding: "6px 10px" }}>{a.fileName} (Office file — view in system)</span>
                       ))}
                     </div>
                   )}

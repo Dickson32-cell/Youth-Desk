@@ -205,7 +205,7 @@ export default function Dashboard() {
                     <div key={a.id} className="note" style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <span style={{ flex: 1, overflowWrap: "anywhere" }}>{a.fileName}</span>
                       <span style={{ color: "#5b6b86", fontSize: 12 }}>{Math.round(a.size / 1024)} KB</span>
-                      <a href={`/api/attachments/${a.id}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">Open</a>
+                      <a href={`/view/${a.id}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">View</a>
                     </div>
                   ))}
                 </div>
