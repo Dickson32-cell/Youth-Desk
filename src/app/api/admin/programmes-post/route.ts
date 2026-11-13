@@ -72,6 +72,7 @@ export async function POST(req: NextRequest) {
       title, description, category,
       deadline: f.deadline ? String(f.deadline).slice(0, 60) : null,
       venue: f.venue ? String(f.venue).trim().slice(0, 160) : null,
+      meetingDate: f.meetingDate ? String(f.meetingDate).trim().slice(0, 80) : null,
       seats, status: "OPEN", postedBy: s.u,
     },
   });
