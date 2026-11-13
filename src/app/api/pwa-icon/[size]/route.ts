@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { unstable_cache } from "next/cache";
 import { readFileSync } from "fs";
 import path from "path";
 
@@ -15,17 +14,11 @@ const SIZES: Record<string, { slot: string; fallback: string }> = {
   "512m": { slot: "icon512m", fallback: "maskable-512.png" },
 };
 
-const getIcon = unstable_cache(
-  async (slot: string) => prisma.siteImage.findFirst({ where: { slot }, orderBy: { id: "desc" }, select: { mimeType: true, data: true } }),
-  ["site-media"],
-  { revalidate: 3600, tags: ["site-media"] },
-);
-
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ size: string }> }) {
   const { size: raw } = await params;
   const cfg = SIZES[raw];
   if (!cfg) return new NextResponse("Not found", { status: 404 });
-  const row = await getIcon(cfg.slot);
+  const row = await prisma.siteImage.findFirst({ where: { slot: cfg.slot }, orderBy: { id: "desc" }, select: { mimeType: true, data: true } });
   if (row) {
     const bytes = Buffer.from(row.data);
     return new NextResponse(new Uint8Array(bytes), {
