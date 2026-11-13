@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
       warning = e instanceof Error ? e.message : "One image failed";
     }
   }
+  revalidateTag("landing-news", "max");
   return NextResponse.json({ ok: true, id: created.id, saved, warning });
 }
 
@@ -107,6 +108,7 @@ export async function PATCH(req: NextRequest) {
       // keep going: one bad image must not fail the edit
     }
   }
+  revalidateTag("landing-news", "max");
   return NextResponse.json({ ok: true, warning });
 }
 
