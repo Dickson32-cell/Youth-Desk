@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import TopBar from "@/components/Shell";
+import AboutGallery from "@/components/AboutGallery";
 
 // Live municipal data: render per request (cacheComponents-compatible).
 export const instant = false;
@@ -57,14 +58,7 @@ export default async function Programs() {
             The <b>Youth Desk</b> is the Assembly&apos;s front door for young people: one office where youth
             walk in, are heard, and their matters are taken up with the right department and followed to resolution.
           </p>
-          {aboutImgs.length > 0 && (
-            <div className="aboutgal">
-              {aboutImgs.map((im) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={im.id} src={`/api/media/${im.id}`} alt="Assembly" />
-              ))}
-            </div>
-          )}
+          {aboutImgs.length > 0 && <AboutGallery images={aboutImgs} />}
         </div>
 
         <div className="card">

@@ -153,3 +153,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 [data-theme="dark"] .casecard { background: #17222f; border-color: #2a3c52; }
 [data-theme="dark"] .casecard .row2 { color: #dbe6f4; }
 @media (max-width: 639px) { .casetbl { display: none; } .case-cards { display: block; } .tblwrap { overflow-x: auto; -webkit-overflow-scrolling: touch; } .tblwrap .tbl { min-width: 620px; } }
+
+/* About gallery: clickable photos (client lightbox) */
+button.galleryitem { padding: 0; border: none; background: none; cursor: zoom-in; border-radius: 12px; overflow: hidden; line-height: 0; transition: transform .15s ease, box-shadow .15s ease; }
+button.galleryitem:hover { transform: scale(1.02); box-shadow: 0 6px 22px rgba(18,36,71,.25); }
+button.galleryitem img { display: block; width: 100%; height: 100%; object-fit: cover; }
