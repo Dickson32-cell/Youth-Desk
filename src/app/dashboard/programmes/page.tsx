@@ -22,6 +22,7 @@ type PostRow = {
   venue: string | null; seats: number | null; status: string; postedBy: string; registrations: number;
 };
 type RegRow = { id: number; name: string; phone: string | null; area: string | null; note: string | null; createdAt: string };
+type PubFullRow = { id: number; title: string; description: string; category: string; deadline: string | null; venue: string | null; seats: number | null; status: string; registrations: RegRow[] };
 
 const TYPES: [string, string][] = [
   ["TRAINING", "Skills training"],
@@ -47,6 +48,7 @@ export default function Programmes() {
   const [pf, setPf] = useState({ title: "", category: "TRAINING", categoryOther: "", description: "", deadline: "", venue: "", seats: "" });
   const [regFor, setRegFor] = useState<{ id: number; title: string } | null>(null);
   const [regs, setRegs] = useState<RegRow[]>([]);
+  const [pubFull, setPubFull] = useState<PubFullRow[]>([]);
 
   // ---- (2+3) KPI register ----
   const [rows, setRows] = useState<Row[]>([]);
@@ -60,6 +62,10 @@ export default function Programmes() {
     fetch("/api/admin/programmes-post")
       .then((r) => r.json())
       .then((j) => setPosts(j.rows || []))
+      .catch(() => {});
+    fetch("/api/admin/programmes-post?full=1")
+      .then((r) => r.json())
+      .then((j) => setPubFull(j.rows || []))
       .catch(() => {});
   }
   function loadRows() {
@@ -192,11 +198,30 @@ export default function Programmes() {
                 <tbody>
                   {posts.map((r) => (
                     <tr key={r.id}>
-                      <td><b>{r.title}</b></td>
+                      <td style={{ minWidth: 300 }}>
+                      <b style={{ fontSize: 13.5, color: "#12294a" }}>{r.title}</b>
+                      {r.description && <div style={{ fontSize: 12, color: "#5b6b86", marginTop: 2, maxWidth: 340, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{r.description}</div>}
+                      {r.venue && <div style={{ fontSize: 11.5, color: "#8fa2bd", marginTop: 2 }}>Venue: {r.venue}</div>}
+                    </td>
                       <td>{catLabel(r.category)}</td>
                       <td>{r.deadline || "\u2014"}</td>
                       <td>{r.seats ?? "\u2014"}</td>
-                      <td style={{ fontWeight: 700 }}>{r.registrations}</td>
+                      <td style={{ minWidth: 110 }}>
+                        {(() => {
+                          const filled = r.registrations;
+                          const total = r.seats || 0;
+                          return total ? (
+                            <div>
+                              <div style={{ fontWeight: 700 }}>{filled} / {total}</div>
+                              <div style={{ height: 5, width: 90, background: "#e8eef7", borderRadius: 4, marginTop: 3, overflow: "hidden" }}>
+                                <div style={{ height: "100%", width: Math.min(100, Math.round((filled / total) * 100)) + "%", background: "#0d6b3a", borderRadius: 4 }} />
+                              </div>
+                            </div>
+                          ) : (
+                            <div style={{ fontWeight: 600 }}>{filled} sign-ups</div>
+                          );
+                        })()}
+                      </td>
                       <td>
                         <button type="button" className={"tag tag-" + (r.status === "OPEN" ? "NEW" : "RESOLVED")} style={{ cursor: "pointer" }} onClick={() => closeReopen(r.id, r.status === "OPEN" ? "close" : "reopen")} title="Tap to open or close registration">
                           {r.status}
@@ -318,6 +343,42 @@ export default function Programmes() {
           )}
         </div>
 
+        {pubFull.length > 0 && (
+          <div className="card print-only">
+            <h3 style={{ fontSize: 16 }}>Programmes published for registration &amp; their sign-ups</h3>
+            {pubFull.map((r) => (
+              <div key={"pp-" + r.id} style={{ padding: "12px 0", borderBottom: "1px solid #dfe6f1" }}>
+                <div style={{ fontWeight: 800, fontSize: 13.5, color: "#122447" }}>
+                  {r.title} <span style={{ fontWeight: 400, color: "#5b6b86" }}>({catLabel2(r.category)}; {r.status === "OPEN" ? "registration open" : "registration closed"}</span>)
+                </div>
+                <div style={{ fontSize: 13, color: "#33383f", lineHeight: 1.6, whiteSpace: "pre-line", margin: "4px 0" }}>{r.description}</div>
+                <div style={{ fontSize: 12, color: "#52637d", lineHeight: 1.7 }}>
+                  {r.deadline ? <>Registration closes: {r.deadline}<br /></> : null}
+                  {r.venue ? <>Venue: {r.venue}<br /></> : null}
+                  {r.seats ? <>Planned participants: {r.seats}<br /></> : null}
+                  Registered young people: {r.registrations.length}
+                </div>
+                {r.registrations.length > 0 && (
+                  <table style={{ marginTop: 8 }}>
+                    <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Area</th><th>Registered</th></tr></thead>
+                    <tbody>
+                      {r.registrations.map((g, k) => (
+                        <tr key={"pr-" + g.id}>
+                          <td>{k + 1}</td>
+                          <td>{g.name}</td>
+                          <td>{g.phone || "—"}</td>
+                          <td>{g.area || "—"}</td>
+                          <td>{new Date(g.createdAt).toLocaleDateString("en-GB")}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
         {rows.some((r) => r.note) && (
           <div className="card print-only">
             <h3 style={{ fontSize: 16 }}>Programme descriptions</h3>
@@ -333,3 +394,4 @@ export default function Programmes() {
     </main>
   );
 }
+const catLabel2 = (c: string) => (c ? c[0] + c.slice(1).toLowerCase() : c);

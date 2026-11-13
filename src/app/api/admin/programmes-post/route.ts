@@ -12,6 +12,38 @@ export async function GET(req: NextRequest) {
   const s = verifySession(req.cookies.get(SESSION_COOKIE)?.value);
   if (!s) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  // ?full=1 : every published programme WITH its registered individuals (print PDF source)
+  if (req.nextUrl.searchParams.get("full") === "1") {
+    const rows = await prisma.program.findMany({
+      orderBy: { id: "desc" },
+      include: { registrations: { orderBy: { id: "asc" } }, _count: { select: { registrations: true } } },
+    });
+    return NextResponse.json({
+      ok: true,
+      rows: rows.map((r) => ({
+        id: r.id, title: r.title, description: r.description, category: r.category,
+        deadline: r.deadline, venue: r.venue, seats: r.seats, status: r.status,
+        registrations: r.registrations.map((g) => ({ id: g.id, name: g.name, phone: g.phone, area: g.area, note: g.note, createdAt: g.createdAt })),
+      })),
+    });
+  }
+
+  // ?full=1 : every published programme WITH its registered individuals (print PDF source)
+  if (req.nextUrl.searchParams.get("full") === "1") {
+    const rows = await prisma.program.findMany({
+      orderBy: { id: "desc" },
+      include: { registrations: { orderBy: { id: "asc" } }, _count: { select: { registrations: true } } },
+    });
+    return NextResponse.json({
+      ok: true,
+      rows: rows.map((r) => ({
+        id: r.id, title: r.title, description: r.description, category: r.category,
+        deadline: r.deadline, venue: r.venue, seats: r.seats, status: r.status,
+        registrations: r.registrations.map((g) => ({ id: g.id, name: g.name, phone: g.phone, area: g.area, note: g.note, createdAt: g.createdAt })),
+      })),
+    });
+  }
+
   const want = parseInt(req.nextUrl.searchParams.get("registrants") || "", 10);
   if (want) {
     const program = await prisma.program.findUnique({ where: { id: want }, select: { id: true, title: true } });
