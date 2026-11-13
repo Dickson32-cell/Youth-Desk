@@ -146,3 +146,29 @@ model Counter {
   key String @id
   n   Int    @default(0)
 }
+
+// Municipal news posted by the officer; shown on the main page (latest 3 cards
+// + the scrolling newsflash ticker). Images live in this database too.
+model News {
+  id        Int         @id @default(autoincrement())
+  title     String // <=120
+  body      String // <=4000
+  author    String // officer username
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  images    NewsImage[]
+
+  @@index([createdAt])
+}
+
+model NewsImage {
+  id       Int    @id @default(autoincrement())
+  newsId   Int
+  mimeType String
+  size     Int
+  sort     Int    @default(0)
+  data     Bytes
+  news     News   @relation(fields: [newsId], references: [id], onDelete: Cascade)
+
+  @@index([newsId])
+}

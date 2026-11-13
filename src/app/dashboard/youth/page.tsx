@@ -15,6 +15,7 @@ export default function YouthRegister() {
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   const [lastYouth, setLastYouth] = useState<{ id: number; serial: string; name: string; phone: string; area: string } | null>(null);
+  const [editing, setEditing] = useState<Youth | null>(null);
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) => setForm((s) => ({ ...s, [k]: e.target.value }));
 
   const load = useCallback(async (query: string) => {
@@ -46,6 +47,33 @@ export default function YouthRegister() {
     }
   }
 
+  function startEdit(y: Youth) {
+    setEditing(y);
+    setForm({
+      name: y.name || "", phone: y.phone || "", area: y.area || "",
+      education: y.education || "", skills: y.skills || "", ghanaCard: y.ghanaCard || "",
+      dateOfBirth: (() => { const d = y.dateOfBirth ? new Date(y.dateOfBirth) : null; return d && !isNaN(d.getTime()) ? d.toISOString().slice(0, 10) : ""; })(),
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function saveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editing) return;
+    setMsg(""); setErr("");
+    const res = await fetch(`/api/admin/cases/youth?id=${editing.id}`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form),
+    });
+    const j = await res.json();
+    if (!res.ok) setErr(j.error || "Could not save changes");
+    else {
+      setMsg(`${editing.serial} updated.`);
+      setEditing(null);
+      setForm({ name: "", phone: "", area: "", education: "", skills: "", ghanaCard: "", dateOfBirth: "" });
+      load(q);
+    }
+  }
+
   function takeComplaint(y: { id: number; serial: string; name: string; phone: string; area: string } | null) {
     if (!y) return;
     sessionStorage.setItem("youthcomplaint", JSON.stringify(y));
@@ -59,7 +87,13 @@ export default function YouthRegister() {
         <div className="card">
           <h2>Walk-in youth register</h2>
           <p className="sub">Everyone who visits the desk gets a card with their serial. Search by name, serial or area on the left.</p>
-          <form className="form-grid" onSubmit={go}>
+          {editing && (
+            <div className="alert-ok" style={{ marginBottom: 10 }}>
+              Editing <b>{editing.serial} - {editing.name}</b>{" "}
+              <button type="button" className="btn btn-sm btn-ghost" style={{ marginLeft: 8 }} onClick={() => { setEditing(null); setForm({ name: "", phone: "", area: "", education: "", skills: "", ghanaCard: "", dateOfBirth: "" }); }}>Cancel edit</button>
+            </div>
+          )}
+          <form className="form-grid" onSubmit={editing ? saveEdit : go}>
             <label className="fld"><span className="cap">Full name *</span>
               <input type="text" value={form.name} onChange={set("name")} required />
             </label>
@@ -82,7 +116,7 @@ export default function YouthRegister() {
               <input type="text" value={form.ghanaCard} onChange={set("ghanaCard")} placeholder="GHA-XXXXXXXXX-X" />
             </label>
             <div style={{ display: "flex", alignItems: "flex-end" }}>
-              <button className="btn btn-primary w-full">Register this youth</button>
+              <button className="btn btn-primary w-full">{editing ? "Save changes" : "Register this youth"}</button>
             </div>
           </form>
           {msg && (
@@ -116,6 +150,7 @@ export default function YouthRegister() {
                   <td>{y.skills || "—"}</td>
                   <td style={{ whiteSpace: "nowrap" }} onClick={(e) => e.stopPropagation()}>
                     <button className="btn btn-sm btn-ghost" onClick={() => takeComplaint({ id: y.id, serial: y.serial, name: y.name, phone: y.phone || "", area: y.area || "" })}>Take complaint</button>
+                    <button className="btn btn-sm btn-ghost" style={{ marginLeft: 6 }} onClick={() => startEdit(y)}>Edit</button>
                     <button className="btn btn-sm btn-danger" style={{ marginLeft: 6 }} onClick={async () => {
                       if (!window.confirm(`Delete ${y.serial} - ${y.name} from the walk-in register?`)) return;
                       let res = await fetch(`/api/admin/cases/youth?id=${y.id}`, { method: "DELETE" });

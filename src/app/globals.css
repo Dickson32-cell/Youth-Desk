@@ -170,3 +170,19 @@ tr.rownew > td { animation: rownewbg 2.5s ease; }
 @keyframes rownewbg { 0% { background: #e6f5ed; } 100% { background: transparent; } }
 [data-theme=dark] tr.rownew > td { animation-name: rownewbgd; }
 @keyframes rownewbgd { 0% { background: #123224; } 100% { background: transparent; } }
+
+/* Municipal news: ticker strip + latest-3 card grid (main page) */
+.tickerband { display: flex; align-items: center; gap: 12px; background: var(--navy); color: #fff; padding: 9px 16px; overflow: hidden; }
+.tickerlabel { flex: 0 0 auto; background: #B88721; color: #fff; font-weight: 800; font-size: 11px; letter-spacing: 1.2px; padding: 3px 9px; border-radius: 6px; }
+.ticker { overflow: hidden; flex: 1; min-width: 0; }
+.tickertrack { display: inline-flex; white-space: nowrap; will-change: transform; animation: ydticker 40s linear infinite; }
+.tickerband:hover .tickertrack { animation-play-state: paused; }
+.tickeritem { padding-right: 48px; font-size: 13px; font-weight: 600; }
+@keyframes ydticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .tickertrack { animation: none; } .tickertrack > span:last-child { display: none; } }
+.newssection { margin-top: -6px; }
+.newsh { font-size: 19px; margin: 0 0 10px; }
+.newsgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+[data-theme=dark] .newssection article > div { background: #12203a !important; border-color: #22365c !important; color: #d5e1f2 !important; }
+[data-theme=dark] .newssection h3 { color: #e8eef8 !important; }
+[data-theme=dark] .newssection p { color: #b9c9de !important; }

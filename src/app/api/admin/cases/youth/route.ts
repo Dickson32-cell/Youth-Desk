@@ -51,6 +51,29 @@ export async function DELETE(req: NextRequest) {
   return NextResponse.json({ ok: true, deletedCases: linkedRows.map((c) => c.caseNumber) });
 }
 
+
+export async function PATCH(req: NextRequest) {
+  const s = verifySession(req.cookies.get(SESSION_COOKIE)?.value);
+  if (!s) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const id = Number(req.nextUrl.searchParams.get("id")) || 0;
+  const body = await req.json().catch(() => ({}));
+  const clean = (v: unknown, n: number) => (typeof v === "string" && v.trim() ? v.trim().slice(0, n) : null);
+  const data: Record<string, string | null> = {};
+  if (typeof body.name === "string" && body.name.trim()) data.name = body.name.trim().slice(0, 80);
+  for (const [k, n] of [["phone", 15], ["area", 60], ["dateOfBirth", 12], ["education", 60], ["skills", 200], ["ghanaCard", 20]] as const) {
+    if (k in body) data[k] = clean(body[k], n as number);
+  }
+  if (!Object.keys(data).length) return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
+  if (data.name === null) delete data.name; // name must stay non-empty
+  const youth = await prisma.youth.update({
+    where: { id },
+    data,
+    select: { id: true, serial: true, name: true, phone: true, area: true, education: true, skills: true, ghanaCard: true, dateOfBirth: true },
+  }).catch(() => null);
+  if (!youth) return NextResponse.json({ error: "Record not found" }, { status: 404 });
+  return NextResponse.json({ ok: true, youth });
+}
+
 export async function POST(req: NextRequest) {
   const s = verifySession(req.cookies.get(SESSION_COOKIE)?.value);
   if (!s) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

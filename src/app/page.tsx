@@ -17,7 +17,21 @@ export default async function Home() {
     ["site-words"],
     { revalidate: 300 },
   );
-  const [imgs, words] = await Promise.all([getHeroIds().catch(() => []), getWords().catch(() => [] as { key: string; value: string }[])]);
+  const getNews = unstable_cache(
+    async () =>
+      prisma.news.findMany({
+        orderBy: { id: "desc" },
+        take: 6,
+        include: { images: { select: { id: true, mimeType: true }, orderBy: { sort: "asc" } } },
+      }),
+    ["landing-news"],
+    { revalidate: 300 },
+  );
+  const [imgs, words, news] = await Promise.all([
+    getHeroIds().catch(() => [] as { id: number }[]),
+    getWords().catch(() => [] as { key: string; value: string }[]),
+    getNews().catch(() => [] as { id: number; title: string; body: string; createdAt: Date; images: { id: number; mimeType: string }[] }[]),
+  ]);
   const w = Object.fromEntries(words.map((r) => [r.key, r.value]));
   const heroTitle = w.hero_title || "Youth Desk NJSMA";
   const heroSub =
@@ -47,6 +61,45 @@ export default async function Home() {
           <a href="/report" className="btn btn-primary" style={{ background: "#fff", color: "#1c3f6e" }}>Report an issue</a>
         </div>
       </div>
+      {news.length > 0 && (
+        <div className="tickerband" aria-label="Latest municipal news">
+          <span className="tickerlabel">NEWS</span>
+          <div className="ticker">
+            <div className="tickertrack">
+              <span>
+                {news.map((n) => (
+                  <span key={"a" + n.id} className="tickeritem">• {n.title}</span>
+                ))}
+              </span>
+              <span aria-hidden="true">
+                {news.map((n) => (
+                  <span key={"b" + n.id} className="tickeritem">• {n.title}</span>
+                ))}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+      {news.length > 0 && (
+        <section className="main newssection" id="news">
+          <h2 className="newsh">Latest news</h2>
+          <div className="newsgrid">
+            {news.slice(0, 3).map((n) => (
+              <article key={n.id} style={{ margin: 0 }}>
+                {n.images[0] && String(n.images[0].mimeType).startsWith("image/") && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={`/api/news-image/${n.images[0].id}`} alt="" loading="lazy" style={{ width: "100%", height: 170, objectFit: "cover", borderRadius: "12px 12px 0 0", display: "block" }} />
+                )}
+                <div style={{ background: "#fff", border: "1px solid #e3e9f2", borderTop: n.images[0] ? "none" : undefined, borderRadius: n.images[0] ? "0 0 12px 12px" : 12, padding: "14px 16px" }}>
+                  <div style={{ fontSize: 11.5, color: "#8fa2bd", letterSpacing: 0.5 }}>{new Date(n.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</div>
+                  <h3 style={{ margin: "6px 0 6px", fontSize: 16, color: "#12294a" }}>{n.title}</h3>
+                  <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.6, color: "#3c5170" }}>{n.body}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
       <main className="main">
         <div className="card">
           <h2>What you can do here</h2>
