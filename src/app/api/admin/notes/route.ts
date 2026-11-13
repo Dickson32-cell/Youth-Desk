@@ -33,6 +33,12 @@ export async function PATCH(req: NextRequest) {
       await sendStatusSms(c.caseNumber, c.phone, newStatus);
     });
   }
-  const updated = await prisma.case.findUnique({ where: { id }, include: { notes: { orderBy: { id: "asc" } } } });
+  const updated = await prisma.case.findUnique({
+    where: { id },
+    include: {
+      notes: { orderBy: { id: "asc" } },
+      attachments: { select: { id: true, fileName: true, mimeType: true, size: true, createdAt: true } },
+    },
+  });
   return NextResponse.json({ ok: true, case: updated, smsQueued: !!notify && smsConfigured() && !!normalizeGhPhone(c.phone) });
 }

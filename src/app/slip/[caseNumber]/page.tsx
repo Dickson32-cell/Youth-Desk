@@ -57,12 +57,15 @@ export default async function Slip({ params }: { params: Promise<{ caseNumber: s
             ))}
           </>
         )}
+        <div className="row" style={{ marginTop: 16, padding: "8px 10px", border: "1px solid #ccd8ea", borderRadius: 6, fontSize: 13 }}>
+          <b>Tracking key: {c.trackKey || "(not set)"}</b> — keep this private. Together with the case number it is the only way to view this case online.
+        </div>
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 24, paddingTop: 14, borderTop: "1px solid #ccd8ea", fontSize: 12, color: "#5b6b86" }}>
           <div>Officer sign: ________________</div>
           <div>Date: ____________</div>
         </div>
         <p style={{ fontSize: 12, color: "#5b6b86", marginTop: 12 }}>
-          NJSMA Youth Desk - track any time with your reference number. Keep this slip.
+          NJSMA Youth Desk - track with your reference number AND tracking key. Keep this slip.
         </p>
       </div>
       <div className="noprint" style={{ textAlign: "center" }}>

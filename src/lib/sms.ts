@@ -27,9 +27,11 @@ export function normalizeGhPhone(raw: string | null | undefined): string | null 
 }
 
 // The ONLY SMS the system sends of this kind (fixed template, edit here).
-export function caseSmsText(caseNumber: string): string {
-  const t = `Youth Desk: Your report has been received. Case No. ${caseNumber}. Keep it. To track it, open the Youth Desk website, choose Track and enter this number.`;
-  return t.length <= 160 ? t : t.slice(0, 160);
+// Confidentiality: every case gets a private tracking KEY - the number alone
+// no longer opens the case, so a leaked/guessed number reveals nothing.
+export function caseSmsText(caseNumber: string, trackKey: string): string {
+  const t = `Youth Desk: Case ${caseNumber} received. Your tracking key: ${trackKey}. Open the Youth Desk website, choose Track and enter the case number AND this key.`;
+  return t.length <= 320 ? t : t.slice(0, 320);
 }
 
 // Stage-update SMS templates (fixed, one per officer action):
@@ -78,7 +80,7 @@ export async function sendStatusSms(caseNumber: string, phone: string | null, st
   }
 }
 
-export async function sendCaseSms(caseNumber: string, phone: string): Promise<void> {
+export async function sendCaseSms(caseNumber: string, phone: string, trackKey: string): Promise<void> {
   const to = normalizeGhPhone(phone);
   const base = { kind: "CASE_CONFIRM", caseNumber, phone: to || String(phone ?? "").slice(0, 20) };
   if (!to) {
@@ -95,7 +97,7 @@ export async function sendCaseSms(caseNumber: string, phone: string): Promise<vo
       headers: { "api-key": String(process.env.ARKESEL_API_KEY), "Content-Type": "application/json", "User-Agent": UA },
       body: JSON.stringify({
         sender: process.env.ARKESEL_SENDER || "YOUTHDSK",
-        message: caseSmsText(caseNumber),
+        message: caseSmsText(caseNumber, trackKey),
         recipients: [to],
       }),
       signal: AbortSignal.timeout(20000),

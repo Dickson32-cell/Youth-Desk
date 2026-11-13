@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { nextSerialKey, caseFormat } from "@/lib/auth";
 import { normalizeGhPhone, sendCaseSms, smsConfigured } from "@/lib/sms";
 import { saveAttachments } from "@/lib/attachments";
+import { newTrackKey } from "@/lib/trackKey";
 
 export async function POST(req: NextRequest) {
   const ct = req.headers.get("content-type") || "";
@@ -39,6 +40,9 @@ export async function POST(req: NextRequest) {
     caseFormat,
     async (candidate) => !!(await prisma.case.findUnique({ where: { caseNumber: candidate }, select: { id: true } })),
   );
+  // A private tracking key is issued with every case. The case NUMBER goes on
+  // the public face; the KEY (SMS + slip) is the only thing that opens it.
+  const trackKey = newTrackKey();
   const created = await prisma.case.create({
     data: {
       caseNumber,
@@ -48,6 +52,7 @@ export async function POST(req: NextRequest) {
       type,
       description,
       status: "NEW",
+      trackKey,
     },
   });
   // Evidence files (photos/documents). A failed upload never blocks the case:
@@ -65,8 +70,8 @@ export async function POST(req: NextRequest) {
   const smsQueued = !!phone && smsConfigured() && !!normalizeGhPhone(phone);
   if (smsQueued) {
     after(async () => {
-      await sendCaseSms(caseNumber, phone);
+      await sendCaseSms(caseNumber, phone, trackKey);
     });
   }
-  return NextResponse.json({ ok: true, caseNumber, smsQueued, warning, message: "Keep this number to track your case." });
+  return NextResponse.json({ ok: true, caseNumber, trackKey, smsQueued, warning, message: "Keep this number AND your tracking key to track the case." });
 }

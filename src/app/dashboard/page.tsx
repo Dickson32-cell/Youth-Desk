@@ -31,7 +31,7 @@ export default function Dashboard() {
   const [intakeForm, setIntakeForm] = useState({ name: "", phone: "", area: "", type: "EMPLOYMENT", description: "" });
   const [intakeBusy, setIntakeBusy] = useState(false);
   const [intakeErr, setIntakeErr] = useState("");
-  const [intakeDone, setIntakeDone] = useState<{ caseNumber: string; smsQueued: boolean } | null>(null);
+  const [intakeDone, setIntakeDone] = useState<{ caseNumber: string; trackKey?: string; smsQueued: boolean } | null>(null);
   const [intakeFiles, setIntakeFiles] = useState<File[]>([]);
   const [intakeYouth, setIntakeYouth] = useState<{ id: number; serial: string; name: string } | null>(null);
   const onIntakeFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -198,10 +198,10 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {open.attachments.length > 0 && (
+              {(open.attachments || []).length > 0 && (
                 <div style={{ marginBottom: 12 }}>
                   <div className="sub">Attachments (evidence)</div>
-                  {open.attachments.map((a) => (
+                  {(open.attachments || []).map((a) => (
                     <div key={a.id} className="note" style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <span style={{ flex: 1, overflowWrap: "anywhere" }}>{a.fileName}</span>
                       <span style={{ color: "#5b6b86", fontSize: 12 }}>{Math.round(a.size / 1024)} KB</span>
@@ -252,6 +252,12 @@ export default function Dashboard() {
                 <h2>Case logged</h2>
                 <p className="sub">{intakeDone.smsQueued ? "Confirmation SMS on its way to the youth's phone." : "No confirmation SMS for this entry (no phone on file)."}</p>
                 <div className="big-num">{intakeDone.caseNumber}</div>
+                {intakeDone.trackKey && (
+                  <div style={{ margin: "10px auto 0", padding: "8px 12px", border: "1px solid #ccd8ea", borderRadius: 8, maxWidth: 420, fontSize: 13.5 }}>
+                    <b>Tracking key: {intakeDone.trackKey}</b>
+                    <div style={{ fontSize: 12, color: "#5b6b86", marginTop: 3 }}>Read this to the youth and give them the printed slip - they will need BOTH the number and this key to track the case.</div>
+                  </div>
+                )}
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", marginTop: 14 }}>
                   <a href={`/slip/${intakeDone.caseNumber}`} target="_blank" rel="noreferrer" className="btn btn-ghost">Print case slip</a>
                   <a href={`/forward/${intakeDone.caseNumber}`} target="_blank" rel="noreferrer" className="btn btn-ghost">Referral form (MCD)</a>
@@ -286,7 +292,7 @@ export default function Dashboard() {
                     const res = await fetch("/api/admin/cases", { method: "POST", body: fd });
                     const j = await res.json().catch(() => ({}));
                     if (!res.ok) setIntakeErr(j.error || "Could not save");
-                    else { setIntakeDone({ caseNumber: j.caseNumber, smsQueued: !!j.smsQueued }); setIntakeFiles([]); setIntakeYouth(null); load(filter, q); }
+                    else { setIntakeDone({ caseNumber: j.caseNumber, trackKey: j.trackKey, smsQueued: !!j.smsQueued }); setIntakeFiles([]); setIntakeYouth(null); load(filter, q); }
                   } finally { setIntakeBusy(false); }
                 }}>
                   <div className="form-grid">

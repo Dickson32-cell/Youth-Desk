@@ -52,10 +52,13 @@ model Case {
   forwardedTo  String?
   youthId      Int? // links a walk-in youth account
   youth        Youth?     @relation(fields: [youthId], references: [id])
+  trackKey     String?     @unique // private tracking key: number alone cannot open the case
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
   notes        CaseNote[]
   attachments  Attachment[]
+
+  @@index([status, createdAt])
 }
 // Evidence files (photos/documents) attached by the youth or the officer.
 // Bytes live in this database - no external bucket - so uploads stay sealed.
@@ -77,6 +80,8 @@ model CaseNote {
   author    String
   createdAt DateTime @default(now())
   case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
 }
 
 model Program {
@@ -98,6 +103,8 @@ model SiteImage {
   sort      Int      @default(0)
   data      Bytes
   createdAt DateTime @default(now())
+
+  @@index([slot])
 }
 
 model SiteItem {

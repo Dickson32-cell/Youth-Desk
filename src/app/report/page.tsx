@@ -19,6 +19,7 @@ export default function Report() {
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<string | null>(null);
+  const [doneKey, setDoneKey] = useState<string>("");
   const [smsNote, setSmsNote] = useState("");
   const [upNote, setUpNote] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -46,7 +47,7 @@ export default function Report() {
       const j = await res.json().catch(() => ({}));
       if (!res.ok) setErr(j.error || "Could not send");
       else {
-        setDone(j.caseNumber);
+        setDone(j.caseNumber); setDoneKey(j.trackKey || "");
         setSmsNote(j.smsQueued ? `An SMS with this case number is on its way to ${f.phone}.` : "");
         setUpNote(j.warning || "");
       }
@@ -68,11 +69,17 @@ export default function Report() {
           {upNote && (
             <p style={{ fontSize: 13, color: "#a2631f", fontWeight: 600, margin: "8px 0 0" }}>Note: {upNote} Your case was still received.</p>
           )}
+          {doneKey && (
+            <div style={{ margin: "14px auto 0", padding: "10px 14px", border: "1px solid #ccd8ea", borderRadius: 8, maxWidth: 420, fontSize: 14 }}>
+              <b>Tracking key: {doneKey}</b>
+              <div style={{ fontSize: 12.5, color: "#5b6b86", marginTop: 4 }}>Keep this PRIVATE. The case number alone cannot open your case — only the number plus this key can.</div>
+            </div>
+          )}
           <p style={{ fontSize: 13.5, color: "#5b6b86", margin: "10px 0 18px" }}>
             Keep it safe — it is your proof and your way to check progress.
           </p>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
-            <a href={`/track?c=${done}`} className="btn btn-ghost">Track it</a>
+            <a href={`/track?c=${done}&k=${doneKey}`} className="btn btn-ghost">Track it</a>
             <a href="/report" className="btn btn-ghost">Report another</a>
           </div>
         </div>

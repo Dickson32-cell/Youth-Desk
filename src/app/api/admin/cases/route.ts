@@ -2,6 +2,7 @@ import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifySession, SESSION_COOKIE, nextSerialKey, caseFormat } from "@/lib/auth";
 import { normalizeGhPhone, sendCaseSms, smsConfigured } from "@/lib/sms";
+import { newTrackKey } from "@/lib/trackKey";
 import { saveAttachments } from "@/lib/attachments";
 
 export async function GET(req: NextRequest) {
@@ -83,9 +84,11 @@ export async function POST(req: NextRequest) {
     caseFormat,
     async (candidate) => !!(await prisma.case.findUnique({ where: { caseNumber: candidate }, select: { id: true } })),
   );
+  const trackKey = newTrackKey();
   const created = await prisma.case.create({
     data: {
       caseNumber,
+      trackKey,
       reporterName: name || null,
       phone: phone || null,
       area: area || null,
@@ -107,8 +110,8 @@ export async function POST(req: NextRequest) {
   const smsQueued = !!phone && smsConfigured() && !!normalizeGhPhone(phone);
   if (smsQueued) {
     after(async () => {
-      await sendCaseSms(caseNumber, phone);
+      await sendCaseSms(caseNumber, phone, trackKey);
     });
   }
-  return NextResponse.json({ ok: true, caseNumber, smsQueued, warning, message: "Keep this number to track the case." });
+  return NextResponse.json({ ok: true, caseNumber, trackKey, smsQueued, warning, message: "Keep this number AND the tracking key to track the case." });
 }
