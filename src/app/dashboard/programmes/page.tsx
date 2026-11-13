@@ -132,9 +132,85 @@ export default function Programmes() {
             <div style={{ marginLeft: "auto", fontSize: 11, color: "#5b6b86", textAlign: "right", lineHeight: 1.6 }}>
               Prepared by: {preparedBy || "the desk officer"}<br />{new Date().toLocaleString()}
             </div>
+        <div className="card noprint">
+          <h2>Open for registration</h2>
+          <p className="sub">This is where the officer POSTS a programme for youth to register remotely: press "+ Publish a programme", fill in the details, and it appears on the MAIN WEBSITE under "Programmes open for registration". Youth anywhere sign up from their phones, each phone sign-up gets a confirmation SMS, and the who-signed-up list shows below.</p>
+          <div className="row" style={{ marginTop: 10 }}>
+            <button className="btn btn-primary noprint" onClick={() => setShowPostForm(!showPostForm)}>{showPostForm ? "Close the publish form" : "+ Publish a programme"}</button>
+          </div>
+          {showPostForm && (
+            <form onSubmit={postProgramme}>
+              <div className="filters" style={{ flexWrap: "wrap", rowGap: 8, marginTop: 10 }}>
+                <input required placeholder="Programme title (e.g: Skills training for young tailors)" value={pf.title} onChange={(e) => setPf({ ...pf, title: e.target.value })} style={{ minWidth: 320 }} />
+                <select value={pf.category} onChange={(e) => setPf({ ...pf, category: e.target.value })} style={{ textTransform: "capitalize" }}>
+                  {TYPES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                  <option value="OTHER">Other (type it)</option>
+                </select>
+                {pf.category === "OTHER" && (
+                  <input required placeholder="Type the kind of programme" value={pf.categoryOther} onChange={(e) => setPf({ ...pf, categoryOther: e.target.value })} style={{ width: 240, textTransform: "uppercase" }} />
+                )}
+                <input placeholder="Deadline / closing date (optional, e.g: 30 Nov 2026)" value={pf.deadline} onChange={(e) => setPf({ ...pf, deadline: e.target.value })} style={{ minWidth: 240 }} />
+                <input placeholder="Venue / how to take part (optional)" value={pf.venue} onChange={(e) => setPf({ ...pf, venue: e.target.value })} style={{ minWidth: 260 }} />
+                <input type="number" min="1" placeholder="Planned seats (optional)" value={pf.seats} onChange={(e) => setPf({ ...pf, seats: e.target.value })} style={{ width: 180 }} />
+              </div>
+              <textarea required placeholder="Full details: what the programme offers, requirements, who can apply, how selection works." value={pf.description} onChange={(e) => setPf({ ...pf, description: e.target.value })} style={{ width: "100%", minHeight: 90, marginTop: 8 }} />
+              <div className="row" style={{ marginTop: 10 }}>
+                <button className="btn btn-primary" disabled={busy}>{busy ? "Publishing…" : "Publish to the main website"}</button>
+              </div>
+            </form>
+          )}
+          {posts.length === 0 ? (
+            <p className="sub" style={{ marginTop: 10 }}>Nothing published yet.</p>
+          ) : (
+            <table style={{ marginTop: 10 }}>
+              <thead><tr><th>Programme</th><th>Type</th><th>Deadline</th><th>Seats</th><th>Sign-ups</th><th>Status</th><th className="noprint"></th></tr></thead>
+              <tbody>
+                {posts.map((r) => (
+                  <tr key={r.id}>
+                    <td style={{ maxWidth: 320 }}><b>{r.title}</b></td>
+                    <td>{tLabel(r.category)}</td>
+                    <td>{r.deadline || "\u2014"}</td>
+                    <td>{r.seats ?? "\u2014"}</td>
+                    <td style={{ fontWeight: 700 }}>{r.registrations}</td>
+                    <td><span className={"tag tag-" + (r.status === "OPEN" ? "NEW" : "RESOLVED")} style={{ cursor: "pointer" }} onClick={() => closeReopen(r.id, r.status === "OPEN" ? "close" : "reopen")} title="Tap to toggle open/closed">{r.status}</span></td>
+                    <td className="noprint" style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                      <button type="button" className="btn btn-sm btn-ghost" onClick={() => openRegistrants(r.id, r.title)}>{regFor && regFor.id === r.id ? "Hide list" : "Sign-ups"}</button>
+                      {" "}
+                      <button type="button" className="btn btn-danger" style={{ padding: "3px 10px", fontSize: 12 }} onClick={() => delPost(r.id)}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          {regFor && (
+            <div style={{ marginTop: 12, borderTop: "1px solid #ccd8ea", paddingTop: 10 }}>
+              <h3>Sign-ups: {regFor.title}</h3>
+              {regs.length === 0 ? (
+                <p className="sub">No sign-ups yet.</p>
+              ) : (
+                <table>
+                  <thead><tr><th>When</th><th>Name</th><th>Phone</th><th>Area</th><th>Note</th></tr></thead>
+                  <tbody>
+                    {regs.map((r) => (
+                      <tr key={r.id}>
+                        <td>{new Date(r.createdAt).toLocaleString("en-GB")}</td>
+                        <td>{r.name}</td>
+                        <td>{r.phone || "\u2014"}</td>
+                        <td>{r.area || "\u2014"}</td>
+                        <td>{r.note || "\u2014"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+        </div>
+
         <div className="card">
-          <h2>Programmes &amp; interventions</h2>
-          <p className="sub">Municipal programmes and interventions for young people that the desk coordinates or monitors. These feed the KPI table in the Management report pack.</p>
+          <h2>Programme KPI register — interventions</h2>
+          <p className="sub">Every programme the desk runs lands here with its numbers (target vs youth reached) and feeds the KPI table in the Management report pack.</p>
           <div className="filters" style={{ gap: 14, marginTop: 10 }}>
             <div className="tile" style={{ padding: "10px 16px" }}><div style={{ fontSize: 12, color: "#5b6b86" }}>Programmes</div><div style={{ fontSize: 20, fontWeight: 800, color: "#1c3f6e" }}>{summary.items}</div></div>
             <div className="tile" style={{ padding: "10px 16px" }}><div style={{ fontSize: 12, color: "#5b6b86" }}>Target (planned)</div><div style={{ fontSize: 20, fontWeight: 800, color: "#1c3f6e" }}>{summary.target}</div></div>
@@ -152,7 +228,7 @@ export default function Programmes() {
 
         <div className="card noprint">
           <h2>Open for registration</h2>
-          <p className="sub">Publish a programme on the main website. Youth who cannot walk to the office sign up from their phones; each sign-up with a phone gets a confirmation SMS, and you see the list here.</p>
+          <p className="sub">This is where the officer POSTS a programme for youth to register remotely: press "+ Publish a programme", fill in the details, and it appears on the MAIN WEBSITE under "Programmes open for registration". Youth anywhere sign up from their phones, each phone sign-up gets a confirmation SMS, and the who-signed-up list shows below.</p>
           <div className="row" style={{ marginTop: 10 }}>
             <button className="btn btn-primary noprint" onClick={() => setShowPostForm(!showPostForm)}>{showPostForm ? "Close the publish form" : "+ Publish a programme"}</button>
           </div>
