@@ -3,15 +3,24 @@
 import { useEffect, useState } from "react";
 import TopBar from "@/components/Shell";
 
-// Programmes & interventions the desk coordinates: the municipal KPI register.
+// THE OFFICER'S PROGRAMMES TAB — three jobs on one page, in order:
+// (1) Open for registration: publish a programme on the main website so youth
+//     who cannot walk to the office can sign up from their phones (each sign-up
+//     with a phone gets a confirmation SMS). The officer sees every sign-up.
+// (2) Programme KPI register: log interventions AFTER they happen (target vs
+//     youth reached) - feeds the KPI table of the Management report pack.
+// (3) The register of everything logged, printable as PDF for Management.
+
 type Row = {
   id: number; date: string; department: string; title: string; type: string;
   target: number; reached: number; budget: number | null; note: string | null; officer: string;
 };
 type Summary = { items: number; target: number; reached: number; budget: number };
 type ByDept = { department: string; target: number; reached: number; items: number };
-
-type PostRow = { id: number; title: string; description: string; category: string; deadline: string | null; venue: string | null; seats: number | null; status: string; postedBy: string; registrations: number };
+type PostRow = {
+  id: number; title: string; description: string; category: string; deadline: string | null;
+  venue: string | null; seats: number | null; status: string; postedBy: string; registrations: number;
+};
 type RegRow = { id: number; name: string; phone: string | null; area: string | null; note: string | null; createdAt: string };
 
 const TYPES: [string, string][] = [
@@ -21,37 +30,30 @@ const TYPES: [string, string][] = [
   ["MENTORSHIP", "Mentorship"],
   ["GRANT", "Grant / funding support"],
   ["MARKET", "Market linkage"],
-  ["OTHER", "Other"],
+  ["OTHER", "Other (type it)"],
 ];
 
 export default function Programmes() {
+  // ---- shared UI state ----
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const [msg, setMsg] = useState("");
+  const [preparedBy, setPreparedBy] = useState("");
+
+  // ---- (1) open-for-registration posts ----
+  const [posts, setPosts] = useState<PostRow[]>([]);
+  const [showPostForm, setShowPostForm] = useState(false);
+  const [pf, setPf] = useState({ title: "", category: "TRAINING", categoryOther: "", description: "", deadline: "", venue: "", seats: "" });
+  const [regFor, setRegFor] = useState<{ id: number; title: string } | null>(null);
+  const [regs, setRegs] = useState<RegRow[]>([]);
+
+  // ---- (2+3) KPI register ----
   const [rows, setRows] = useState<Row[]>([]);
   const [summary, setSummary] = useState<Summary>({ items: 0, target: 0, reached: 0, budget: 0 });
   const [byDept, setByDept] = useState<ByDept[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [msg, setMsg] = useState("");
-  const [err, setErr] = useState("");
-  const [busy, setBusy] = useState(false);
   const [customType, setCustomType] = useState("");
-  const [preparedBy, setPreparedBy] = useState("");
-  const [posts, setPosts] = useState<PostRow[]>([]);
-  const [showPostForm, setShowPostForm] = useState(false);
-  const [regFor, setRegFor] = useState<{ id: number; title: string } | null>(null);
-  const [regs, setRegs] = useState<RegRow[]>([]);
-  const [pf, setPf] = useState({ title: "", category: "TRAINING", categoryOther: "", description: "", deadline: "", venue: "", seats: "" });
   const [f, setF] = useState({ date: new Date().toISOString().slice(0, 10), department: "", title: "", type: "TRAINING", target: "", reached: "", budget: "", note: "" });
-
-  const load = () => {
-    fetch("/api/admin/interventions")
-      .then((r) => r.json())
-      .then((j) => { setRows(j.rows || []); setSummary(j.summary || { items: 0, target: 0, reached: 0, budget: 0 }); setByDept(j.byDept || []); })
-      .catch(() => setErr("Could not load programmes."));
-  };
-  useEffect(() => {
-    fetch("/api/admin/auth").then(async (r) => (r.ok ? r.json() : null)).then((j) => (j ? setPreparedBy(j.fullName || j.username || "") : null));
-    loadPosts();
-  }, []);
-  useEffect(load, []);
 
   function loadPosts() {
     fetch("/api/admin/programmes-post")
@@ -59,30 +61,43 @@ export default function Programmes() {
       .then((j) => setPosts(j.rows || []))
       .catch(() => {});
   }
+  function loadRows() {
+    fetch("/api/admin/interventions")
+      .then((r) => r.json())
+      .then((j) => { setRows(j.rows || []); setSummary(j.summary || { items: 0, target: 0, reached: 0, budget: 0 }); setByDept(j.byDept || []); })
+      .catch(() => {});
+  }
+  useEffect(() => {
+    fetch("/api/admin/auth").then(async (r) => (r.ok ? r.json() : null)).then((j) => (j ? setPreparedBy(j.fullName || j.username || "") : null));
+    loadPosts();
+    loadRows();
+  }, []);
+
+  function fail(m: string) { setErr(m); setBusy(false); }
+
+  // ---- publish handlers ----
   async function postProgramme(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true); setErr(""); setMsg("");
-    const body = { ...pf, category: pf.category === "OTHER" && pf.categoryOther.trim() ? pf.categoryOther.trim().toUpperCase() : pf.category };
-    const res = await fetch("/api/admin/programmes-post", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const category = pf.category === "OTHER" && pf.categoryOther.trim() ? pf.categoryOther.trim().toUpperCase() : pf.category;
+    const res = await fetch("/api/admin/programmes-post", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...pf, category }) });
     const j = await res.json().catch(() => ({}));
-    if (!res.ok) fail(j.error || "Could not publish the programme.");
-    else {
-      setShowPostForm(false); setMsg("Programme published on the main website - registration is open.");
-      setPf({ title: "", category: "TRAINING", categoryOther: "", description: "", deadline: "", venue: "", seats: "" });
-      loadPosts();
-    }
-    setBusy(false);
+    if (!res.ok) return fail(j.error || "Could not publish the programme.");
+    setShowPostForm(false); setMsg("Published. It now shows on the main website under Programmes open for registration.");
+    setPf({ title: "", category: "TRAINING", categoryOther: "", description: "", deadline: "", venue: "", seats: "" });
+    loadPosts(); setBusy(false);
   }
   async function closeReopen(id: number, action: string) {
     const r = await fetch("/api/admin/programmes-post", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, action }) });
-    if (!r.ok) fail("Could not update it.");
-    else { setMsg(action === "close" ? "Registration closed." : "Registration reopened."); loadPosts(); }
+    if (!r.ok) return fail("Could not update it.");
+    setMsg(action === "close" ? "Registration closed - the youth sign-up button is hidden." : "Registration reopened."); loadPosts();
   }
   async function delPost(id: number) {
     if (!confirm("Remove this published programme and its sign-ups?")) return;
     const r = await fetch("/api/admin/programmes-post?id=" + id, { method: "DELETE" });
-    if (!r.ok) fail("Could not remove it.");
-    else { setRegFor(null); setMsg("Published programme removed."); loadPosts(); }
+    if (!r.ok) return fail("Could not remove it.");
+    if (regFor && regFor.id === id) { setRegFor(null); setRegs([]); }
+    setMsg("Published programme removed."); loadPosts();
   }
   function openRegistrants(id: number, title: string) {
     if (regFor && regFor.id === id) { setRegFor(null); setRegs([]); return; }
@@ -93,67 +108,74 @@ export default function Programmes() {
       .catch(() => setRegs([]));
   }
 
+  // ---- KPI register handlers ----
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true); setErr(""); setMsg("");
-    const res = await fetch("/api/admin/interventions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...f, type: f.type === "OTHER" && customType.trim() ? customType.trim().toUpperCase() : f.type }) });
+    const type = f.type === "OTHER" && customType.trim() ? customType.trim().toUpperCase() : f.type;
+    const res = await fetch("/api/admin/interventions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...f, type }) });
     const j = await res.json().catch(() => ({}));
-    if (!res.ok) fail(j.error || "Could not save the programme.");
-    else { setShowForm(false); setMsg("Programme saved."); setF({ ...f, department: "", title: "", target: "", reached: "", budget: "", note: "" }); load(); }
-    setBusy(false);
+    if (!res.ok) return fail(j.error || "Could not log the programme.");
+    setShowForm(false); setCustomType(""); setMsg("Logged in the KPI register.");
+    setF({ ...f, department: "", title: "", target: "", reached: "", budget: "", note: "" });
+    loadRows(); setBusy(false);
   }
-  function fail(m: string) { setErr(m); setBusy(false); }
-
   async function del(id: number) {
-    if (!confirm("Remove this programme from the register?")) return;
+    if (!confirm("Remove this logged programme?")) return;
     const r = await fetch("/api/admin/interventions?id=" + id, { method: "DELETE" });
-    if (!r.ok) fail("Could not remove it.");
-    else { setMsg("Programme removed."); load(); }
+    if (!r.ok) return fail("Could not remove it.");
+    setMsg("Removed."); loadRows();
   }
 
   const pct = summary.target > 0 ? Math.round((summary.reached / summary.target) * 100) : 0;
-  const tLabel = (t: string) => {
-    const known = TYPES.find((x) => x[0] === t);
-    if (t === "ALL") return "—";
-    return known ? known[1] : (t[0] + t.slice(1).toLowerCase());
-  };
+  const tLabel = (t: string) => (t === "ALL" ? "\u2014" : TYPES.find((x) => x[0] === t)?.[1] || catLabel(t));
 
   return (
     <main>
       <TopBar mode="office" />
       <div className="main">
+        {/* print header (only in the Download PDF) */}
         <div className="card print-only" style={{ marginTop: 14 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/api/seal" alt="NJSMA seal" width={52} height={52} style={{ objectFit: "contain" }} />
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, color: "#122447" }}>Youth Desk NJSMA — Programmes &amp; interventions</div>
               <div style={{ fontSize: 11, letterSpacing: 1, color: "#5b6b86" }}>MANAGEMENT KPI REPORT — {new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}</div>
             </div>
-            <div style={{ marginLeft: "auto", fontSize: 11, color: "#5b6b86", textAlign: "right", lineHeight: 1.6 }}>
-              Prepared by: {preparedBy || "the desk officer"}<br />{new Date().toLocaleString()}
+          </div>
+          <div style={{ marginTop: 6, fontSize: 11, color: "#5b6b86", textAlign: "right" }}>
+            Prepared by: {preparedBy || "the desk officer"} · {new Date().toLocaleString()}
           </div>
         </div>
 
-        <div className="card noprint">
-          <h2>Open for registration</h2>
-          <p className="sub">This is where the officer POSTS a programme for youth to register remotely: press "+ Publish a programme", fill in the details, and it appears on the MAIN WEBSITE under "Programmes open for registration". Youth anywhere sign up from their phones, each phone sign-up gets a confirmation SMS, and the who-signed-up list shows below.</p>
+        {/* ============ (1) OPEN FOR REGISTRATION ============ */}
+        <div className="card" style={{ marginTop: 12 }}>
+          <h2>Open for registration — post a programme for youth to join</h2>
+          <p className="sub">
+            Press <b>+ Publish a programme</b> and it appears on the MAIN WEBSITE under &quot;Programmes open for registration&quot;.
+            Youth who cannot walk to the office tap Register and sign up from their phones; every sign-up with a phone gets a
+            confirmation SMS. The sign-ups appear below as &quot;Sign-ups&quot;.
+          </p>
           <div className="row" style={{ marginTop: 10 }}>
-            <button className="btn btn-primary noprint" onClick={() => setShowPostForm(!showPostForm)}>{showPostForm ? "Close the publish form" : "+ Publish a programme"}</button>
+            <button className="btn btn-primary" style={{ minHeight: 40 }} onClick={() => setShowPostForm(!showPostForm)}>{showPostForm ? "Cancel" : "+ Publish a programme"}</button>
           </div>
+          {msg && <div className="alert-ok" style={{ marginTop: 8 }}>{msg}</div>}
+          {err && <div className="alert-err" style={{ marginTop: 8 }}>{err}</div>}
+
           {showPostForm && (
             <form onSubmit={postProgramme}>
               <div className="filters" style={{ flexWrap: "wrap", rowGap: 8, marginTop: 10 }}>
-                <input required placeholder="Programme title (e.g: Skills training for young tailors)" value={pf.title} onChange={(e) => setPf({ ...pf, title: e.target.value })} style={{ minWidth: 320 }} />
-                <select value={pf.category} onChange={(e) => setPf({ ...pf, category: e.target.value })} style={{ textTransform: "capitalize" }}>
+                <input required placeholder="Programme title" value={pf.title} onChange={(e) => setPf({ ...pf, title: e.target.value })} style={{ minWidth: 320 }} />
+                <select value={pf.category} onChange={(e) => setPf({ ...pf, category: e.target.value })}>
                   {TYPES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                  <option value="OTHER">Other (type it)</option>
                 </select>
                 {pf.category === "OTHER" && (
                   <input required placeholder="Type the kind of programme" value={pf.categoryOther} onChange={(e) => setPf({ ...pf, categoryOther: e.target.value })} style={{ width: 240, textTransform: "uppercase" }} />
                 )}
-                <input placeholder="Deadline / closing date (optional, e.g: 30 Nov 2026)" value={pf.deadline} onChange={(e) => setPf({ ...pf, deadline: e.target.value })} style={{ minWidth: 240 }} />
+                <input placeholder="Closing date (optional, e.g: 30 Nov 2026)" value={pf.deadline} onChange={(e) => setPf({ ...pf, deadline: e.target.value })} style={{ minWidth: 220 }} />
                 <input placeholder="Venue / how to take part (optional)" value={pf.venue} onChange={(e) => setPf({ ...pf, venue: e.target.value })} style={{ minWidth: 260 }} />
-                <input type="number" min="1" placeholder="Planned seats (optional)" value={pf.seats} onChange={(e) => setPf({ ...pf, seats: e.target.value })} style={{ width: 180 }} />
+                <input type="number" min="1" placeholder="Planned seats (optional)" value={pf.seats} onChange={(e) => setPf({ ...pf, seats: e.target.value })} style={{ width: 170 }} />
               </div>
               <textarea required placeholder="Full details: what the programme offers, requirements, who can apply, how selection works." value={pf.description} onChange={(e) => setPf({ ...pf, description: e.target.value })} style={{ width: "100%", minHeight: 90, marginTop: 8 }} />
               <div className="row" style={{ marginTop: 10 }}>
@@ -161,98 +183,99 @@ export default function Programmes() {
               </div>
             </form>
           )}
-          {posts.length === 0 ? (
-            <p className="sub" style={{ marginTop: 10 }}>Nothing published yet.</p>
-          ) : (
-            <table style={{ marginTop: 10 }}>
-              <thead><tr><th>Programme</th><th>Type</th><th>Deadline</th><th>Seats</th><th>Sign-ups</th><th>Status</th><th className="noprint"></th></tr></thead>
-              <tbody>
-                {posts.map((r) => (
-                  <tr key={r.id}>
-                    <td style={{ maxWidth: 320 }}><b>{r.title}</b></td>
-                    <td>{tLabel(r.category)}</td>
-                    <td>{r.deadline || "\u2014"}</td>
-                    <td>{r.seats ?? "\u2014"}</td>
-                    <td style={{ fontWeight: 700 }}>{r.registrations}</td>
-                    <td><span className={"tag tag-" + (r.status === "OPEN" ? "NEW" : "RESOLVED")} style={{ cursor: "pointer" }} onClick={() => closeReopen(r.id, r.status === "OPEN" ? "close" : "reopen")} title="Tap to toggle open/closed">{r.status}</span></td>
-                    <td className="noprint" style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                      <button type="button" className="btn btn-sm btn-ghost" onClick={() => openRegistrants(r.id, r.title)}>{regFor && regFor.id === r.id ? "Hide list" : "Sign-ups"}</button>
-                      {" "}
-                      <button type="button" className="btn btn-danger" style={{ padding: "3px 10px", fontSize: 12 }} onClick={() => delPost(r.id)}>Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-          {regFor && (
-            <div style={{ marginTop: 12, borderTop: "1px solid #ccd8ea", paddingTop: 10 }}>
-              <h3>Sign-ups: {regFor.title}</h3>
-              {regs.length === 0 ? (
-                <p className="sub">No sign-ups yet.</p>
-              ) : (
-                <table>
-                  <thead><tr><th>When</th><th>Name</th><th>Phone</th><th>Area</th><th>Note</th></tr></thead>
-                  <tbody>
-                    {regs.map((r) => (
-                      <tr key={r.id}>
-                        <td>{new Date(r.createdAt).toLocaleString("en-GB")}</td>
-                        <td>{r.name}</td>
-                        <td>{r.phone || "\u2014"}</td>
-                        <td>{r.area || "\u2014"}</td>
-                        <td>{r.note || "\u2014"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+
+          {posts.length > 0 && (
+            <div style={{ marginTop: 14 }}>
+              <table>
+                <thead><tr><th>Programme</th><th>Type</th><th>Closing</th><th>Seats</th><th>Sign-ups</th><th>Status</th><th className="noprint"></th></tr></thead>
+                <tbody>
+                  {posts.map((r) => (
+                    <tr key={r.id}>
+                      <td><b>{r.title}</b></td>
+                      <td>{catLabel(r.category)}</td>
+                      <td>{r.deadline || "\u2014"}</td>
+                      <td>{r.seats ?? "\u2014"}</td>
+                      <td style={{ fontWeight: 700 }}>{r.registrations}</td>
+                      <td>
+                        <button type="button" className={"tag tag-" + (r.status === "OPEN" ? "NEW" : "RESOLVED")} style={{ cursor: "pointer" }} onClick={() => closeReopen(r.id, r.status === "OPEN" ? "close" : "reopen")} title="Tap to open or close registration">
+                          {r.status}
+                        </button>
+                      </td>
+                      <td className="noprint" style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                        <button type="button" className="btn btn-sm btn-ghost" onClick={() => openRegistrants(r.id, r.title)}>{regFor && regFor.id === r.id ? "Hide list" : "Sign-ups"}</button>
+                        {" "}
+                        <button type="button" className="btn btn-danger" style={{ padding: "3px 10px", fontSize: 12 }} onClick={() => delPost(r.id)}>Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {regFor && (
+                <div style={{ marginTop: 12, borderTop: "1px solid #ccd8ea", paddingTop: 10 }}>
+                  <h3>Sign-ups: {regFor.title}</h3>
+                  {regs.length === 0 ? (
+                    <p className="sub">No sign-ups yet - share the main website link.</p>
+                  ) : (
+                    <table>
+                      <thead><tr><th>When</th><th>Name</th><th>Phone</th><th>Area</th><th>Note</th></tr></thead>
+                      <tbody>
+                        {regs.map((r) => (
+                          <tr key={r.id}>
+                            <td>{new Date(r.createdAt).toLocaleString("en-GB")}</td>
+                            <td>{r.name}</td>
+                            <td>{r.phone || "\u2014"}</td>
+                            <td>{r.area || "\u2014"}</td>
+                            <td>{r.note || "\u2014"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
               )}
             </div>
           )}
+          {posts.length === 0 && <p className="sub" style={{ marginTop: 10 }}>Nothing published yet. Publish above for youth to sign up from their phones.</p>}
         </div>
 
-        <div className="card">
+        {/* ============ (2+3) KPI REGISTER ============ */}
+        <div className="card" style={{ marginTop: 12 }}>
           <h2>Programme KPI register — interventions</h2>
-          <p className="sub">Every programme the desk runs lands here with its numbers (target vs youth reached) and feeds the KPI table in the Management report pack.</p>
+          <p className="sub">Log a programme after it happens (targeted vs youth actually reached, optionally the amount committed). These numbers build the KPI table in the Management report PDF.</p>
           <div className="filters" style={{ gap: 14, marginTop: 10 }}>
             <div className="tile" style={{ padding: "10px 16px" }}><div style={{ fontSize: 12, color: "#5b6b86" }}>Programmes</div><div style={{ fontSize: 20, fontWeight: 800, color: "#1c3f6e" }}>{summary.items}</div></div>
-            <div className="tile" style={{ padding: "10px 16px" }}><div style={{ fontSize: 12, color: "#5b6b86" }}>Target (planned)</div><div style={{ fontSize: 20, fontWeight: 800, color: "#1c3f6e" }}>{summary.target}</div></div>
+            <div className="tile" style={{ padding: "10px 16px" }}><div style={{ fontSize: 12, color: "#5b6b86" }}>Target</div><div style={{ fontSize: 20, fontWeight: 800, color: "#1c3f6e" }}>{summary.target}</div></div>
             <div className="tile" style={{ padding: "10px 16px" }}><div style={{ fontSize: 12, color: "#5b6b86" }}>Youth reached</div><div style={{ fontSize: 20, fontWeight: 800, color: "#0d6b3a" }}>{summary.reached}</div></div>
             <div className="tile" style={{ padding: "10px 16px" }}><div style={{ fontSize: 12, color: "#5b6b86" }}>Coverage</div><div style={{ fontSize: 20, fontWeight: 800, color: "#1c3f6e" }}>{pct}%</div></div>
           </div>
           <div className="row" style={{ marginTop: 12 }}>
-            <button className="btn btn-primary noprint" onClick={() => setShowForm(!showForm)}>{showForm ? "Close the form" : "+ Log a programme"}</button>
-            <button className="btn btn-primary noprint" style={{ marginLeft: 10 }} onClick={() => window.print()}>Download PDF</button>
+            <button className="btn btn-primary" style={{ minHeight: 40 }} onClick={() => setShowForm(!showForm)}>{showForm ? "Cancel" : "+ Log an intervention"}</button>
+            <button className="btn btn-primary" style={{ marginLeft: 10, minHeight: 40 }} onClick={() => window.print()}>Download PDF</button>
           </div>
-          {err && <div className="alert-err">{err}</div>}
-          {msg && <div className="alert-ok">{msg}</div>}
+
+          {showForm && (
+            <form onSubmit={submit}>
+              <div className="filters" style={{ flexWrap: "wrap", rowGap: 8, marginTop: 8 }}>
+                <input type="date" required value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} style={{ paddingRight: 8 }} />
+                <input required placeholder="Leading department (e.g. Social Welfare)" value={f.department} onChange={(e) => setF({ ...f, department: e.target.value })} style={{ minWidth: 240 }} />
+                <input required placeholder="Programme title" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} style={{ minWidth: 260 }} />
+                <select value={f.type} onChange={(e) => { setF({ ...f, type: e.target.value }); if (e.target.value !== "OTHER") setCustomType(""); }}>
+                  {TYPES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                </select>
+                {f.type === "OTHER" && (
+                  <input required autoFocus placeholder="Type the kind of programme" value={customType} onChange={(e) => setCustomType(e.target.value)} style={{ width: 250, textTransform: "uppercase" }} />
+                )}
+                <input type="number" min="0" placeholder="Target (planned youth)" value={f.target} onChange={(e) => setF({ ...f, target: e.target.value })} style={{ width: 180 }} />
+                <input type="number" min="0" placeholder="Youth reached" value={f.reached} onChange={(e) => setF({ ...f, reached: e.target.value })} style={{ width: 180 }} />
+                <input type="number" min="0" step="0.01" placeholder="Amount committed (GHS, optional)" value={f.budget} onChange={(e) => setF({ ...f, budget: e.target.value })} style={{ width: 210 }} />
+                <textarea placeholder="Notes (optional)" value={f.note} onChange={(e) => setF({ ...f, note: e.target.value })} style={{ width: "100%", minHeight: 50 }} />
+              </div>
+              <div className="row" style={{ marginTop: 10 }}>
+                <button className="btn btn-primary" disabled={busy}>{busy ? "Saving…" : "Save to the KPI register"}</button>
+              </div>
+            </form>
+          )}
         </div>
-
-
-
-          </div>
-        {showForm && (
-          <form className="card noprint" onSubmit={submit}>
-            <h3>Log a programme</h3>
-            <div className="filters" style={{ flexWrap: "wrap", rowGap: 8, marginTop: 8 }}>
-              <input type="date" required value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} style={{ paddingRight: 8 }} />
-              <input required placeholder="Leading department (e.g. Social Welfare)" value={f.department} onChange={(e) => setF({ ...f, department: e.target.value })} style={{ minWidth: 240 }} />
-              <input required placeholder="Programme title" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} style={{ minWidth: 260 }} />
-              <select value={f.type} onChange={(e) => { setF({ ...f, type: e.target.value }); if (e.target.value !== "OTHER") setCustomType(""); }}>
-                {TYPES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
-              {f.type === "OTHER" && (
-                <input required autoFocus placeholder="Type the kind of programme (e.g: SATELLITE WORKSHOP)" value={customType} onChange={(e) => setCustomType(e.target.value)} style={{ width: 280, textTransform: "uppercase" }} />
-              )}
-              <input type="number" min="0" placeholder="Target (planned youth)" value={f.target} onChange={(e) => setF({ ...f, target: e.target.value })} style={{ width: 180 }} />
-              <input type="number" min="0" placeholder="Youth reached" value={f.reached} onChange={(e) => setF({ ...f, reached: e.target.value })} style={{ width: 180 }} />
-              <input type="number" min="0" step="0.01" placeholder="Amount committed (GHS, optional)" value={f.budget} onChange={(e) => setF({ ...f, budget: e.target.value })} style={{ width: 220 }} />
-              <textarea placeholder="Notes (optional)" value={f.note} onChange={(e) => setF({ ...f, note: e.target.value })} style={{ width: "100%", minHeight: 60 }} />
-            </div>
-            <div className="row" style={{ marginTop: 10 }}>
-              <button className="btn btn-primary" disabled={busy}>{busy ? "Saving…" : "Save programme"}</button>
-            </div>
-          </form>
-        )}
 
         {byDept.length > 0 && (
           <div className="card">
@@ -263,7 +286,7 @@ export default function Programmes() {
                 {byDept.map((d) => (
                   <tr key={d.department}>
                     <td>{d.department}</td><td>{d.items}</td><td>{d.target}</td><td>{d.reached}</td>
-                    <td>{d.target > 0 ? Math.round((d.reached / d.target) * 100) + "%" : "—"}</td>
+                    <td>{d.target > 0 ? Math.round((d.reached / d.target) * 100) + "%" : "\u2014"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -271,23 +294,10 @@ export default function Programmes() {
           </div>
         )}
 
-
-        {rows.some((r) => r.note) && (
-          <div className="card print-only">
-            <h3 style={{ fontSize: 16 }}>Programme descriptions</h3>
-            {rows.filter((r) => r.note).map((r) => (
-              <div key={"pd-" + r.id} style={{ padding: "10px 0", borderBottom: "1px solid #e3e9f2" }}>
-                <div style={{ fontWeight: 700, fontSize: 13, color: "#122447" }}>{r.title} — {r.department}</div>
-                <div style={{ whiteSpace: "pre-wrap", fontSize: 13, color: "#33383f", lineHeight: 1.6 }}>{r.note}</div>
-              </div>
-            ))}
-          </div>
-        )}
-
         <div className="card">
-          <h3>Programme register</h3>
+          <h3>Programme KPI register</h3>
           {rows.length === 0 ? (
-            <p className="sub">No programmes logged yet.</p>
+            <p className="sub">No interventions logged yet. Use &quot;+ Log an intervention&quot; above after a programme happens.</p>
           ) : (
             <table>
               <thead><tr><th>Date</th><th>Department</th><th>Programme</th><th>Type</th><th>Target</th><th>Reached</th><th className="noprint"></th></tr></thead>
@@ -306,6 +316,18 @@ export default function Programmes() {
             </table>
           )}
         </div>
+
+        {rows.some((r) => r.note) && (
+          <div className="card print-only">
+            <h3 style={{ fontSize: 16 }}>Programme descriptions</h3>
+            {rows.filter((r) => r.note).map((r) => (
+              <div key={"pd-" + r.id} style={{ padding: "10px 0", borderBottom: "1px solid #e3e9f2" }}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: "#122447" }}>{r.title} — {r.department}</div>
+                <div style={{ whiteSpace: "pre-wrap", fontSize: 13, color: "#33383f", lineHeight: 1.6 }}>{r.note}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );
