@@ -19,6 +19,17 @@ export async function GET(req: NextRequest) {
   if (c.trackKey && c.trackKey !== key) {
     return NextResponse.json({ error: "We could not find that case. Use the case number AND the tracking key from your SMS or slip." }, { status: 404 });
   }
+  // Stage history for the "where the case has gotten to" view. The SMS ledger
+  // already records each officer stage-change timestamp; it is public-safe
+  // (stage names only - no officer notes or personal details).
+  const [inProgLog, resolvedLog] = await Promise.all([
+    prisma.smsLog.findFirst({ where: { caseNumber: c.caseNumber, kind: "STATUS_IN_PROGRESS", status: "SENT" }, orderBy: { createdAt: "desc" } }),
+    prisma.smsLog.findFirst({ where: { caseNumber: c.caseNumber, kind: "STATUS_RESOLVED", status: "SENT" }, orderBy: { createdAt: "desc" } }),
+  ]);
   const { trackKey: _tk, ...safe } = c; // never ship the key back to the browser
-  return NextResponse.json(safe);
+  return NextResponse.json({
+    ...safe,
+    inProgressAt: inProgLog?.createdAt || null,
+    resolvedAt: resolvedLog?.createdAt || null,
+  });
 }

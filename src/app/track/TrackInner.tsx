@@ -33,6 +33,35 @@ export default function TrackInner() {
   }
 
   useEffect(() => { const q = sp.get("c"); if (q) go(q, sp.get("k") || ""); /* eslint-disable-next-line */ }, []);
+  // Live update: while a case is open, its stage view refreshes every 10 s
+  // (silent - the checker button only shows its busy state on manual checks).
+  useEffect(() => {
+    if (!c) return;
+    const t = setInterval(() => {
+      fetch("/api/public/track?caseNumber=" + encodeURIComponent(c.caseNumber) + "&key=" + encodeURIComponent(key))
+        .then(async (r) => (r.ok ? r.json() : null))
+        .then((j) => j && setC(j))
+        .catch(() => {});
+    }, 10000);
+    return () => clearInterval(t);
+  }, [c, key]);
+
+  // Stage timeline for the client: where the case has gotten to.
+  const fmtS = (v: string | null) => (v ? new Date(v).toLocaleString() : "");
+  const statusNow = c ? c.status : "";
+  const inProg = c && (c.inProgressAt || statusNow === "IN_PROGRESS" || statusNow === "RESOLVED" || statusNow === "FORWARDED");
+  const resolved = c && (c.resolvedAt || statusNow === "RESOLVED");
+  const forwarded = c && statusNow === "FORWARDED";
+  const steps = c ? [
+    { label: "Received", done: true, current: statusNow === "NEW", date: fmtS(c.createdAt) },
+    ...(forwarded && !inProg
+      ? [{ label: "Forwarded", done: true, current: true, date: fmtS(c.updatedAt) }]
+      : [
+          { label: "In progress", done: !!inProg, current: statusNow === "IN_PROGRESS", date: fmtS(c.inProgressAt || (inProg ? c.updatedAt : null)) },
+          ...(forwarded ? [{ label: "Forwarded", done: true, current: true, date: fmtS(c.updatedAt) }] : []),
+        ]),
+    { label: "Resolved", done: !!resolved, current: statusNow === "RESOLVED", date: fmtS(c.resolvedAt) },
+  ] : [];
 
   return (
     <><TopBar on="track" /><main className="main" style={{ maxWidth: 560 }}>
@@ -54,12 +83,35 @@ export default function TrackInner() {
             <span className="cn">{c.caseNumber}</span>
             <span className={"tag tag-" + c.status}>{c.status.replace("_", " ")}</span>
           </div>
-          <div className="kv">
+          {/* Where the case has gotten to: stage timeline (updates every 10 s) */}
+          <div style={{ margin: "16px 0 4px", position: "relative" }}>
+            <div style={{ position: "absolute", top: 14, left: 16, right: 16, height: 2, background: "#dde5f2" }} />
+            <div style={{ position: "relative", display: "flex", justifyContent: "space-between" }}>
+              {steps.map((st) => (
+                <div key={st.label} style={{ textAlign: "center", flex: 1 }}>
+                  <div style={{
+                    width: 30, height: 30, borderRadius: 999, margin: "0 auto 6px",
+                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13.5, fontWeight: 700,
+                    background: st.done ? "#1f7a48" : st.current ? "#1C3F6E" : "#eef1f8",
+                    color: st.done || st.current ? "#fff" : "#8fa2bd",
+                    boxShadow: st.current ? "0 0 0 4px rgba(28,63,110,.18)" : "none",
+                  }}>{st.done ? "✓" : ""}</div>
+                  <div style={{ fontSize: 11.5, fontWeight: st.done || st.current ? 700 : 500, color: st.done || st.current ? "#12294a" : "#8fa2bd" }}>{st.label}</div>
+                  <div style={{ fontSize: 10.5, color: "#8fa2bd", marginTop: 2 }}>{st.date}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="kv" style={{ marginTop: 14 }}>
             <dt>What it is about</dt><dd>{c.type}</dd>
             <dt>Area</dt><dd>{c.area || "—"}</dd>
             <dt>Received</dt><dd>{new Date(c.createdAt).toLocaleDateString()}</dd>
+            <dt>Last update</dt><dd>{new Date(c.updatedAt).toLocaleString()}</dd>
             <dt>What it means</dt><dd>{LABEL[c.status] || c.status}</dd>
           </div>
+          <p style={{ fontSize: 12, color: "#8fa2bd", marginTop: 10 }}>
+            This view refreshes itself every 10 seconds — the stage moves as the officer works. Nothing else shares this page: only your number and key.
+          </p>
         </div>
       )}
     </main>

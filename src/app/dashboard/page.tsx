@@ -22,6 +22,7 @@ const STATUSES = ["NEW", "IN_PROGRESS", "RESOLVED", "FORWARDED"] as const;
 
 export default function Dashboard() {
   const [cases, setCases] = useState<Case[]>([]);
+  const [notice, setNotice] = useState<string>(""); // NEW-case notification (officer)
   const [counts, setCounts] = useState<any>({ all: 0, NEW: 0, IN_PROGRESS: 0, RESOLVED: 0, FORWARDED: 0 });
   const [filter, setFilter] = useState<string>("NEW");
   const [q, setQ] = useState("");
@@ -79,13 +80,27 @@ export default function Dashboard() {
 
   // Live queue: re-poll every 10 s so new cases appear without a manual reload,
   // plus an instant refresh the moment the officer returns to this tab.
+  const noticedCount = useRef<number | null>(null); // all-time count seen on the last heartbeat
   const reloadRef = useRef<() => void>(() => {});
   reloadRef.current = () => load(filter, q);
   useEffect(() => {
+    const beat = async () => {
+      try {
+        const j = await (await fetch("/api/admin/newcase-check")).json();
+        if (typeof j.count !== "number") return;
+        if (noticedCount.current !== null && j.count > noticedCount.current && j.latest) {
+          setNotice(`New case received: ${j.latest.caseNumber} - ${j.latest.reporterName || "Anonymous"}${j.latest.area ? ` (${j.latest.area})` : ""}`);
+          reloadRef.current(); // bring the fresh case straight into whatever view is open
+        }
+        noticedCount.current = j.count;
+      } catch { /* transient */ }
+    };
+    beat();
+    const hb = setInterval(beat, 10000);
     const t = setInterval(() => reloadRef.current(), 10000);
     const onVis = () => { if (document.visibilityState === "visible") reloadRef.current(); };
     document.addEventListener("visibilitychange", onVis);
-    return () => { clearInterval(t); document.removeEventListener("visibilitychange", onVis); };
+    return () => { clearInterval(t); clearInterval(hb); document.removeEventListener("visibilitychange", onVis); };
   }, []);
 
   async function patch(id: number, body: object) {
@@ -104,6 +119,12 @@ export default function Dashboard() {
     <main>
       <TopBar mode="office" />
       <div className="main">
+        {notice && (
+          <div className="newcase-toast" role="status">
+            <span className="newcase-dot" />
+            <span style={{ flex: 1 }}>{notice} <button className="btn btn-sm btn-ghost" style={{ marginLeft: 10 }} onClick={() => setNotice("")}>Dismiss</button></span>
+          </div>
+        )}
         <div className="card">
           <h2 style={{ fontSize: 17 }}>Case queue</h2>
           <p className="sub" style={{ margin: 0 }}>Signed in as {me}. Pick a case, act on it, keep the note. Use the menu to move between Cases, Youth and Reports.</p>
