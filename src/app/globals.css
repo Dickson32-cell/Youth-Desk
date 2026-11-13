@@ -186,3 +186,34 @@ tr.rownew > td { animation: rownewbg 2.5s ease; }
 [data-theme=dark] .newssection article > div { background: #12203a !important; border-color: #22365c !important; color: #d5e1f2 !important; }
 [data-theme=dark] .newssection h3 { color: #e8eef8 !important; }
 [data-theme=dark] .newssection p { color: #b9c9de !important; }
+
+/* ===== Professional print typography (ALL printable PDFs: slip, referral, evidence, report pack, programmes KPI) ===== */
+@page { size: A4; margin: 17mm 15mm 19mm; }
+@media print {
+  body { font-size: 10.5pt; line-height: 1.55; color: #1a2233; }
+  h1 { font-size: 15pt !important; line-height: 1.25; margin: 0 0 10px !important; }
+  h2 { font-size: 13.5pt !important; line-height: 1.3; margin: 0 0 8px !important; color: #12294a; break-after: avoid; }
+  h3 { font-size: 11.5pt !important; margin: 0 0 6px !important; break-after: avoid; }
+  p, li { orphans: 2; widows: 2; }
+  .wrap, .main { max-width: none; padding: 0; margin: 0; }
+  .card { background: #fff; border: 1px solid #d5dde9; border-radius: 6px; box-shadow: none; padding: 13px 16px; margin: 0 0 12px; break-inside: avoid; }
+  .sub { font-size: 9.5pt; color: #5a6b85; line-height: 1.5; }
+  /* tables: clean ruled style */
+  table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+  .card table th, .tbl th { text-align: left; font-size: 8.5pt; letter-spacing: .07em; text-transform: uppercase; color: #52637d; border-bottom: 1.5px solid #b9c6d9; padding: 6px 8px; font-weight: 700; }
+  .card table td, .tbl td { padding: 6px 8px; border-bottom: 1px solid #e4eaf2; vertical-align: top; font-variant-numeric: tabular-nums; }
+  .card table tr, .tbl tr { break-inside: avoid; }
+  /* officer-note blocks: quiet panel, not a plain box */
+  .note { padding: 7px 10px !important; background: #f4f7fc !important; border-radius: 5px; font-size: 9.5pt; line-height: 1.5; }
+  .kv dt { font-size: 8.5pt; letter-spacing: .06em; text-transform: uppercase; color: #52637d; }
+  .kv dd { margin: 0 0 6px; font-size: 10pt; }
+  .tag { font-size: 8.5pt !important; padding: 2px 8px !important; }
+  .filters { gap: 12px; }
+  /* interactive controls never print */
+  .btn { display: none !important; }
+  input, select, textarea { border-color: #d0d8e4; }
+  a { text-decoration: none; color: inherit; }
+  footer { font-size: 9pt; color: #5a6b85; }
+  /* no stray page-break orphans */
+  tr, .note, .case-detail { break-inside: avoid; }
+}
