@@ -11,8 +11,7 @@ export async function GET(req: NextRequest) {
   if (!secret || auth !== `Bearer ${secret}`) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const t0 = new Date();
-  const t1 = new Date(t0.getTime() + 36 * 3600 * 1000); // send window: tomorrow-ish (30h-36h)
-  const t0s = new Date(t0.getTime() + 30 * 3600 * 1000);
+  const t0d = new Date(Date.UTC(t0.getUTCFullYear(), t0.getUTCMonth(), t0.getUTCDate()));
   const due = await prisma.program.findMany({
     where: { status: "OPEN", meetingDate: { not: null } },
     select: { id: true, title: true, venue: true, meetingDate: true },
@@ -20,10 +19,14 @@ export async function GET(req: NextRequest) {
 
   const results: { programme: string; meeting: string; sent: number }[] = [];
   for (const prog of due) {
-    // parse the officer-typed meetingDate (accepts e.g. "20 Nov 2026")
+    // day-before rule: the meeting is exactly 1 calendar day from the run
+    // (officer date strings like "14 Nov 2026" are date-only, so calendar-day
+    // math is the right tool - hour windows drift badly around midnight runs)
     const md = new Date(prog.meetingDate || "");
     if (isNaN(md.getTime())) continue;
-    if (md < t0s || md > t1) continue; // only programmes meeting TOMORROW
+    const m0 = new Date(Date.UTC(md.getUTCFullYear(), md.getUTCMonth(), md.getUTCDate()));
+    const diff = Math.round((m0.getTime() - t0d.getTime()) / 86400000);
+    if (diff !== 1) continue;
 
     const targets = await prisma.registration.findMany({
       where: { programId: prog.id, reminderSentAt: null, phone: { not: null } },
