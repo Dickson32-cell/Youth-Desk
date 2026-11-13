@@ -10,7 +10,7 @@ import { unstable_cache } from "next/cache";
 const getMedia = unstable_cache(
   async (id: number) => prisma.siteImage.findUnique({ where: { id }, select: { mimeType: true, data: true } }),
   ["site-media"],
-  { revalidate: 3600 },
+  { revalidate: 3600, tags: ["site-media"] },
 );
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

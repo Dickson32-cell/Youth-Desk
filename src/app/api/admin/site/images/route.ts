@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifySession, SESSION_COOKIE } from "@/lib/auth";
 import { isAllowedType } from "@/lib/attachments";
+import { revalidateTag } from "next/cache";
 
 // Officer-managed public images. slot: "hero" (slideshow) | "about" | "logo"
 // (brand logo shown on the console + the public site; a new logo replaces the old).
@@ -36,6 +37,7 @@ export async function POST(req: NextRequest) {
       if (slot === "logo") {
         // A logo replaces any previous one - there is always exactly one.
         await prisma.siteImage.deleteMany({ where: { slot: "logo" } });
+        revalidateTag("site-media");
       }
       const sort = await prisma.siteImage.count({ where: { slot } });
       const row = await prisma.siteImage.create({
@@ -55,5 +57,6 @@ export async function DELETE(req: NextRequest) {
   const id = Number(req.nextUrl.searchParams.get("id")) || 0;
   const gone = await prisma.siteImage.deleteMany({ where: { id } });
   if (gone.count === 0) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  revalidateTag("site-media");
   return NextResponse.json({ ok: true });
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifySession, SESSION_COOKIE } from "@/lib/auth";
 import { isAllowedType } from "@/lib/attachments";
+import { revalidateTag } from "next/cache";
 
 // Municipal news: officer-managed. Post with up to 3 images (multipart), edit
 // (multipart or JSON), delete. Shown on the main page: latest-3 cards + ticker.
@@ -86,7 +87,11 @@ export async function PATCH(req: NextRequest) {
   if (t) data.title = t;
   if (b) data.body = b;
   await prisma.news.update({ where: { id }, data });
-  if (removeIds.length) await prisma.newsImage.deleteMany({ where: { id: { in: removeIds }, newsId: id } });
+  if (removeIds.length) {
+    await prisma.newsImage.deleteMany({ where: { id: { in: removeIds }, newsId: id } });
+    revalidateTag("news-media");
+    revalidateTag("landing-news");
+  }
   const warning = "";
   let sort = await prisma.newsImage.count({ where: { newsId: id } });
   for (const f of addFiles.filter((v) => v.size > 0).slice(0, 3)) {
@@ -111,5 +116,7 @@ export async function DELETE(req: NextRequest) {
   const id = Number(req.nextUrl.searchParams.get("id")) || 0;
   const gone = await prisma.news.deleteMany({ where: { id } });
   if (gone.count === 0) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  revalidateTag("news-media");
+  revalidateTag("landing-news");
   return NextResponse.json({ ok: true });
 }

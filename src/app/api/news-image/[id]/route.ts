@@ -8,7 +8,7 @@ import { unstable_cache } from "next/cache";
 const getImg = unstable_cache(
   async (id: number) => prisma.newsImage.findUnique({ where: { id }, select: { mimeType: true, data: true } }),
   ["news-media"],
-  { revalidate: 3600 },
+  { revalidate: 3600, tags: ["news-media"] },
 );
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

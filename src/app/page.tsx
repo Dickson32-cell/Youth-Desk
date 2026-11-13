@@ -25,7 +25,7 @@ export default async function Home() {
         include: { images: { select: { id: true, mimeType: true }, orderBy: { sort: "asc" } } },
       }),
     ["landing-news"],
-    { revalidate: 300 },
+    { revalidate: 60, tags: ["landing-news"] },
   );
   const [imgs, words, news] = await Promise.all([
     getHeroIds().catch(() => [] as { id: number }[]),
