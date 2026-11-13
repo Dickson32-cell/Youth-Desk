@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 const PUBLIC_TABS = [
   { href: "/", label: "Home", exact: true },
+  { href: "/news", label: "News" },
   { href: "/report", label: "Report" },
   { href: "/track", label: "Track" },
   { href: "/programs", label: "About" },
