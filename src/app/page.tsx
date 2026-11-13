@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/db";
-import { unstable_cache } from "next/cache";
 import TopBar from "@/components/Shell";
 import Slideshow from "@/components/Slideshow";
 
@@ -7,40 +6,16 @@ import Slideshow from "@/components/Slideshow";
 export const instant = false;
 
 export default async function Home() {
-  const getHeroIds = unstable_cache(
-    async () => prisma.siteImage.findMany({ where: { slot: "hero" }, orderBy: { sort: "asc" }, select: { id: true } }),
-    ["hero-ids"],
-    { revalidate: 300 },
-  );
-  const getWords = unstable_cache(
-    async () => prisma.siteText.findMany({ select: { key: true, value: true } }),
-    ["site-words"],
-    { revalidate: 300 },
-  );
-  const getNews = unstable_cache(
-    async () => {
-      const rows = await prisma.news.findMany({
-        orderBy: { id: "desc" },
-        take: 6,
-        include: { images: { select: { id: true, mimeType: true }, orderBy: { sort: "asc" } } },
-      });
-      // plain serialisable shapes only (the data cache must not fail on Prisma types)
-      return rows.map((n) => ({
-        id: n.id,
-        title: n.title,
-        body: n.body,
-        created: n.createdAt.toISOString(),
-        images: n.images.map((im) => ({ id: im.id, mime: im.mimeType })),
-      }));
-    },
-    ["landing-news"],
-    { revalidate: 60, tags: ["landing-news"] },
-  );
-  const [imgs, words, news] = await Promise.all([
-    getHeroIds().catch(() => [] as { id: number }[]),
-    getWords().catch(() => [] as { key: string; value: string }[]),
-    getNews().catch(() => [] as { id: number; title: string; body: string; created: string; images: { id: number; mime: string }[] }[]),
+  const [imgs, words, newsRaw] = await Promise.all([
+    prisma.siteImage.findMany({ where: { slot: "hero" }, orderBy: { sort: "asc" }, select: { id: true } }).catch(() => [] as { id: number }[]),
+    prisma.siteText.findMany({ select: { key: true, value: true } }).catch(() => [] as { key: string; value: string }[]),
+    prisma.news.findMany({
+      orderBy: { id: "desc" },
+      take: 6,
+      include: { images: { select: { id: true, mimeType: true }, orderBy: { sort: "asc" } } },
+    }).catch(() => [] as { id: number; title: string; body: string; createdAt: Date; images: { id: number; mimeType: string }[] }[]),
   ]);
+  const news = newsRaw.map((n) => ({ id: n.id, title: n.title, body: n.body, created: n.createdAt.toISOString(), images: n.images.map((im) => ({ id: im.id, mime: im.mimeType })) }));
   const w = Object.fromEntries(words.map((r) => [r.key, r.value]));
   const heroTitle = w.hero_title || "Youth Desk NJSMA";
   const heroSub =
