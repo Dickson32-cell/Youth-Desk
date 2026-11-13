@@ -44,7 +44,10 @@ export default function ProgrammesOpen() {
 
   const catLabel = (c: string) => (["TRAINING", "APPRENTICESHIP", "INTERNSHIP", "MENTORSHIP", "GRANT", "MARKET", "OTHER"].includes(c) ? c[0] + c.slice(1).toLowerCase() : c[0] + c.slice(1).toLowerCase());
 
-  if (rows !== null && rows.length === 0) return null;
+  // Hidden while loading AND when nothing is open: the heading/intro never
+  // flashes on a refresh, and it vanishes the moment the officer closes a
+  // programme.
+  if (rows === null || rows.length === 0) return null;
 
   return (
     <section className="main" id="programmes-open" style={{ marginTop: 46 }}>
