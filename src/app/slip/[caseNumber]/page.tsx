@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
+import { verifySession, SESSION_COOKIE } from "@/lib/auth";
 import PrintBtn from "@/components/PrintBtn";
 
 // Printable live case data: render per request (cacheComponents-compatible).
@@ -7,6 +9,15 @@ export const instant = false;
 
 export default async function Slip({ params }: { params: Promise<{ caseNumber: string }> }) {
   const { caseNumber } = await params;
+  let officerName = "";
+  try {
+    const ck = await cookies();
+    const sj = verifySession(ck.get(SESSION_COOKIE)?.value);
+    if (sj) {
+      const o = await prisma.officer.findUnique({ where: { username: sj.u }, select: { fullName: true } });
+      officerName = o?.fullName || "";
+    }
+  } catch { /* anonymous open still works */ }
   const c = await prisma.case.findUnique({
     where: { caseNumber: caseNumber.toUpperCase() },
     include: { notes: { orderBy: { id: "asc" } } },
@@ -21,7 +32,7 @@ export default async function Slip({ params }: { params: Promise<{ caseNumber: s
             <div style={{ fontSize: 11, letterSpacing: 1, color: "#5b6b86" }}>CASE SLIP — KEEP THIS NUMBER</div>
           </div>
           <div style={{ fontSize: 11, color: "#5b6b86", lineHeight: 1.6, textAlign: "right" }}>
-            NJSMA - Municipal Assembly<br />Youth Desk Office<br />{new Date(c.createdAt).toLocaleString()}
+            NJSMA - Municipal Assembly<br />Youth Desk Office{officerName ? ` - ${officerName}` : ""}<br />{new Date(c.createdAt).toLocaleString()}
           </div>
         </div>
         <div style={{ textAlign: "center", margin: "14px 0 18px" }}>

@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
+import { verifySession, SESSION_COOKIE } from "@/lib/auth";
 import PrintBtn from "@/components/PrintBtn";
 
 // Printable referral form for the MCD or the responsible department (cacheComponents-compatible).
@@ -7,6 +9,16 @@ export const instant = false;
 
 export default async function ReferralForm({ params }: { params: Promise<{ caseNumber: string }> }) {
   const { caseNumber } = await params;
+  // The officer's full name (saved in Account) stamps the FROM line and signatures.
+  let officerName = "";
+  try {
+    const ck = await cookies();
+    const sj = verifySession(ck.get(SESSION_COOKIE)?.value);
+    if (sj) {
+      const o = await prisma.officer.findUnique({ where: { username: sj.u }, select: { fullName: true } });
+      officerName = o?.fullName || "";
+    }
+  } catch { /* anonymous open still works */ }
   const c = await prisma.case.findUnique({
     where: { caseNumber: caseNumber.toUpperCase() },
     include: {
@@ -39,7 +51,7 @@ export default async function ReferralForm({ params }: { params: Promise<{ caseN
             <strong>TO:</strong> The{" "}
             <input className="ref-input" type="text" defaultValue={to} placeholder="type the department / office here"
               style={{ fontWeight: 800, border: "none", borderBottom: "1px dashed #8ba0bd", font: "inherit", fontSize: 13, width: "auto", minWidth: 260, background: "transparent", padding: "0 2px" }} /><br />
-            <strong>FROM:</strong> The Youth Desk Officer, NJSMA Youth Desk<br />
+            <strong>FROM:</strong> {officerName ? <>The Youth Desk Officer (<b>{officerName}</b>), NJSMA Youth Desk</> : "The Youth Desk Officer, NJSMA Youth Desk"}<br />
             <strong>SUBJECT:</strong> Referral of case {c.caseNumber} for investigation and resolution
           </div>
         </div>

@@ -43,7 +43,7 @@ export default function ReportPack() {
       .then((j) => (j ? setCases(j.cases || []) : null));
     fetch("/api/admin/auth")
       .then(async (r) => (r.ok ? r.json() : null))
-      .then((j) => (j ? setPreparedBy(j.username || "") : null));
+      .then((j) => (j ? setPreparedBy(j.fullName || j.username || "") : null));
   }, []);
 
   if (err) return <main className="main"><div className="alert-err">{err}</div></main>;
