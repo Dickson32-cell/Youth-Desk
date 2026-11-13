@@ -34,6 +34,7 @@ export default function Dashboard() {
   const [intakeErr, setIntakeErr] = useState("");
   const [intakeDone, setIntakeDone] = useState<{ caseNumber: string; trackKey?: string; smsQueued: boolean } | null>(null);
   const [intakeFiles, setIntakeFiles] = useState<File[]>([]);
+  const [intakeType, setIntakeType] = useState(""); // typed issue type wins over the Category dropdown
   const [intakeYouth, setIntakeYouth] = useState<{ id: number; serial: string; name: string } | null>(null);
   const onIntakeFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { prepareFilesForUpload } = await import("@/lib/imgPrepare");
@@ -151,7 +152,7 @@ export default function Dashboard() {
         <div className="card">
           <div className="filters">
             <input type="text" placeholder="Search name, number, area…" value={q} onChange={(e) => setQ(e.target.value)} style={{ flex: 1 }} />
-            <button className="btn btn-primary btn-sm noprint" onClick={() => { setIntakeDone(null); setIntakeErr(""); setIntakeForm({ name: "", phone: "", area: "", type: "EMPLOYMENT", description: "" }); setIntakeOpen(true); }}>+ New case</button>
+            <button className="btn btn-primary btn-sm noprint" onClick={() => { setIntakeDone(null); setIntakeErr(""); setIntakeForm({ name: "", phone: "", area: "", type: "EMPLOYMENT", description: "" }); setIntakeType(""); setIntakeOpen(true); }}>+ New case</button>
           </div>
           <table className="tbl casetbl">
             <thead>
@@ -285,7 +286,7 @@ export default function Dashboard() {
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", marginTop: 14 }}>
                   <a href={`/slip/${intakeDone.caseNumber}`} target="_blank" rel="noreferrer" className="btn btn-ghost">Print case slip</a>
                   <a href={`/forward/${intakeDone.caseNumber}`} target="_blank" rel="noreferrer" className="btn btn-ghost">Referral form (MCD)</a>
-                  <button className="btn btn-ghost" onClick={() => { setIntakeDone(null); setIntakeForm({ name: "", phone: "", area: "", type: "EMPLOYMENT", description: "" }); setIntakeYouth(null); }}>Log another</button>
+                  <button className="btn btn-ghost" onClick={() => { setIntakeDone(null); setIntakeForm({ name: "", phone: "", area: "", type: "EMPLOYMENT", description: "" }); setIntakeType(""); setIntakeYouth(null); }}>Log another</button>
                   <button className="btn btn-primary" onClick={() => { setIntakeOpen(false); load(filter, q); }}>Done</button>
                 </div>
               </div>
@@ -309,7 +310,7 @@ export default function Dashboard() {
                     fd.append("name", intakeForm.name);
                     fd.append("phone", intakeForm.phone);
                     fd.append("area", intakeForm.area);
-                    fd.append("type", intakeForm.type);
+                    fd.append("type", (intakeType.trim() || intakeForm.type).slice(0, 20));
                     fd.append("description", intakeForm.description);
                     if (intakeYouth) fd.append("youthId", String(intakeYouth.id));
                     intakeFiles.forEach((fl) => fd.append("files", fl));
@@ -339,6 +340,9 @@ export default function Dashboard() {
                         <option>EDUCATION</option>
                         <option>OTHER</option>
                       </select>
+                    </label>
+                    <label className="fld" style={{ marginTop: 8 }}><span className="cap">Not in the list? Type the issue type — it overrides the Category</span>
+                      <input value={intakeType} onChange={(e) => setIntakeType(e.target.value)} placeholder="e.g. Land dispute, Police harassment…" maxLength={40} autoComplete="off" />
                     </label>
                   </div>
                   <label className="fld"><span className="cap">The complaint / request, as told to you *</span>

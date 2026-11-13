@@ -16,6 +16,7 @@ const TYPES = [
 export default function Report() {
   const [f, setF] = useState({ name: "", phone: "", area: "", type: "EMPLOYMENT", description: "" });
   const [anon, setAnon] = useState(false);
+  const [customType, setCustomType] = useState(""); // if the client types their own issue type, it wins over the dropdown
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<string | null>(null);
@@ -39,7 +40,7 @@ export default function Report() {
       fd.append("name", anon ? "" : f.name);
       fd.append("phone", f.phone);
       fd.append("area", f.area);
-      fd.append("type", f.type);
+      fd.append("type", (customType.trim() || f.type).slice(0, 20));
       fd.append("description", f.description);
       files.forEach((fl) => fd.append("files", fl));
       const res = await fetch("/api/public/report", { method: "POST", body: fd });
@@ -116,6 +117,9 @@ export default function Report() {
             </select>
           </label>
         </div>
+        <label className="fld"><span className="cap">Not in the list? Type your issue type here — it overrides the dropdown</span>
+          <input type="text" value={customType} onChange={(e) => setCustomType(e.target.value)} placeholder="e.g. Land dispute, Police harassment, Electricity bill…" maxLength={40} />
+        </label>
         <label className="fld"><span className="cap">Describe your issue</span>
           <textarea rows={5} value={f.description} onChange={set("description")} placeholder="Tell the officer what happened and what you ask for…" required />
         </label>

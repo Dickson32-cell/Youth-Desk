@@ -116,6 +116,13 @@ export default function YouthRegister() {
                   <td>{y.skills || "—"}</td>
                   <td style={{ whiteSpace: "nowrap" }} onClick={(e) => e.stopPropagation()}>
                     <button className="btn btn-sm btn-ghost" onClick={() => takeComplaint({ id: y.id, serial: y.serial, name: y.name, phone: y.phone || "", area: y.area || "" })}>Take complaint</button>
+                    <button className="btn btn-sm btn-danger" style={{ marginLeft: 6 }} onClick={async () => {
+                      if (!window.confirm(`Delete ${y.serial} - ${y.name} from the walk-in register?`)) return;
+                      const res = await fetch(`/api/admin/cases/youth?id=${y.id}`, { method: "DELETE" });
+                      const j = await res.json().catch(() => ({}));
+                      if (res.ok) load(q);
+                      else window.alert(j.error || "Could not delete");
+                    }}>Delete</button>
                   </td>
                 </tr>
               ))}

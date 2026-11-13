@@ -21,6 +21,23 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ youth });
 }
 
+export async function DELETE(req: NextRequest) {
+  const s = verifySession(req.cookies.get(SESSION_COOKIE)?.value);
+  if (!s) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const id = Number(req.nextUrl.searchParams.get("id")) || 0;
+  const youth = await prisma.youth.findUnique({ where: { id }, select: { id: true, serial: true } });
+  if (!youth) return NextResponse.json({ error: "Not found (already deleted?)" }, { status: 404 });
+  const linked = await prisma.case.count({ where: { youthId: id } });
+  if (linked > 0) {
+    return NextResponse.json(
+      { error: `${youth.serial} has ${linked} linked case${linked === 1 ? "" : "s"}. Delete the case(s) from the case queue first — the record stays so the history is not lost.` },
+      { status: 409 },
+    );
+  }
+  await prisma.youth.delete({ where: { id } });
+  return NextResponse.json({ ok: true });
+}
+
 export async function POST(req: NextRequest) {
   const s = verifySession(req.cookies.get(SESSION_COOKIE)?.value);
   if (!s) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
