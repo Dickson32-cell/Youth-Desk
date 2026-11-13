@@ -18,19 +18,28 @@ export default async function Home() {
     { revalidate: 300 },
   );
   const getNews = unstable_cache(
-    async () =>
-      prisma.news.findMany({
+    async () => {
+      const rows = await prisma.news.findMany({
         orderBy: { id: "desc" },
         take: 6,
         include: { images: { select: { id: true, mimeType: true }, orderBy: { sort: "asc" } } },
-      }),
+      });
+      // plain serialisable shapes only (the data cache must not fail on Prisma types)
+      return rows.map((n) => ({
+        id: n.id,
+        title: n.title,
+        body: n.body,
+        created: n.createdAt.toISOString(),
+        images: n.images.map((im) => ({ id: im.id, mime: im.mimeType })),
+      }));
+    },
     ["landing-news"],
     { revalidate: 60, tags: ["landing-news"] },
   );
   const [imgs, words, news] = await Promise.all([
     getHeroIds().catch(() => [] as { id: number }[]),
     getWords().catch(() => [] as { key: string; value: string }[]),
-    getNews().catch(() => [] as { id: number; title: string; body: string; createdAt: Date; images: { id: number; mimeType: string }[] }[]),
+    getNews().catch(() => [] as { id: number; title: string; body: string; created: string; images: { id: number; mime: string }[] }[]),
   ]);
   const w = Object.fromEntries(words.map((r) => [r.key, r.value]));
   const heroTitle = w.hero_title || "Youth Desk NJSMA";
@@ -86,12 +95,12 @@ export default async function Home() {
           <div className="newsgrid">
             {news.slice(0, 3).map((n) => (
               <article key={n.id} style={{ margin: 0 }}>
-                {n.images[0] && String(n.images[0].mimeType).startsWith("image/") && (
+                {n.images[0] && String(n.images[0].mime).startsWith("image/") && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={`/api/news-image/${n.images[0].id}`} alt="" loading="lazy" style={{ width: "100%", height: 170, objectFit: "cover", borderRadius: "12px 12px 0 0", display: "block" }} />
                 )}
                 <div style={{ background: "#fff", border: "1px solid #e3e9f2", borderTop: n.images[0] ? "none" : undefined, borderRadius: n.images[0] ? "0 0 12px 12px" : 12, padding: "14px 16px" }}>
-                  <div style={{ fontSize: 11.5, color: "#8fa2bd", letterSpacing: 0.5 }}>{new Date(n.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</div>
+                  <div style={{ fontSize: 11.5, color: "#8fa2bd", letterSpacing: 0.5 }}>{new Date(n.created).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</div>
                   <h3 style={{ margin: "6px 0 6px", fontSize: 16, color: "#12294a" }}>{n.title}</h3>
                   <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.6, color: "#3c5170" }}>{n.body}</p>
                 </div>
