@@ -25,13 +25,13 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
   const tabs = office ? OFFICE_TABS : PUBLIC_TABS;
   const [me, setMe] = useState("");
   const [dark, setDark] = useState(false);
-  const [brand, setBrand] = useState({ main: "Youth Desk NJSMA", sub: "NJSMA MUNICIPAL ASSEMBLY" });
+  const [brand, setBrand] = useState({ main: "Youth Desk NJSMA", sub: "NEW JUABEN SOUTH MUNICIPAL ASSEMBLY" });
   const [logo, setLogo] = useState<string>("");
 
   // Brand words + logo come from the layout (officer-edited); read once after mount.
   useEffect(() => {
     const html = document.documentElement;
-    setBrand({ main: html.getAttribute("data-brand-main") || "Youth Desk NJSMA", sub: html.getAttribute("data-brand-sub") || "NJSMA MUNICIPAL ASSEMBLY" });
+    setBrand({ main: html.getAttribute("data-brand-main") || "Youth Desk NJSMA", sub: html.getAttribute("data-brand-sub") || "NEW JUABEN SOUTH MUNICIPAL ASSEMBLY" });
     setLogo(html.getAttribute("data-logo-url") || "");
   }, []);
 

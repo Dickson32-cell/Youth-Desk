@@ -37,7 +37,7 @@ export default async function Slip({ params }: { params: Promise<{ caseNumber: s
             </div>
           </div>
           <div style={{ fontSize: 11, color: "#5b6b86", lineHeight: 1.6, textAlign: "right" }}>
-            NJSMA - Municipal Assembly<br />Youth Desk Office{officerName ? ` - ${officerName}` : ""}<br />{new Date(c.createdAt).toLocaleString()}
+            New Juaben South Municipal Assembly<br />Youth Desk Office{officerName ? ` - ${officerName}` : ""}<br />{new Date(c.createdAt).toLocaleString()}
           </div>
         </div>
         <div style={{ textAlign: "center", margin: "14px 0 18px" }}>

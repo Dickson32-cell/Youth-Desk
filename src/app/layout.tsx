@@ -47,7 +47,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const primary = t?.primary || "#1C3F6E";
   const accent = t?.accent || "#B88721";
   const brandMain = map.brand_main || "Youth Desk NJSMA";
-  const brandSub = map.brand_sub || "NJSMA MUNICIPAL ASSEMBLY";
+  const brandSub = map.brand_sub || "NEW JUABEN SOUTH MUNICIPAL ASSEMBLY";
   return (
     <html lang="en" data-brand-main={brandMain} data-brand-sub={brandSub} data-logo-url={logo ? "/api/media/" + logo.id : undefined}>
       <head>

@@ -42,7 +42,7 @@ export default async function ReferralForm({ params }: { params: Promise<{ caseN
             </div>
           </div>
           <div style={{ fontSize: 11, color: "#5b6b86", lineHeight: 1.6, textAlign: "right" }}>
-            Municipal Assembly<br />Youth Desk Office<br />Prepared {new Date().toLocaleDateString()}
+            New Juaben South Municipal Assembly<br />Youth Desk Office<br />Prepared {new Date().toLocaleDateString()}
           </div>
         </div>
 
