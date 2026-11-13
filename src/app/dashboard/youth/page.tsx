@@ -26,6 +26,10 @@ export default function YouthRegister() {
   useEffect(() => { load(""); }, [load]); /* eslint-disable-line */
   useEffect(() => { const t = setTimeout(() => load(q), 250); return () => clearTimeout(t); }, [q]); /* eslint-disable-line */
 
+  function exportExcel() {
+    window.location.href = "/api/admin/youth-export";
+  }
+
   async function go(e: React.FormEvent) {
     e.preventDefault();
     setMsg(""); setErr("");
@@ -95,6 +99,7 @@ export default function YouthRegister() {
         <div className="card">
           <div className="filters">
             <input type="text" placeholder="Search name, serial, area…" value={q} onChange={(e) => setQ(e.target.value)} style={{ flex: 1 }} />
+            <button className="btn btn-sm btn-ghost" onClick={exportExcel}>Download Excel</button>
           </div>
           <div className="tblwrap">
           <table className="tbl">

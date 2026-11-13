@@ -115,6 +115,13 @@ model SiteTheme {
   accent  String // highlights (active tab underline, accents)
 }
 
+// Editable words of the public site (keyed lines; code holds the defaults).
+model SiteText {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
+}
+
 model SmsLog {
   id          Int      @id @default(autoincrement())
   kind        String   // CASE_CONFIRM
