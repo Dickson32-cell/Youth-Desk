@@ -89,8 +89,8 @@ export async function PATCH(req: NextRequest) {
   await prisma.news.update({ where: { id }, data });
   if (removeIds.length) {
     await prisma.newsImage.deleteMany({ where: { id: { in: removeIds }, newsId: id } });
-    revalidateTag("news-media");
-    revalidateTag("landing-news");
+    revalidateTag("news-media", "max");
+    revalidateTag("landing-news", "max");
   }
   const warning = "";
   let sort = await prisma.newsImage.count({ where: { newsId: id } });
@@ -116,7 +116,7 @@ export async function DELETE(req: NextRequest) {
   const id = Number(req.nextUrl.searchParams.get("id")) || 0;
   const gone = await prisma.news.deleteMany({ where: { id } });
   if (gone.count === 0) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  revalidateTag("news-media");
-  revalidateTag("landing-news");
+  revalidateTag("news-media", "max");
+  revalidateTag("landing-news", "max");
   return NextResponse.json({ ok: true });
 }

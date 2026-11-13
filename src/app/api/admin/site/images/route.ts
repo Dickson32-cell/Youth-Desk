@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       if (slot === "logo") {
         // A logo replaces any previous one - there is always exactly one.
         await prisma.siteImage.deleteMany({ where: { slot: "logo" } });
-        revalidateTag("site-media");
+        revalidateTag("site-media", "max");
       }
       const sort = await prisma.siteImage.count({ where: { slot } });
       const row = await prisma.siteImage.create({
@@ -57,6 +57,6 @@ export async function DELETE(req: NextRequest) {
   const id = Number(req.nextUrl.searchParams.get("id")) || 0;
   const gone = await prisma.siteImage.deleteMany({ where: { id } });
   if (gone.count === 0) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  revalidateTag("site-media");
+  revalidateTag("site-media", "max");
   return NextResponse.json({ ok: true });
 }
