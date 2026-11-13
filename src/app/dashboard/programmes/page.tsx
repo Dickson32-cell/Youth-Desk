@@ -220,7 +220,7 @@ export default function Programmes() {
             <div style={{ marginTop: 14 }}>
               <div className="tblwrap progtbl-wrap">
               <table className="tbl progtbl" style={{ minWidth: 680 }}>
-                <thead><tr><th>Programme</th><th>Type</th><th>Closing</th><th>Meeting</th><th>Sign-ups</th><th>Status</th><th className="noprint"></th></tr></thead>
+                <thead><tr><th>Programme</th><th>Type</th><th>Closing</th><th>Sign-ups</th><th>Meeting</th><th>Status</th><th className="noprint"></th></tr></thead>
                 <tbody>
                   {posts.map((r) => (
                     <tr key={r.id}>
