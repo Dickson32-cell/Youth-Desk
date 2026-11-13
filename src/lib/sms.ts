@@ -147,7 +147,7 @@ export async function sendProgramSms(programId: number, name: string, phone: str
     const res = await fetch(ENDPOINT, {
       method: "POST",
       headers: { "api-key": String(process.env.ARKESEL_API_KEY), "Content-Type": "application/json", "User-Agent": UA },
-      body: JSON.stringify({ sender: process.env.ARKESEL_SENDER || "YOUTHDSK", message: programSmsText(programId, name, title), recipients: [to] }),
+      body: JSON.stringify({ sender: process.env.ARKESEL_SENDER || "YOUTHDSK", message: programSmsText(programId, name, title, deadline, venue), recipients: [to] }),
       signal: AbortSignal.timeout(20000),
     });
     const j = await res.json().catch(() => ({}));
