@@ -85,7 +85,8 @@ export default async function ReferralForm({ params }: { params: Promise<{ caseN
 
         <div style={{ display: "flex", justifyContent: "space-between", gap: 24, marginTop: 26, paddingTop: 14, borderTop: "1px solid #ccd8ea", fontSize: 12 }}>
           <div style={{ flex: 1 }}>
-            <div style={{ color: "#5b6b86", marginBottom: 18 }}>Youth Desk Officer — Name &amp; Signature</div>
+            <div style={{ color: "#5b6b86", marginBottom: 8 }}>Youth Desk Officer{officerName ? ` - ${officerName}` : ""}</div>
+            <div style={{ color: "#9db0c9", marginBottom: 10, fontSize: 11 }}>Name &amp; Signature</div>
             <div style={{ borderTop: "1px solid #8ba0bd", paddingTop: 4 }}>________________________ &nbsp; Date: ____________</div>
           </div>
           <div style={{ flex: 1 }}>
