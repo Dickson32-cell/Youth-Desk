@@ -81,8 +81,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 @media (min-width: 640px) { .choice { grid-template-columns: 1fr 1fr; } }
 @media (min-width: 1024px) { .choice { grid-template-columns: 1fr 1fr 1fr; } .hero h1 { font-size: 30px; } }
 @media print { .topbar, .tabbar, .noprint { display: none !important; } body { background: #fff; } .main { padding: 0; } .card { box-shadow: none; border: 1px solid #999; break-inside: avoid; } .tbl tr { break-inside: avoid; } .case-detail { break-inside: avoid; } }
-.print-only { display: none; }
-@media print { .print-only { display: block !important; } .card { break-inside: avoid; } }
+.print-only { display: block; position: absolute; left: -10000px; top: 0; width: 1px; height: 1px; overflow: hidden; opacity: 0; }
+@media print { .print-only { position: static !important; left: auto !important; top: auto !important; width: auto !important; height: auto !important; overflow: visible !important; opacity: 1 !important; } }
+@media print { .card { break-inside: avoid; } }
 
 /* ===== Officer appearance editor + public theme toggle ===== */
 .slideshow { position: relative; max-width: 760px; margin: 0 auto 18px; border-radius: 14px; overflow: hidden; box-shadow: 0 12px 30px -18px rgba(6,20,40,.6); background: #0c1522; }
