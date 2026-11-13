@@ -1,4 +1,7 @@
 import { prisma } from "@/lib/db";
+import { cookies } from "next/headers";
+import { verifySession, SESSION_COOKIE } from "@/lib/auth";
+import NewsRemoveButton from "@/components/NewsRemoveButton";
 import TopBar from "@/components/Shell";
 import NewsTicker from "@/components/NewsTicker";
 import Slideshow from "@/components/Slideshow";
@@ -7,6 +10,9 @@ import Slideshow from "@/components/Slideshow";
 export const instant = false;
 
 export default async function Home() {
+  // Officer-only inline controls: the officer who is signed in can remove news
+  // directly from the main page; visitors never see the buttons.
+  const officer = !!verifySession((await cookies()).get(SESSION_COOKIE)?.value);
   const [imgs, words, newsRaw] = await Promise.all([
     prisma.siteImage.findMany({ where: { slot: "hero" }, orderBy: { sort: "asc" }, select: { id: true } }).catch(() => [] as { id: number }[]),
     prisma.siteText.findMany({ select: { key: true, value: true } }).catch(() => [] as { key: string; value: string }[]),
@@ -63,8 +69,13 @@ export default async function Home() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={`/api/news-image/${n.images[0].id}`} alt="" loading="lazy" style={{ width: "100%", height: 170, objectFit: "cover", borderRadius: "12px 12px 0 0", display: "block" }} />
                 ) : null}
-                <div style={{ background: "#fff", border: "1px solid #e3e9f2", borderTop: n.images[0] ? "none" : undefined, borderRadius: n.images[0] ? "0 0 12px 12px" : 12, padding: "14px 16px" }}>
-                  <div style={{ fontSize: 11.5, color: "#8fa2bd", letterSpacing: 0.5 }}>{new Date(n.created).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</div>
+                <div style={{ background: "#fff", border: "1px solid #e3e9f2", borderTop: n.images[0] ? "none" : undefined, borderRadius: n.images[0] ? "0 0 12px 12px" : 12, padding: "14px 16px", position: "relative" }}>
+                  {officer && (
+                    <div style={{ position: "absolute", top: 10, right: 12 }}>
+                      <NewsRemoveButton id={n.id} title={n.title} />
+                    </div>
+                  )}
+                  <div style={{ fontSize: 11.5, color: "#8fa2bd", letterSpacing: 0.5, paddingRight: officer ? 70 : 0 }}>{new Date(n.created).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</div>
                   <h3 style={{ margin: "6px 0 6px", fontSize: 16, color: "#12294a" }}>{n.title}</h3>
                   <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.6, color: "#3c5170" }}>{n.body}</p>
                 </div>
