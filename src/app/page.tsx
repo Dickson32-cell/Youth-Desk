@@ -77,11 +77,11 @@ export default async function Home() {
             </div>
           )}
           <div className="pub-slip">
-            <div className="slip-head">YOUTH DESK · CASE SLIP</div>
-            <div className="slip-row"><span>NO.</span><b>YD-2026-0001</b></div>
-            <div className="slip-row"><span>STATUS</span><b>RECEIVED</b></div>
-            <div className="slip-row"><span>AREA</span><b>ADWESO</b></div>
-            <div className="slip-stamp">RECEIVED<br/>YOUTH DESK<span>{new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span></div>
+            <div className="slip-head">HOW THE DESK WORKS</div>
+            <div className="slip-step"><b>1.</b><span>Report an issue on this site or at the desk.</span></div>
+            <div className="slip-step"><b>2.</b><span>You get a case number by SMS.</span></div>
+            <div className="slip-step"><b>3.</b><span>Track it any time with your private key.</span></div>
+            <div className="slip-note">Complaints are confidential - only you and the desk officer can see your case.</div>
           </div>
         </div>
       </div>

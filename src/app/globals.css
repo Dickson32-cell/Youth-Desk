@@ -313,3 +313,8 @@ tr.rownew > td { animation: rownewbg 2.5s ease; }
   .svc-cta { display: none; }
   .svc-row { gap: 12px; padding: 16px 2px; }
 }
+
+/* How-the-Desk-works plaque (replaces the decorative slip - case data is confidential) */
+.slip-step { display: flex; gap: 10px; align-items: baseline; padding: 7px 0; border-bottom: 1px dotted var(--line-strong); font-size: 13px; color: var(--ink); }
+.slip-step b { color: var(--gold); font-family: Georgia, serif; font-size: 15px; }
+.slip-note { margin-top: 10px; font-size: 11.5px; line-height: 1.55; color: var(--muted); border-left: 3px solid var(--green, var(--navy)); padding-left: 10px; }
