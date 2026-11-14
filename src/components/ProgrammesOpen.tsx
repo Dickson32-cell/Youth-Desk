@@ -50,27 +50,26 @@ export default function ProgrammesOpen() {
   if (rows === null || rows.length === 0) return null;
 
   return (
-    <section className="main" id="programmes-open" style={{ marginTop: 46 }}>
-      <h2 className="newsh">Programmes open for registration</h2>
-      <p style={{ color: "var(--muted)", fontSize: 14, marginTop: -6 }}>Municipal programmes any young person can join - including those who cannot come to the office. Tap a programme to sign up from your phone.</p>
+    <section className="main paper-boardsec" id="programmes-open">
+      <h3 className="paper-sect">On the board <span>PROGRAMMES OPEN FOR REGISTRATION</span></h3>
       <div className="newsgrid">
         {(rows ?? []).map((p) => {
           const remaining = p.seats ? Math.max(0, p.seats - p.registered) : null;
           const full = p.seats !== null && p.seats > 0 && p.registered >= p.seats;
           return (
-            <article key={p.id} style={{ background: "#fff", border: "1px solid #e3e9f2", borderRadius: 12, padding: "16px 18px" }}>
+            <article key={p.id} style={{ background: "#fff", border: "none", borderTop: "1px solid var(--line)", padding: "15px 2px 16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <span className="tag tag-NEW" style={{ textTransform: "none" }}>{catLabel(p.category)}</span>
                 {p.deadline && <span style={{ fontSize: 12, color: "var(--muted)" }}>Register by {p.deadline}</span>}
                 {p.seats !== null && <span style={{ fontSize: 12, color: full ? "#b3261e" : "var(--muted)" }}>{full ? "All seats filled" : `${p.registered}/${p.seats} registered`}</span>}
               </div>
-              <h3 style={{ margin: "8px 0 6px", fontSize: 17, color: "#12294a" }}>{p.title}</h3>
-              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: "#3c5170", whiteSpace: "pre-line" }}>{p.description}</p>
+              <h3 style={{ margin: "10px 0 6px", fontSize: 16.5, color: "var(--ink)", fontFamily: "Georgia, serif", fontWeight: 700 }}>{p.title}</h3>
+              <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.65, color: "var(--muted)", whiteSpace: "pre-line" }}>{p.description}</p>
               {p.venue && <p style={{ margin: "8px 0 0", fontSize: 12.5, color: "var(--muted)" }}>Venue: {p.venue}</p>}
 
               {done && openId === p.id ? null : null}
               {openId === p.id && done ? (
-                <div style={{ marginTop: 10, padding: "9px 12px", background: "#eaf5ee", borderRadius: 8, color: "#0d6b3a", fontSize: 13.5 }}>{done}</div>
+                <div style={{ marginTop: 10, padding: "9px 12px", background: "#eaf5ee", borderRadius: 0, color: "#0d6b3a", fontSize: 13.5 }}>{done}</div>
               ) : null}
 
               {openId !== p.id ? (
@@ -78,19 +77,19 @@ export default function ProgrammesOpen() {
                   <button
                     type="button"
                     onClick={() => { setOpenId(p.id); setDone(null); setErr(""); }}
-                    style={{ marginTop: 10, width: "100%", minHeight: 38, borderRadius: 8, border: "none", background: "#1c3f6e", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "inherit" }}
+                    style={{ marginTop: 10, width: "100%", minHeight: 38, borderRadius: 0, border: "none", background: "var(--navy, #14532d)", color: "#fff", fontWeight: 700, fontSize: 13.5, cursor: "pointer", fontFamily: "inherit" }}
                   >
                     Register for this programme
                   </button>
                 ) : null
               ) : (
                 <form onSubmit={(e) => submit(e, p)} style={{ marginTop: 10 }}>
-                  <input required placeholder="Your full name" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} style={{ width: "100%", minHeight: 38, marginBottom: 6, border: "1px solid #ccd8ea", borderRadius: 8, padding: "8px 10px", font: "inherit" }} />
-                  <input placeholder="Your phone (to get an SMS confirmation)" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} style={{ width: "100%", minHeight: 38, marginBottom: 6, border: "1px solid #ccd8ea", borderRadius: 8, padding: "8px 10px", font: "inherit" }} />
-                  <input placeholder="Your community / electoral area (optional)" value={f.area} onChange={(e) => setF({ ...f, area: e.target.value })} style={{ width: "100%", minHeight: 38, marginBottom: 8, border: "1px solid #ccd8ea", borderRadius: 8, padding: "8px 10px", font: "inherit" }} />
+                  <input required placeholder="Your full name" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} style={{ width: "100%", minHeight: 38, marginBottom: 6, border: "1px solid var(--line)", borderRadius: 0, padding: "8px 10px", font: "inherit" }} />
+                  <input placeholder="Your phone (to get an SMS confirmation)" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} style={{ width: "100%", minHeight: 38, marginBottom: 6, border: "1px solid var(--line)", borderRadius: 0, padding: "8px 10px", font: "inherit" }} />
+                  <input placeholder="Your community / electoral area (optional)" value={f.area} onChange={(e) => setF({ ...f, area: e.target.value })} style={{ width: "100%", minHeight: 38, marginBottom: 8, border: "1px solid var(--line)", borderRadius: 0, padding: "8px 10px", font: "inherit" }} />
                   {err && <div style={{ marginBottom: 8, color: "#b3261e", fontSize: 13 }}>{err}</div>}
                   <div style={{ display: "flex", gap: 8 }}>
-                    <button type="submit" disabled={busy} style={{ flex: 1, minHeight: 38, borderRadius: 8, border: "none", background: "#0d6b3a", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "inherit" }}>{busy ? "Registering…" : "Submit registration"}</button>
+                    <button type="submit" disabled={busy} style={{ flex: 1, minHeight: 38, borderRadius: 8, border: "none", background: "var(--navy, #14532d)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "inherit" }}>{busy ? "Registering…" : "Submit registration"}</button>
                     <button type="button" onClick={() => setOpenId(null)} style={{ minHeight: 38, borderRadius: 8, border: "1px solid #ccd8ea", background: "#fff", color: "#52637d", fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "inherit", padding: "0 12px" }}>Cancel</button>
                   </div>
                 </form>

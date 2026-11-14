@@ -318,3 +318,50 @@ tr.rownew > td { animation: rownewbg 2.5s ease; }
 .slip-step { display: flex; gap: 10px; align-items: baseline; padding: 7px 0; border-bottom: 1px dotted var(--line-strong); font-size: 13px; color: var(--ink); }
 .slip-step b { color: var(--gold); font-family: Georgia, serif; font-size: 15px; }
 .slip-note { margin-top: 10px; font-size: 11.5px; line-height: 1.55; color: var(--muted); border-left: 3px solid var(--green, var(--navy)); padding-left: 10px; }
+
+/* ===== ASSEMBLY PAPER arrangement (mockup A, Dickson pick 17 Nov) ===== */
+.paper-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 20px; font-size: 10.5px; letter-spacing: 1.8px; color: var(--muted); }
+.paper-top-r { display: inline-flex; align-items: center; gap: 14px; }
+.paper-login { color: var(--navy); font-weight: 700; }
+.paper-mast { text-align: center; padding: 24px 16px 14px; }
+.paper-mast img { width: 64px; height: 64px; margin: 0 auto 10px; border-radius: 50%; }
+.paper-mast h1 { font-family: Georgia, "Times New Roman", serif; font-size: 42px; letter-spacing: 1px; color: var(--ink); }
+.paper-mast p { font-size: 11px; letter-spacing: 4px; color: var(--muted); margin-top: 7px; }
+.paper-nav { display: flex; justify-content: center; gap: clamp(16px, 3vw, 34px); padding: 11px 8px; border-top: 2.5px solid var(--navy); border-bottom: 1px solid var(--gold); flex-wrap: wrap; overflow-x: auto; }
+.paper-nav a { font-size: 11.5px; letter-spacing: 2px; color: var(--navy); font-weight: 600; }
+.paper-rule { display: none; }
+.paper-deck { display: grid; grid-template-columns: 1.02fr 1.25fr 0.95fr; gap: 30px; padding: 30px 20px 26px; border-bottom: 1px solid var(--line); max-width: 1240px; margin: 0 auto; }
+.paper-lede h2 { font-family: Georgia, "Times New Roman", serif; font-size: 34px; line-height: 1.12; color: var(--ink); margin-bottom: 0; }
+.paper-lede p { font-size: 14px; line-height: 1.75; color: var(--muted); margin: 13px 0 18px; padding-right: 8px; }
+.paper-lede > a { display: block; padding: 12.5px 2px; border-top: 1px solid var(--line); font-weight: 700; font-size: 14.5px; color: var(--navy); }
+.paper-lede > a:last-child { border-bottom: 1px solid var(--line); }
+.paper-lede > a i { float: right; color: var(--gold); font-style: normal; font-weight: 800; }
+.paper-photo { border: 1px solid var(--line); background: #fff; padding: 6px; align-self: start; }
+.paper-photo-in { width: 100%; }
+.paper-photo-cap { font-size: 10px; letter-spacing: 2.2px; color: var(--muted); text-align: center; padding: 9px 0 4px; }
+.paper-how h3 { font-size: 11px; letter-spacing: 2.6px; color: var(--navy); border-bottom: 2px solid var(--ink); padding-bottom: 7px; }
+.ph-row { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px dotted var(--line); font-size: 12.5px; color: var(--ink); }
+.ph-row b { font-family: Georgia, serif; color: var(--gold); font-size: 16px; }
+.ph-note { font-size: 11.5px; color: var(--muted); margin-top: 12px; border-left: 3px solid var(--navy); padding-left: 10px; line-height: 1.6; }
+.paper-news { max-width: 1240px; margin: 0 auto; padding: 22px 20px 6px; }
+.paper-sect { display: flex; align-items: baseline; gap: 12px; font-family: Georgia, "Times New Roman", serif; font-size: 21px; color: var(--ink); }
+.paper-sect span { font-size: 9.5px; letter-spacing: 2.4px; color: var(--muted); border-left: 3px solid var(--gold); padding-left: 10px; font-family: "Segoe UI", system-ui, sans-serif; }
+.paper-newsgrid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 34px; padding-top: 8px; position: relative; }
+.paper-feat img { width: 100%; height: 240px; object-fit: cover; margin-bottom: 12px; }
+.paper-feat b { font-family: Georgia, "Times New Roman", serif; font-size: 23px; line-height: 1.2; color: var(--ink); font-weight: 700; display: block; margin-bottom: 8px; }
+.paper-feat p { font-size: 13.5px; line-height: 1.7; color: var(--muted); margin: 0; }
+.paper-feat-date { font-size: 10.5px; letter-spacing: 1.6px; color: var(--muted); margin-top: 10px; }
+.paper-col-it { padding: 12px 0; border-top: 1px solid var(--line); position: relative; }
+.paper-col-it span { font-size: 10px; letter-spacing: 1.6px; color: var(--muted); }
+.paper-col-it b { font-family: Georgia, "Times New Roman", serif; font-size: 15.5px; color: var(--ink); display: block; margin-top: 3px; padding-right: 46px; line-height: 1.35; }
+.paper-remove-in { position: absolute; top: 10px; right: 0; }
+.paper-foot { background: var(--navy); color: rgba(255,255,255,.85); padding: 17px 20px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 12.5px; margin-top: 26px; }
+.paper-foot b { color: #fff; }
+@media (max-width: 900px) {
+  .paper-deck { grid-template-columns: 1fr; gap: 22px; }
+  .paper-nav a { padding: 6px 2px; }
+  .paper-mast h1 { font-size: 30px; }
+  .paper-newsgrid { grid-template-columns: 1fr; gap: 18px; }
+  .paper-feat img { height: 190px; }
+  .paper-top { font-size: 9px; letter-spacing: 1.2px; }
+}
