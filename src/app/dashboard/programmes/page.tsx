@@ -149,7 +149,9 @@ export default function Programmes() {
     const r = await fetch("/api/admin/programmes-post/reminder", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, meetingDate: date }) });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) return fail(j.error || "Could not save the meeting date.");
-    setMsg("Meeting date saved: " + date); loadPosts();
+    const lst = await fetch("/api/admin/programmes-post/walkin?id=" + id).then((x) => x.json()).catch(() => null);
+    setWalkList(lst && lst.rows ? lst.rows : []);
+    setMsg("Meeting date saved: " + date); loadRows(); loadPosts();
   }
   async function sendReminder(id: number, title: string) {
     const r0 = await fetch("/api/admin/programmes-post?registrants=" + id);
@@ -162,7 +164,8 @@ export default function Programmes() {
     const j = await r.json().catch(() => ({}));
     if (!r.ok) return fail(j.error || "Could not send the reminders.");
     setMsg("Reminder sent to " + j.sent + " of " + j.targets + " registrant(s). The venue is in the message.");
-    setRemBusy(null); loadPosts();
+    setRemBusy(null); loadRows(); loadPosts();
+    { const lst = await fetch("/api/admin/programmes-post/walkin?id=" + id).then((x) => x.json()).catch(() => null); setWalkList(lst && lst.rows ? lst.rows : []); }
   }
 
   function openRegistrants(id: number, title: string) {
@@ -215,151 +218,7 @@ export default function Programmes() {
           </div>
         </div>
 
-        {/* ============ (1) OPEN FOR REGISTRATION ============ */}
-        <div className="card" style={{ marginTop: 12 }}>
-          <h2>Open for registration — post a programme for youth to join</h2>
-          <p className="sub">
-            Press <b>+ Publish a programme</b> and it appears on the MAIN WEBSITE under &quot;Programmes open for registration&quot;.
-            Youth who cannot walk to the office tap Register and sign up from their phones; every sign-up with a phone gets a
-            confirmation SMS. The sign-ups appear below as &quot;Sign-ups&quot;.
-          </p>
-          <div className="row" style={{ marginTop: 10 }}>
-            <button className="btn btn-primary" style={{ minHeight: 40 }} onClick={() => setShowPostForm(!showPostForm)}>{showPostForm ? "Cancel" : "+ Publish a programme"}</button>
-          </div>
-          {msg && <div className="alert-ok" style={{ marginTop: 8 }}>{msg}</div>}
-          {err && <div className="alert-err" style={{ marginTop: 8 }}>{err}</div>}
-
-          {showPostForm && (
-            <form onSubmit={postProgramme}>
-              <div className="filters" style={{ flexWrap: "wrap", rowGap: 8, marginTop: 10 }}>
-                <input required placeholder="Programme title" value={pf.title} onChange={(e) => setPf({ ...pf, title: e.target.value })} style={{ flex: "1 1 300px", minWidth: 0 }} />
-                <select value={pf.category} onChange={(e) => setPf({ ...pf, category: e.target.value })}>
-                  {TYPES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                </select>
-                {pf.category === "OTHER" && (
-                  <input required placeholder="Type the kind of programme" value={pf.categoryOther} onChange={(e) => setPf({ ...pf, categoryOther: e.target.value })} style={{ flex: "0 0 195px", width: 195, textTransform: "uppercase", minWidth: 0 }} />
-                )}
-                <input placeholder="Closing date (optional, e.g: 30 Nov 2026)" value={pf.deadline} onChange={(e) => setPf({ ...pf, deadline: e.target.value })} style={{ flex: "1 1 210px", minWidth: 0 }} />
-                <input placeholder="Venue / how to take part (optional)" value={pf.venue} onChange={(e) => setPf({ ...pf, venue: e.target.value })} style={{ flex: "1 1 250px", minWidth: 0 }} />
-                <input type="number" min="1" placeholder="Planned seats (optional)" value={pf.seats} onChange={(e) => setPf({ ...pf, seats: e.target.value })} style={{ flex: "0 0 155px", width: 155, minWidth: 0 }} />
-                <input placeholder="Meeting date (e.g: 20 Dec 2026, optional)" value={pf.meetingDate} onChange={(e) => setPf({ ...pf, meetingDate: e.target.value })} style={{ flex: "1 1 210px", minWidth: 0 }} />
-              </div>
-              <textarea required placeholder="Full details: what the programme offers, requirements, who can apply, how selection works." value={pf.description} onChange={(e) => setPf({ ...pf, description: e.target.value })} style={{ width: "100%", minHeight: 90, marginTop: 8 }} />
-              <div className="row" style={{ marginTop: 10 }}>
-                <button className="btn btn-primary" disabled={busy}>{busy ? "Publishing…" : "Publish to the main website"}</button>
-              </div>
-            </form>
-          )}
-
-          {posts !== null && posts.length > 0 && (
-            <div style={{ marginTop: 14 }}>
-              <div className="tblwrap progtbl-wrap">
-              <table className="tbl progtbl" style={{ minWidth: 680 }}>
-                <thead><tr><th>Programme</th><th>Type</th><th>Closing</th><th>Sign-ups</th><th>Meeting</th><th>Status</th><th className="noprint"></th></tr></thead>
-                <tbody>
-                  {posts.map((r) => (
-                    <tr key={r.id}>
-                      <td style={{ minWidth: 300 }}>
-                      <b style={{ fontSize: 13.5, color: "#12294a" }}>{r.title}</b>
-                      {r.description && <div style={{ fontSize: 12, color: "#5b6b86", marginTop: 2, maxWidth: 340, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{r.description}</div>}
-                      {r.venue && <div style={{ fontSize: 11.5, color: "#8fa2bd", marginTop: 2 }}>Venue: {r.venue}</div>}
-                    </td>
-                      <td>{catLabel(r.category)}</td>
-                      <td>{r.deadline || "\u2014"}</td>
-                      <td style={{ minWidth: 110 }}>
-                        {(() => {
-                          const filled = r.registrations;
-                          const total = r.seats || 0;
-                          return total ? (
-                            <div>
-                              <div style={{ fontWeight: 700 }}>{filled} / {total}</div>
-                              <div style={{ height: 5, width: 90, background: "#e8eef7", borderRadius: 4, marginTop: 3, overflow: "hidden" }}>
-                                <div style={{ height: "100%", width: Math.min(100, Math.round((filled / total) * 100)) + "%", background: "#0d6b3a", borderRadius: 4 }} />
-                              </div>
-                            </div>
-                          ) : (
-                            <div style={{ fontWeight: 600 }}>{filled} sign-ups</div>
-                          );
-                        })()}
-                      </td>
-                      <td>{r.meetingDate ? <span style={{ fontWeight: 700, color: "#0d6b3a" }}>{r.meetingDate}</span> : <span style={{ color: "#8fa2bd", fontSize: 12 }}>not set</span>}</td>
-                      <td>
-                        <button type="button" className={"tag tag-" + (r.status === "OPEN" ? "NEW" : "RESOLVED")} style={{ cursor: "pointer", border: "none", font: "inherit", fontWeight: 800 }} onClick={() => closeReopen(r.id, r.status === "OPEN" ? "close" : "reopen")} title="Tap to open or close registration">
-                          {r.status}
-                        </button>
-                      </td>
-                      <td className="noprint" style={{ textAlign: "right" }}>
-                        <div style={{ display: "inline-flex", flexWrap: "wrap", gap: 6, justifyContent: "flex-end", maxWidth: 420 }}>
-                          <button type="button" className="btn btn-sm btn-ghost" onClick={() => { const d = window.prompt("Set the meeting date (e.g: 20 Dec 2026):", r.meetingDate || ""); if (d) setMeeting(r.id, d); }}>{r.meetingDate ? "Change date" : "Set date"}</button>
-                          <button type="button" className="btn btn-sm btn-primary" disabled={remBusy === r.id} onClick={() => sendReminder(r.id, r.title)} style={{ padding: "3px 10px", fontSize: 12 }}>
-                            {remBusy === r.id ? "Sending…" : "Remind all (" + (r.registrations - r.reminded) + " to go)"}
-                          </button>
-                          <button type="button" className="btn btn-sm btn-ghost" onClick={() => openRegistrants(r.id, r.title)}>{regFor && regFor.id === r.id ? "Hide list" : "Sign-ups"}</button>
-                          <button type="button" className="btn btn-danger" style={{ padding: "3px 10px", fontSize: 12 }} onClick={() => delPost(r.id)}>Delete</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-              <div className="progcards">
-                {(posts || []).map((r) => (
-                  <div className="progcard" key={"c" + r.id}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <b style={{ fontSize: 14, color: "#12294a", flex: 1, minWidth: 0 }}>{r.title}</b>
-                      <button type="button" className={"tag tag-" + (r.status === "OPEN" ? "NEW" : "RESOLVED")} style={{ cursor: "pointer", border: "none", font: "inherit", fontWeight: 800, flex: "0 0 auto" }} onClick={() => closeReopen(r.id, r.status === "OPEN" ? "close" : "reopen")}>
-                        {r.status}
-                      </button>
-                    </div>
-                    <div style={{ fontSize: 12, color: "#5b6b86", margin: "4px 0 2px" }}>Type: {catLabel(r.category)} &middot; Closing: {r.deadline || "\u2014"}</div>
-                    <div style={{ fontSize: 12, color: "#5b6b86" }}>Meeting: <b style={{ color: r.meetingDate ? "#0d6b3a" : "#8fa2bd" }}>{r.meetingDate || "not set"}</b>{r.venue ? <span> &middot; Venue: {r.venue}</span> : null}</div>
-                    <div style={{ fontWeight: 700, color: "#12294a", marginTop: 2 }}>{r.registrations}{r.seats ? " / " + r.seats : ""} signed up</div>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
-                      <button type="button" className="btn btn-sm btn-ghost" onClick={() => { const d = window.prompt("Set the meeting date (e.g: 20 Dec 2026):", r.meetingDate || ""); if (d) setMeeting(r.id, d); }}>{r.meetingDate ? "Change date" : "Set date"}</button>
-                      <button type="button" className="btn btn-sm btn-primary" disabled={remBusy === r.id} onClick={() => sendReminder(r.id, r.title)} style={{ padding: "3px 10px", fontSize: 12 }}>
-                        {remBusy === r.id ? "Sending…" : "Remind all (" + (r.registrations - r.reminded) + " to go)"}
-                      </button>
-                      <button type="button" className="btn btn-sm btn-ghost" onClick={() => openRegistrants(r.id, r.title)}>{regFor && regFor.id === r.id ? "Hide list" : "Sign-ups"}</button>
-                      <button type="button" className="btn btn-danger" style={{ padding: "3px 10px", fontSize: 12 }} onClick={() => delPost(r.id)}>Delete</button>
-                    </div>
-                    {regFor && regFor.id === r.id && (
-                      <p style={{ fontSize: 12, color: "#8fa2bd", margin: "6px 0 0" }}>The sign-up list opens here under the table view - scroll below the table.</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-              {regFor && (
-                <div style={{ marginTop: 12, borderTop: "1px solid #ccd8ea", paddingTop: 10 }}>
-                  <h3>Sign-ups: {regFor.title}</h3>
-                  {regs.length === 0 ? (
-                    <p className="sub">No sign-ups yet - share the main website link.</p>
-                  ) : (
-                    <div className="tblwrap" style={{ marginTop: 4 }}>
-                    <table className="tbl" style={{ minWidth: 560 }}>
-                      <thead><tr><th>When</th><th>Name</th><th>Phone</th><th>Area</th><th>Reminder</th><th>Note</th></tr></thead>
-                      <tbody>
-                        {regs.map((r) => (
-                          <tr key={r.id}>
-                            <td>{new Date(r.createdAt).toLocaleString("en-GB")}</td>
-                            <td>{r.name}</td>
-                            <td>{r.phone || "\u2014"}</td>
-                            <td>{r.area || "\u2014"}</td>
-                            <td>{r.reminderSentAt ? "\u2713" : "\u2014"}</td>
-                            <td>{r.note || "\u2014"}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-          {posts === null && <p className="sub" style={{ marginTop: 10 }}>Loading programmes\u2026</p>}
-          {posts !== null && posts.length === 0 && <p className="sub" style={{ marginTop: 10 }}>Nothing published yet. Publish above for youth to sign up from their phones.</p>}
-        </div>
+        {/* The old standalone posts card is gone: publishing happens from the KPI register (checkbox on logging or the row button); programme management (meeting date, reminders, open/close) lives in the per-programme drawer. */}
 
         {/* ============ (2+3) KPI REGISTER ============ */}
         <div className="card" style={{ marginTop: 12 }}>
@@ -504,6 +363,26 @@ export default function Programmes() {
                 <button type="button" className="btn btn-primary" onClick={saveWalk} disabled={walkBusy || !walk.name.trim()} style={{ minHeight: 40, width: "100%" }}>
                   {walkBusy ? "Registering…" : "Register this youth"}
                 </button>
+              </div>
+              <div className="sheet-sep" style={{ margin: "10px 14px 6px" }} />
+              <div className="sheet-head">Programme</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, padding: "0 14px 8px" }}>
+                {(() => {
+                  const prog = (posts || []).find((x) => x.id === walkRow.id);
+                  if (!prog) return null;
+                  return (
+                    <>
+                      <button type="button" className="btn btn-sm btn-ghost" onClick={() => { const d = window.prompt("Set the meeting date (e.g: 20 Dec 2026):", prog.meetingDate || ""); if (d) setMeeting(prog.id, d); }}>{prog.meetingDate ? "Change date" : "Set date"}</button>
+                      <button type="button" className="btn btn-sm btn-primary" disabled={remBusy === prog.id} onClick={() => sendReminder(prog.id, prog.title)} style={{ padding: "3px 10px", fontSize: 12 }}>
+                        {remBusy === prog.id ? "Sending…" : "Remind all (" + (prog.registrations - prog.reminded) + " to go)"}
+                      </button>
+                      <button type="button" className={"btn btn-sm " + (prog.status === "OPEN" ? "btn-ghost" : "btn-primary")} onClick={() => closeReopen(prog.id, prog.status === "OPEN" ? "close" : "reopen")} style={{ padding: "3px 10px", fontSize: 12 }}>
+                        {prog.status === "OPEN" ? "Close registration" : "Reopen registration"}
+                      </button>
+                      <button type="button" className="btn btn-danger" style={{ padding: "3px 10px", fontSize: 12 }} onClick={() => { delPost(prog.id); setWalkRow(null); }}>Delete programme</button>
+                    </>
+                  );
+                })()}
               </div>
               <div className="sheet-sep" style={{ margin: "10px 14px 6px" }} />
               <div className="sheet-head">Registered ({walkList ? walkList.length : 0})</div>

@@ -239,7 +239,7 @@ tr.rownew > td { animation: rownewbg 2.5s ease; }
 }
 
 /* ============ Officer More sheet (phone/tablet bottom bar) ============ */
-.sheetwrap { display: none; }
+/* sheetwrap renders only when open - no display guard, it must be VISIBLE */
 .sheet { display: flex; flex-direction: column; }
 .sheet-grip { width: 44px; height: 5px; border-radius: 12px; background: #c7d2e0; margin: 10px auto 4px; }
 .sheet-head { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #8fa2bd; padding: 4px 18px 6px; }
