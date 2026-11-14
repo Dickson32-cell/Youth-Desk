@@ -330,7 +330,7 @@ tr.rownew > td { animation: rownewbg 2.5s ease; }
 .paper-nav { display: flex; justify-content: center; gap: clamp(16px, 3vw, 34px); padding: 11px 8px; border-top: 2.5px solid var(--navy); border-bottom: 1px solid var(--gold); flex-wrap: wrap; overflow-x: auto; }
 .paper-nav a { font-size: 11.5px; letter-spacing: 2px; color: var(--navy); font-weight: 600; }
 .paper-rule { display: none; }
-.paper-deck { display: grid; grid-template-columns: 1.02fr 1.25fr 0.95fr; gap: 30px; padding: 30px 20px 26px; border-bottom: 1px solid var(--line); max-width: 1240px; margin: 0 auto; }
+.paper-deck { display: grid; grid-template-columns: 1fr 1.35fr; gap: 34px; padding: 30px 20px 26px; border-bottom: 1px solid var(--line); max-width: 1240px; margin: 0 auto; }
 .paper-lede h2 { font-family: Georgia, "Times New Roman", serif; font-size: 34px; line-height: 1.12; color: var(--ink); margin-bottom: 0; }
 .paper-lede p { font-size: 14px; line-height: 1.75; color: var(--muted); margin: 13px 0 18px; padding-right: 8px; }
 .paper-lede > a { display: block; padding: 12.5px 2px; border-top: 1px solid var(--line); font-weight: 700; font-size: 14.5px; color: var(--navy); }

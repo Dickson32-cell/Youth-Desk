@@ -75,13 +75,6 @@ export default async function Home() {
           </div>
           <div className="paper-photo-cap">AT THE DESK &mdash; {new Date().getFullYear()}</div>
         </div>
-        <div className="paper-how">
-          <h3>HOW THE DESK WORKS</h3>
-          <div className="ph-row"><b>1.</b><span>Report an issue on this site or at the desk.</span></div>
-          <div className="ph-row"><b>2.</b><span>You get a case number by SMS.</span></div>
-          <div className="ph-row"><b>3.</b><span>Track it any time with your private key.</span></div>
-          <div className="ph-note">Complaints are confidential &mdash; only you and the desk officer can see your case.</div>
-        </div>
       </div>
 
       <NewsTicker items={(news.filter((n) => n.important).length > 0 ? news.filter((n) => n.important) : news).slice(0, 6).map((n) => ({ id: n.id, title: n.title }))} />
