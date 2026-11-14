@@ -61,14 +61,6 @@ export default function PaperHead({ active = "" }: { active?: string }) {
         ))}
       </nav>
 
-      {/* Phone bottom tab bar (same tab bar as before, text-only) */}
-      <nav className="tabbar noprint" aria-label="Primary">
-        {TABS.map((t) => (
-          <Link key={t.href} href={t.href} className={"tab" + (isOn(t) ? " on" : "")} aria-current={isOn(t) ? "page" : undefined}>
-            <span>{t.tab}</span>
-          </Link>
-        ))}
-      </nav>
     </>
   );
 }

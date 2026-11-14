@@ -260,8 +260,6 @@ tr.rownew > td { animation: rownewbg 2.5s ease; }
 .tabbar .tab svg { flex: 0 0 auto; }
 
 /* ============ Public homepage - Design 1 "Modern civic" (picked by Dickson 16 Nov) ============ */
-/* Public pages must clear the fixed bottom tab bar on phones/tablets */
-@media (max-width: 1024px) { body { padding-bottom: calc(78px + env(safe-area-inset-bottom)); } }
 
 /* ===== PUBLIC HOMEPAGE - editorial "notice register" language (16 Nov) =====
    Derive from the Desk's printed artefacts: letterhead masthead, ruled ledger
