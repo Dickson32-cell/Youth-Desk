@@ -1,6 +1,6 @@
 :root {
-  --navy: #1c3f6e; --navy-800: #162d4f; --ink: #122447; --text: #33415c;
-  --muted: #5b6b86; --line: #e2e8f2; --line-strong: #ccd6e5; --paper: #eef2f8;
+  --navy: #1c3f6e; --navy-800: #162d4f; --ink: #12332B; --text: #2E4638;
+  --muted: #566a60; --line: #e4e9e4; --line-strong: #cdd6cf; --paper: #f0f3ef;
   --white: #ffffff; --gold: #b88721; --danger: #b3261e; --ok: #157347; --radius: 12px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
