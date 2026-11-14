@@ -11,14 +11,57 @@ const PUBLIC_TABS = [
   { href: "/programs", label: "About" },
 ];
 
+// Officer bar: four primary destinations + one More button on phones/tablets;
+// Content and Account (plus identity + sign out) live in the More bottom sheet
+// so the bar never packs more than five items.
 const OFFICE_TABS = [
   { href: "/dashboard", label: "Cases", exact: true },
   { href: "/dashboard/youth", label: "Youth" },
   { href: "/dashboard/programmes", label: "Programmes" },
   { href: "/dashboard/report", label: "Reports" },
-  { href: "/dashboard/content", label: "Content" },
-  { href: "/dashboard/account", label: "Account" },
 ];
+
+const OFFICE_MORE = [
+  { href: "/dashboard/content", label: "Content", note: "Edit the public pages" },
+  { href: "/dashboard/account", label: "Account", note: "Officer details" },
+];
+
+const CASES_ICON = (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+    <rect x="9" y="3" width="6" height="4" rx="1" />
+  </svg>
+);
+const YOUTH_ICON = (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" />
+    <circle cx="10" cy="7" r="4" />
+    <path d="M21 21v-2a4 4 0 0 0-3-3.87" />
+  </svg>
+);
+const PROG_ICON = (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3" y="4" width="18" height="18" rx="2" />
+    <path d="M16 2v4M8 2v4M3 10h18" />
+  </svg>
+);
+const REP_ICON = (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <path d="M14 2v6h6M16 13H8M16 17H8" />
+  </svg>
+);
+const MORE_ICON = (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+    <circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="19" cy="12" r="2" />
+  </svg>
+);
+const TAB_ICONS: Record<string, React.ReactNode> = {
+  "/dashboard": CASES_ICON,
+  "/dashboard/youth": YOUTH_ICON,
+  "/dashboard/programmes": PROG_ICON,
+  "/dashboard/report": REP_ICON,
+};
 
 export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office"; on?: string }) {
   const path = usePathname();
@@ -28,6 +71,7 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
   const [dark, setDark] = useState(false);
   const [brand, setBrand] = useState({ main: "Youth Desk NJSMA", sub: "NEW JUABEN SOUTH MUNICIPAL ASSEMBLY" });
   const [logo, setLogo] = useState<string>("");
+  const [moreOpen, setMoreOpen] = useState(false);
 
   // Brand words + logo come from the layout (officer-edited); read once after mount.
   useEffect(() => {
@@ -35,6 +79,9 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
     setBrand({ main: html.getAttribute("data-brand-main") || "Youth Desk NJSMA", sub: html.getAttribute("data-brand-sub") || "NEW JUABEN SOUTH MUNICIPAL ASSEMBLY" });
     setLogo(html.getAttribute("data-logo-url") || "");
   }, []);
+
+  // close the More sheet whenever the route changes
+  useEffect(() => { setMoreOpen(false); }, [path]);
 
   // Public pages remember the visitor's light/dark choice; officer pages stay light
   // (the console and all printables are designed for paper-white surfaces).
@@ -73,6 +120,8 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
   const isActive = (t: { href: string; exact?: boolean }) =>
     t.exact ? path === t.href : path === t.href || path.startsWith(t.href + "/");
 
+  const moreActive = office && OFFICE_MORE.some((t) => isActive(t));
+
   return (
     <>
       {/*
@@ -88,6 +137,11 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
           </Link>
           <span className="sp" />
           <nav className="navlinks" aria-label="Primary">
+            {office && OFFICE_MORE.map((t) => (
+              <Link key={t.href} href={t.href} className={"navbtn" + (isActive(t) ? " on" : "")}>
+                {t.label}
+              </Link>
+            ))}
             {tabs.map((t) => (
               <Link key={t.href} href={t.href} className={"navbtn" + (isActive(t) ? " on" : "")}>
                 {t.label}
@@ -108,7 +162,8 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
         </div>
       </header>
 
-      {/* Phone: fixed bottom tab bar (public 4 tabs; office adds Sign out). */}
+      {/* Phone + tablet: fixed bottom tab bar - four primary destinations + More.
+          The More bottom sheet carries Content, Account, identity and Sign out. */}
       <nav className="tabbar noprint" aria-label="Primary">
         {tabs.map((t) => (
           <Link
@@ -117,13 +172,40 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
             className={"tab" + (isActive(t) ? " on" : "")}
             aria-current={isActive(t) ? "page" : undefined}
           >
-            {t.label}
+            {office ? TAB_ICONS[t.href] : null}
+            <span>{t.label}</span>
           </Link>
         ))}
         {office && (
-          <button className="tab" onClick={signOut}>Sign out</button>
+          <button
+            type="button"
+            className={"tab" + (moreOpen || moreActive ? " on" : "")}
+            onClick={() => setMoreOpen(!moreOpen)}
+            aria-expanded={moreOpen}
+          >
+            {MORE_ICON}
+            <span>More</span>
+          </button>
         )}
       </nav>
+
+      {office && moreOpen && (
+        <div className="sheetwrap noprint" onClick={() => setMoreOpen(false)}>
+          <div className="sheet" role="menu" onClick={(e) => e.stopPropagation()}>
+            <div className="sheet-grip" aria-hidden="true" />
+            <div className="sheet-head">More</div>
+            {OFFICE_MORE.map((t) => (
+              <Link key={t.href} href={t.href} className={"sheet-row" + (isActive(t) ? " on" : "")}>
+                <span>{t.label}</span>
+                <span className="sheet-note">{t.note}</span>
+              </Link>
+            ))}
+            <div className="sheet-sep" />
+            <div className="sheet-id">Signed in as <b>{me || "Officer"}</b></div>
+            <button className="sheet-row so" onClick={signOut}>Sign out</button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
