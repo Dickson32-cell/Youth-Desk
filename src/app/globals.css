@@ -289,3 +289,5 @@ tr.rownew > td { animation: rownewbg 2.5s ease; }
 @media (min-width: 961px) {
   .foot-strip { padding-left: max(24px, calc((100vw - 1240px) / 2 + 24px)); padding-right: 24px; }
 }
+/* Public pages must clear the fixed bottom tab bar on phones/tablets */
+@media (max-width: 1024px) { body { padding-bottom: calc(78px + env(safe-area-inset-bottom)); } }

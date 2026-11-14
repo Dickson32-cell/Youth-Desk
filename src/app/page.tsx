@@ -35,9 +35,9 @@ export default async function Home() {
   // Three action cards (Design 1 - modern civic): Report / Track / Programmes.
   // Titles and bodies follow the officer's Content-tab words (c1t/c1b etc).
   const tiles: { href: string; icon: string; top: string; title: string; body: string; cta: string }[] = [
-    { href: "/report", icon: "📋", top: "var(--navy)", title: w.c1t || "Report an issue", body: w.c1b || "Walk-in or from your phone, anonymous or with your name. You receive a case number instantly.", cta: "Start a report" },
-    { href: "/track", icon: "🔍", top: "var(--gold)", title: w.c2t || "Track your case", body: w.c2b || "See exactly where your case has gotten to: received, in progress, forwarded or resolved.", cta: "Track a case" },
-    { href: "/programs", icon: "\u2713", top: "var(--navy-800, var(--navy))", title: w.c3t || "About & opportunities", body: w.c3b || "Departments and services of the Assembly, plus training, jobs and scholarships announced by the desk.", cta: "Open programmes" },
+    { href: "/report", icon: "clipboard", top: "var(--navy)", title: w.c1t || "Report an issue", body: w.c1b || "Walk-in or from your phone, anonymous or with your name. You receive a case number instantly.", cta: "Start a report" },
+    { href: "/track", icon: "magnifier", top: "var(--gold)", title: w.c2t || "Track your case", body: w.c2b || "See exactly where your case has gotten to: received, in progress, forwarded or resolved.", cta: "Track a case" },
+    { href: "/programs", icon: "check", top: "var(--navy-800, var(--navy))", title: w.c3t || "About & opportunities", body: w.c3b || "Departments and services of the Assembly, plus training, jobs and scholarships announced by the desk.", cta: "Open programmes" },
   ];
   return (
     <>
@@ -78,7 +78,17 @@ export default async function Home() {
       <div className="tiles3">
         {tiles.map((t) => (
           <div key={t.href} className="tile3" style={{ borderTopColor: t.top }}>
-            <div className="tile3-ico">{t.icon}</div>
+            <div className="tile3-ico">
+              {t.icon === "clipboard" && (
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" /><rect x="9" y="3" width="6" height="4" rx="1" /></svg>
+              )}
+              {t.icon === "magnifier" && (
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.35-4.35" /></svg>
+              )}
+              {t.icon === "check" && (
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="3" /><path d="m8 12 3 3 5-6" /></svg>
+              )}
+            </div>
             <h3>{t.title}</h3>
             <p>{t.body}</p>
             <a href={t.href}>{t.cta} &rsaquo;</a>

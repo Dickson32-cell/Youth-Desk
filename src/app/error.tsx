@@ -9,7 +9,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
       padding: "24px", textAlign: "center",
     }}>
       <div style={{ maxWidth: 480 }}>
-        <div style={{ fontSize: 42, marginBottom: 12 }}>⚠</div>
+        <svg viewBox="0 0 48 48" width="46" height="46" fill="none" stroke="#b88721" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ marginBottom: 12 }}><path d="M24 6 3 42h42L24 6Z" /><path d="M24 20v10" /><circle cx="24" cy="36" r="1.4" fill="#b88721" /></svg>
         <h2 style={{ fontSize: 20, fontWeight: 800, color: "#12294a", marginBottom: 8 }}>Something went wrong</h2>
         <p style={{ fontSize: 14, color: "#5b6b86", lineHeight: 1.6, marginBottom: 18 }}>
           The page could not be loaded just now. Your case numbers, programmes and all records are safe.
