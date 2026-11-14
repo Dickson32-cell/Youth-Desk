@@ -26,8 +26,13 @@ export async function POST(req: NextRequest) {
   }
   const current = Object.keys(updates).length ? await prisma.program.findUnique({ where: { id }, select: { title: true, deadline: true, venue: true, meetingDate: true } }) : prog;
 
+  if (f.reset) {
+    // explicit officer re-reminder (meeting moved / youth who did not come):
+    // clear the once-mark so EVERY registrant gets this SMS again
+    await prisma.registration.updateMany({ where: { programId: id }, data: { reminderSentAt: null } });
+  }
   const targets = await prisma.registration.findMany({
-    where: { programId: id, reminderSentAt: null, phone: { not: null } },
+    where: { programId: id, reminderSentAt: null, phone: { not: null }, OR: [{ phone: { not: "" } }] },
     select: { id: true, name: true, phone: true },
     take: 300,
   });

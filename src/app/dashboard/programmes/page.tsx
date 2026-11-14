@@ -15,8 +15,11 @@ type Row = {
   id: number; date: string; department: string; title: string; type: string;
   target: number; reached: number; budget: number | null; note: string | null; officer: string;
   programs?: { id: number; title: string; status: string; venue: string | null; deadline: string | null; meetingDate: string | null; _count?: { registrations: number } }[];
+  reachedCalc?: number;
+  liveReached?: number | null;
+  coverage?: number | null;
 };
-type Summary = { items: number; target: number; reached: number; budget: number };
+type Summary = { items: number; target: number; reached: number; budget: number; coverage?: number | null };
 type ByDept = { department: string; target: number; reached: number; items: number };
 type PostRow = {
   id: number; title: string; description: string; category: string; deadline: string | null;
@@ -228,7 +231,7 @@ export default function Programmes() {
             <div className="tile" style={{ padding: "10px 16px" }}><div style={{ fontSize: 12, color: "#5b6b86" }}>Programmes</div><div style={{ fontSize: 20, fontWeight: 800, color: "#1c3f6e" }}>{summary.items}</div></div>
             <div className="tile" style={{ padding: "10px 16px" }}><div style={{ fontSize: 12, color: "#5b6b86" }}>Target</div><div style={{ fontSize: 20, fontWeight: 800, color: "#1c3f6e" }}>{summary.target}</div></div>
             <div className="tile" style={{ padding: "10px 16px" }}><div style={{ fontSize: 12, color: "#5b6b86" }}>Youth reached</div><div style={{ fontSize: 20, fontWeight: 800, color: "#0d6b3a" }}>{summary.reached}</div></div>
-            <div className="tile" style={{ padding: "10px 16px" }}><div style={{ fontSize: 12, color: "#5b6b86" }}>Coverage</div><div style={{ fontSize: 20, fontWeight: 800, color: "#1c3f6e" }}>{pct}%</div></div>
+            <div className="tile" style={{ padding: "10px 16px" }}><div style={{ fontSize: 12, color: "#5b6b86" }}>Coverage</div><div style={{ fontSize: 20, fontWeight: 800, color: "#1c3f6e" }}>{summary.coverage != null ? summary.coverage : pct}%</div></div>
           </div>
           <div className="row" style={{ marginTop: 12 }}>
             <button className="btn btn-primary" style={{ minHeight: 40 }} onClick={() => setShowForm(!showForm)}>{showForm ? "Cancel" : "+ Log an intervention"}</button>
@@ -317,7 +320,7 @@ export default function Programmes() {
           ) : (
             <div className="tblwrap" style={{ marginTop: 8 }}>
             <table className="tbl" style={{ minWidth: 640 }}>
-              <thead><tr><th>Date</th><th>Department</th><th>Programme</th><th>Type</th><th>Target</th><th>Reached</th><th className="noprint"></th></tr></thead>
+              <thead><tr><th>Date</th><th>Department</th><th>Programme</th><th>Type</th><th>Target</th><th>Reached</th><th>Coverage</th><th className="noprint"></th></tr></thead>
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.id}>
@@ -325,14 +328,15 @@ export default function Programmes() {
                     <td>{r.department}</td>
                     <td>{r.title}{r.note ? <div style={{ fontSize: 12, color: "#5b6b86" }}>{r.note}</div> : null}</td>
                     <td>{tLabel(r.type)}</td>
-                    <td>{r.target}</td><td style={{ fontWeight: 600 }}>{r.reached}</td>
+                    <td>{r.target}</td><td style={{ fontWeight: 700, color: "#12294a" }}>{r.reachedCalc ?? r.reached}{r.liveReached != null ? <span style={{ fontSize: 10.5, fontWeight: 500, color: "#8fa2bd" }}> (live)</span> : null}</td>
+                    <td>{r.coverage != null ? <b style={{ color: "#1c3f6e" }}>{r.coverage}%</b> : "\u2014"}</td>
                     <td className="noprint" style={{ textAlign: "right" }}>
                     <div style={{ display: "inline-flex", flexWrap: "wrap", gap: 6, justifyContent: "flex-end", maxWidth: 420 }}>
                       {(() => {
                         const prog = r.programs && r.programs[0];
                         return prog ? (
                           <>
-                            <span style={{ fontSize: 11, fontWeight: 800, color: "#0d6b3a", background: "rgba(13,107,58,.09)", borderRadius: 999, padding: "4px 10px", alignSelf: "center" }}>On website - {(prog._count && prog._count.registrations) || 0} signed up</span>
+                            <span style={{ fontSize: 11, fontWeight: 800, color: "#0d6b3a", background: "rgba(13,107,58,.09)", borderRadius: 999, padding: "4px 10px", alignSelf: "center" }}>On website - {(prog._count && prog._count.registrations) || 0} signed up{r.target ? " (" + Math.round(((prog._count && prog._count.registrations) || 0) / r.target * 100) + "% of " + r.target + ")" : ""}</span>
                             <button type="button" className="btn btn-sm btn-primary" onClick={() => openWalkin(r)} style={{ padding: "3px 10px", fontSize: 12 }}>Register walk-in</button>
                           </>
                         ) : (
@@ -376,6 +380,20 @@ export default function Programmes() {
                       <button type="button" className="btn btn-sm btn-primary" disabled={remBusy === prog.id} onClick={() => sendReminder(prog.id, prog.title)} style={{ padding: "3px 10px", fontSize: 12 }}>
                         {remBusy === prog.id ? "Sending…" : "Remind all (" + (prog.registrations - prog.reminded) + " to go)"}
                       </button>
+                      {prog.reminded > 0 && (
+                        <button type="button" className="btn btn-sm btn-ghost" disabled={remBusy === prog.id} onClick={async () => {
+                          if (!confirm("Remind EVERYONE again, including those already reminded? This is for meetings that moved or youth who did not come.")) return;
+                          setRemBusy(prog.id); setErr(""); setMsg("");
+                          const r = await fetch("/api/admin/programmes-post/reminder", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: prog.id, reset: true }) });
+                          const j = await r.json().catch(() => ({}));
+                          if (!r.ok) return fail(j.error || "Could not send the reminders.");
+                          setMsg("Reminder sent to " + j.sent + " registrant(s) (including previously reminded).");
+                          setRemBusy(null); loadRows(); loadPosts();
+                          { const lst = await fetch("/api/admin/programmes-post/walkin?id=" + prog.id).then((x) => x.json()).catch(() => null); setWalkList(lst && lst.rows ? lst.rows : []); }
+                        }} style={{ padding: "3px 10px", fontSize: 12 }}>
+                          Remind everyone again
+                        </button>
+                      )}
                       <button type="button" className={"btn btn-sm " + (prog.status === "OPEN" ? "btn-ghost" : "btn-primary")} onClick={() => closeReopen(prog.id, prog.status === "OPEN" ? "close" : "reopen")} style={{ padding: "3px 10px", fontSize: 12 }}>
                         {prog.status === "OPEN" ? "Close registration" : "Reopen registration"}
                       </button>

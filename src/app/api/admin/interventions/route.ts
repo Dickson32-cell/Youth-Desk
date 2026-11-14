@@ -19,19 +19,34 @@ export async function GET(req: NextRequest) {
   if (from && to) where.date = { gte: new Date(from + "T00:00:00.000Z"), lte: new Date(to + "T23:59:59.999Z") };
 
   const rows = await prisma.intervention.findMany({ where, orderBy: [{ date: "desc" }, { id: "desc" }], include: { programs: { select: { id: true, title: true, status: true, venue: true, deadline: true, meetingDate: true, _count: { select: { registrations: true } } } } } });
+
+  // "Youth reached" for a posted programme = every youth actually registered,
+  // walk-in AND online combined (live count from the sign-ups). Rows without a
+  // sign-up post keep the officer's typed attendance figure.
+  const liveOf = (r: (typeof rows)[number]) => (r.programs && r.programs.length ? r.programs.reduce((n, x) => n + (x._count?.registrations || 0), 0) : null);
+  const enriched = rows.map((r) => {
+    const reachedCalc = liveOf(r) ?? r.reached;
+    const coverage = r.target && r.target > 0 ? Math.round((reachedCalc / r.target) * 100) : null;
+    return { ...r, reachedCalc, liveReached: liveOf(r), coverage };
+  });
   const summary = {
-    items: rows.length,
-    target: rows.reduce((n, r) => n + (r.target || 0), 0),
-    reached: rows.reduce((n, r) => n + (r.reached || 0), 0),
-    budget: rows.reduce((n, r) => n + (r.budget ? Number(r.budget) : 0), 0),
+    items: enriched.length,
+    target: enriched.reduce((n, r) => n + (r.target || 0), 0),
+    reached: enriched.reduce((n, r) => n + (r.reachedCalc || 0), 0),
+    budget: enriched.reduce((n, r) => n + (r.budget ? Number(r.budget) : 0), 0),
+    coverage: (() => {
+      const t = enriched.reduce((n, r) => n + (r.target || 0), 0);
+      if (!t) return null;
+      return Math.round((enriched.reduce((n, r) => n + (r.reachedCalc || 0), 0) / t) * 100);
+    })(),
   };
   const byDept = new Map<string, { target: number; reached: number; items: number }>();
-  for (const r of rows) {
+  for (const r of enriched) {
     const d = byDept.get(r.department) || { target: 0, reached: 0, items: 0 };
-    d.target += r.target || 0; d.reached += r.reached || 0; d.items += 1;
+    d.target += r.target || 0; d.reached += r.reachedCalc || 0; d.items += 1;
     byDept.set(r.department, d);
   }
-  return NextResponse.json({ ok: true, rows, summary, byDept: [...byDept.entries()].map(([department, v]) => ({ department, ...v })) });
+  return NextResponse.json({ ok: true, rows: enriched, summary, byDept: [...byDept.entries()].map(([department, v]) => ({ department, ...v })) });
 }
 
 export async function POST(req: NextRequest) {
