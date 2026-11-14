@@ -1,0 +1,16 @@
+User-agent: *
+# Officer console + secrets-bearing lanes: never indexed, never archived
+Disallow: /office
+Disallow: /dashboard
+Disallow: /api/
+# Youth case printables and tracking = personal data of complainants
+Disallow: /track
+Disallow: /slip/
+Disallow: /forward/
+Disallow: /evidence/
+Disallow: /manifest.webmanifest
+Disallow: /sw.js
+Disallow: /offline.html
+# Public, indexable: / (home), /report, /news, /programs, /privacy
+
+Sitemap: https://youth-desk-abdul-rashid-dicksons-projects.vercel.app/sitemap.xml
