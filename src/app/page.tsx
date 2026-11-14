@@ -48,7 +48,6 @@ export default async function Home() {
           <div className="paper-photo-in">
             {imgs.length > 0 && <Slideshow images={imgs.map((i) => i.id)} alt="" priority={true} />}
           </div>
-          <div className="paper-photo-cap">AT THE DESK &mdash; {new Date().getFullYear()}</div>
         </div>
       </div>
 
