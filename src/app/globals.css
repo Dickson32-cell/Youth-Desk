@@ -368,3 +368,15 @@ tr.rownew > td { animation: rownewbg 2.5s ease; }
 .paper-nav a.pon { color: var(--ink); font-weight: 800; border-bottom: 2px solid var(--gold); padding-bottom: 3px; }
 .paper-mast img { width: 58px; height: 58px; }
 .tabbar .tab { flex-direction: column; gap: 2px; }
+
+/* The public theme switch: drawn sun/moon slide toggle (no text pills) */
+.paper-switch { position: relative; width: 54px; height: 28px; border-radius: 15px; border: 1.5px solid var(--ink); background: #fff; cursor: pointer; padding: 0; }
+.paper-switch .knob { position: absolute; top: 2px; left: 2px; width: 21px; height: 21px; border-radius: 50%; background: var(--navy); transition: left .18s ease; box-shadow: 0 1px 3px rgba(10,20,30,.25); }
+.paper-switch .sw-sun { position: absolute; right: 8px; top: 6.5px; color: var(--ink); opacity: .8; }
+.paper-switch .sw-moon { position: absolute; left: 8px; top: 6.5px; color: var(--ink); opacity: .45; }
+.paper-switch[aria-checked="true"] .knob { left: 27px; }
+.paper-switch[aria-checked="true"] .sw-sun { opacity: .45; }
+.paper-switch[aria-checked="true"] .sw-moon { opacity: .8; }
+html[data-theme="dark"] .paper-switch { border-color: rgba(255,255,255,.45); background: transparent; }
+html[data-theme="dark"] .paper-switch .knob { background: var(--gold); }
+html[data-theme="dark"] .paper-switch .sw-sun, html[data-theme="dark"] .paper-switch .sw-moon { color: rgba(255,255,255,.9); }

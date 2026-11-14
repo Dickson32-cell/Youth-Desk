@@ -41,10 +41,11 @@ export default function PaperHead({ active = "" }: { active?: string }) {
       <div className="paper-top noprint">
         <span className="paper-region">KOFORIDUA &middot; EASTERN REGION &middot; GHANA</span>
         <span className="paper-top-r">
-          <button type="button" className="themetoggle" onClick={toggleTheme} title={dark ? "Switch to light mode" : "Switch to dark mode"} aria-label="Toggle dark mode">
-            {dark ? "Light" : "Dark"}
+          <button type="button" className="paper-switch" role="switch" aria-checked={dark} aria-label="Toggle dark mode" title={dark ? "Switch to light mode" : "Switch to dark mode"} onClick={toggleTheme}>
+            <svg className="sw-sun" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5" /><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8" /></svg>
+            <svg className="sw-moon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z" /></svg>
+            <span className="knob" />
           </button>
-          <Link href="/office/login" className="paper-login">OFFICER SIGN IN</Link>
         </span>
       </div>
       <div className="paper-mast">
