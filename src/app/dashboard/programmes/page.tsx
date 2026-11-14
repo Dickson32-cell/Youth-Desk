@@ -90,6 +90,11 @@ export default function Programmes() {
     fetch("/api/admin/auth").then(async (r) => (r.ok ? r.json() : null)).then((j) => (j ? setPreparedBy(j.fullName || j.username || "") : null));
     loadPosts();
     loadRows();
+    // live console: silent refresh every 10s + instant refresh when returning to the tab
+    const t = setInterval(() => { if (!document.hidden) { loadPosts(); loadRows(); } }, 10000);
+    const onVis = () => { if (!document.hidden) { loadPosts(); loadRows(); } };
+    document.addEventListener("visibilitychange", onVis);
+    return () => { clearInterval(t); document.removeEventListener("visibilitychange", onVis); };
   }, []);
 
   function fail(m: string) { setErr(m); setBusy(false); }
