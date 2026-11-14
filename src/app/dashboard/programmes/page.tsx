@@ -360,7 +360,7 @@ export default function Programmes() {
                 <input placeholder="Phone (optional - they get a confirmation SMS)" value={walk.phone} onChange={(e) => setWalk({ ...walk, phone: e.target.value })} style={{ width: "100%", marginBottom: 8 }} />
                 <input placeholder="Area / community (optional)" value={walk.area} onChange={(e) => setWalk({ ...walk, area: e.target.value })} style={{ width: "100%", marginBottom: 8 }} />
                 <input placeholder="Note (optional)" value={walk.note} onChange={(e) => setWalk({ ...walk, note: e.target.value })} style={{ width: "100%", marginBottom: 10 }} />
-                <button type="button" className="btn btn-primary" onClick={saveWalk} disabled={walkBusy || !walk.name.trim()} style={{ minHeight: 40, width: "100%" }}>
+                <button type="button" className="btn btn-primary" onClick={() => { saveWalk(); }} disabled={walkBusy || !walk.name.trim()} style={{ minHeight: 40, width: "100%" }}>
                   {walkBusy ? "Registering…" : "Register this youth"}
                 </button>
               </div>

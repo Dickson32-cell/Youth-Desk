@@ -195,7 +195,7 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
             <div className="sheet-grip" aria-hidden="true" />
             <div className="sheet-head">More</div>
             {OFFICE_MORE.map((t) => (
-              <Link key={t.href} href={t.href} className={"sheet-row" + (isActive(t) ? " on" : "")}>
+              <Link key={t.href} href={t.href} className={"sheet-row" + (isActive(t) ? " on" : "")} onClick={() => setMoreOpen(false)}>
                 <span>{t.label}</span>
                 <span className="sheet-note">{t.note}</span>
               </Link>
