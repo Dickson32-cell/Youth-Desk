@@ -40,7 +40,7 @@ export default async function Programs() {
     : SERVICES;
   return (
     <main>
-      <PaperHead active="ABOUT & PROGRAMMES" />
+      <PaperHead active="ABOUT" />
       <div className="main">
         <div className="card">
           <h2>About the Assembly</h2>

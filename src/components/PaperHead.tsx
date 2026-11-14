@@ -12,7 +12,7 @@ const TABS: { href: string; label: string; nav: string; tab: string; exact?: boo
   { href: "/news", label: "NEWS", nav: "NEWS", tab: "News" },
   { href: "/report", label: "REPORT AN ISSUE", nav: "REPORT AN ISSUE", tab: "Report" },
   { href: "/track", label: "TRACK A CASE", nav: "TRACK A CASE", tab: "Track" },
-  { href: "/programs", label: "ABOUT & PROGRAMMES", nav: "ABOUT & PROGRAMMES", tab: "About" },
+  { href: "/programs", label: "ABOUT", nav: "ABOUT", tab: "About" },
 ];
 
 export default function PaperHead({ active = "" }: { active?: string }) {
