@@ -174,7 +174,7 @@ tr.rownew > td { animation: rownewbg 2.5s ease; }
 
 /* Municipal news: ticker strip + latest-3 card grid (main page) */
 .tickerband { display: flex; align-items: center; gap: 12px; background: var(--navy); color: #fff; padding: 9px 16px; overflow: hidden; }
-.tickerlabel { flex: 0 0 auto; background: #B88721; color: #fff; font-weight: 800; font-size: 11px; letter-spacing: 1.2px; padding: 3px 9px; border-radius: 6px; }
+.tickerlabel { flex: 0 0 auto; background: var(--gold, #efc30c); color: #16242e; font-weight: 800; font-size: 11px; letter-spacing: 1.2px; padding: 3px 9px; border-radius: 6px; }
 .ticker { overflow: hidden; flex: 1; min-width: 0; }
 .tickertrack { display: inline-flex; white-space: nowrap; will-change: transform; animation: ydticker 40s linear infinite; }
 .tickerband:hover .tickertrack { animation-play-state: paused; }
