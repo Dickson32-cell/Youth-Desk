@@ -380,3 +380,14 @@ tr.rownew > td { animation: rownewbg 2.5s ease; }
 html[data-theme="dark"] .paper-switch { border-color: rgba(255,255,255,.45); background: transparent; }
 html[data-theme="dark"] .paper-switch .knob { background: var(--gold); }
 html[data-theme="dark"] .paper-switch .sw-sun, html[data-theme="dark"] .paper-switch .sw-moon { color: rgba(255,255,255,.9); }
+
+/* Paper pages in dark mode: free-standing editorial text flips to light
+   (documents/cards keep their dark card surfaces from the dark layer) */
+[data-theme="dark"] .paper-mast h1, [data-theme="dark"] .paper-lede h2, [data-theme="dark"] .paper-sect, [data-theme="dark"] .paper-col-it b, [data-theme="dark"] .paper-feat b { color: #e7eff8; }
+[data-theme="dark"] .paper-mast p, [data-theme="dark"] .paper-nav a, [data-theme="dark"] .paper-photo-cap, [data-theme="dark"] .paper-col-it span, [data-theme="dark"] .paper-feat p, [data-theme="dark"] .paper-feat-date, [data-theme="dark"] .paper-top, [data-theme="dark"] .paper-lede p { color: #9fb2c9; }
+[data-theme="dark"] .paper-deck, [data-theme="dark"] .paper-col-it, [data-theme="dark"] .paper-nav { border-color: #24354a; }
+[data-theme="dark"] .paper-lede > a { color: #7fd3a5; border-color: #24354a; }
+[data-theme="dark"] .paper-lede > a i { color: var(--gold); }
+[data-theme="dark"] .paper-nav a.pon { color: #fff; border-bottom-color: var(--gold); }
+[data-theme="dark"] .paper-photo { background: #151f2b; border-color: #24354a; }
+[data-theme="dark"] .paper-foot { background: #0b1d13; }
