@@ -353,7 +353,7 @@ tr.rownew > td { animation: rownewbg 2.5s ease; }
 .paper-col-it span { font-size: 10px; letter-spacing: 1.6px; color: var(--muted); }
 .paper-col-it b { font-family: Georgia, "Times New Roman", serif; font-size: 15.5px; color: var(--ink); display: block; margin-top: 3px; padding-right: 46px; line-height: 1.35; }
 .paper-remove-in { position: absolute; top: 10px; right: 0; }
-.paper-foot { background: var(--navy); color: rgba(255,255,255,.85); padding: 17px 20px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 12.5px; margin-top: 26px; }
+.paper-foot { background: var(--navy); color: rgba(255,255,255,.85); padding: 17px 20px; display: flex; justify-content: center; text-align: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px; margin-top: 26px; }
 .paper-foot b { color: #fff; }
 @media (max-width: 900px) {
   .paper-deck { grid-template-columns: 1fr; gap: 22px; }
