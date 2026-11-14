@@ -118,8 +118,7 @@ export default function TrackInner() {
 
     <footer className="paper-foot">
       <span><b>Youth Desk NJSMA</b> &mdash; New Juaben South Municipal Assembly</span>
-      <span>Every case gets a number; nothing is lost.</span>
-    </footer>
+          </footer>
     </main>
     </>
   );

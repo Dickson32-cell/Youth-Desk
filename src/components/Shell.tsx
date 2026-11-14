@@ -211,7 +211,7 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
 }
 
 export function Footer() {
-  return <div className="footer">Youth Desk NJSMA. Every case gets a number; nothing is lost.</div>;
+  return <div className="footer">Youth Desk NJSMA — New Juaben South Municipal Assembly</div>;
 }
 
 export default NavBar;
