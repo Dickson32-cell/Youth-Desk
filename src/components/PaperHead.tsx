@@ -19,10 +19,12 @@ export default function PaperHead({ active = "" }: { active?: string }) {
   const path = usePathname();
   const [dark, setDark] = useState(false);
   const [brand, setBrand] = useState({ main: "Youth Desk NJSMA", sub: "NEW JUABEN SOUTH MUNICIPAL ASSEMBLY" });
+  const [deskLogo, setDeskLogo] = useState("");
 
   useEffect(() => {
     const html = document.documentElement;
     setBrand({ main: html.getAttribute("data-brand-main") || "Youth Desk NJSMA", sub: html.getAttribute("data-brand-sub") || "NEW JUABEN SOUTH MUNICIPAL ASSEMBLY" });
+    setDeskLogo(html.getAttribute("data-logo-url") || "");
     if (localStorage.getItem("youthdesk-theme") === "dark") { html.setAttribute("data-theme", "dark"); setDark(true); }
   }, []);
 
@@ -39,6 +41,10 @@ export default function PaperHead({ active = "" }: { active?: string }) {
   return (
     <>
       <div className="paper-top noprint">
+        {deskLogo && (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img className="paper-top-logo" src={deskLogo} alt="Youth Desk" />
+        )}
         <span className="paper-region">KOFORIDUA &middot; EASTERN REGION &middot; GHANA</span>
         <span className="paper-top-r">
           <button type="button" className="paper-switch" role="switch" aria-checked={dark} aria-label="Toggle dark mode" title={dark ? "Switch to light mode" : "Switch to dark mode"} onClick={toggleTheme}>

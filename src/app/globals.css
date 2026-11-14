@@ -391,3 +391,6 @@ html[data-theme="dark"] .paper-switch .sw-sun, html[data-theme="dark"] .paper-sw
 [data-theme="dark"] .paper-nav a.pon { color: #fff; border-bottom-color: var(--gold); }
 [data-theme="dark"] .paper-photo { background: #151f2b; border-color: #24354a; }
 [data-theme="dark"] .paper-foot { background: #0b1d13; }
+
+/* The Desk's own logo: quiet corner mark at the top of every public page */
+.paper-top-logo { width: auto; height: 30px; margin-right: 10px; flex: 0 0 auto; object-fit: contain; }
