@@ -32,12 +32,11 @@ export default async function Home() {
     w.hero_sub ||
     "One place for the municipality's young people: report an issue, get a case number, track it until it is resolved, and find training and job opportunities.";
   const firstHero = imgs[0]?.id;
-  // Three action cards (Design 1 - modern civic): Report / Track / Programmes.
-  // Titles and bodies follow the officer's Content-tab words (c1t/c1b etc).
-  const tiles: { href: string; icon: string; top: string; title: string; body: string; cta: string }[] = [
-    { href: "/report", icon: "clipboard", top: "var(--navy)", title: w.c1t || "Report an issue", body: w.c1b || "Walk-in or from your phone, anonymous or with your name. You receive a case number instantly.", cta: "Start a report" },
-    { href: "/track", icon: "magnifier", top: "var(--gold)", title: w.c2t || "Track your case", body: w.c2b || "See exactly where your case has gotten to: received, in progress, forwarded or resolved.", cta: "Track a case" },
-    { href: "/programs", icon: "check", top: "var(--navy-800, var(--navy))", title: w.c3t || "About & opportunities", body: w.c3b || "Departments and services of the Assembly, plus training, jobs and scholarships announced by the desk.", cta: "Open programmes" },
+  // Numbered services (editorial ledger, derived from the Desk's printed slips)
+  const rows = [
+    { n: "01", href: "/report", t: w.c1t || "Report an issue", d: w.c1b || "Walk-in or from your phone - anonymous if you choose. A case number is issued the moment you finish.", a: "Report an issue" },
+    { n: "02", href: "/track", t: w.c2t || "Track a case", d: w.c2b || "Every case moves on the record: received, in progress, forwarded, resolved.", a: "Track a case" },
+    { n: "03", href: "/programs", t: w.c3t || "Programmes & opportunities", d: w.c3b || "Training, mentorship, internships and grants - announced here, registered online.", a: "Open programmes" },
   ];
   return (
     <>
@@ -45,56 +44,62 @@ export default async function Home() {
         <link rel="preload" as="image" href={`/api/media/${firstHero}`} fetchPriority="high" />
       )}
       <TopBar />
-      {/* SPLIT HERO (Design 1): left = words + actions, right = the officer slideshow */}
-      <div className="hero-wrap">
-        <div className="hero-left">
-          <div className="hero-eyebrow">YOUTH DESK NJSMA</div>
-          <h1 className="hero-h1">{heroTitle}</h1>
-          <p className="hero-sub">{heroSub}</p>
-          <div className="hero-cta">
-            <a href="/report" className="hero-btn-solid">Report an issue</a>
-            <a href="/track" className="hero-btn-ghost">Track a case</a>
+
+      {/* Editorial masthead - same grammar as the Desk's printed letterhead */}
+      <div className="pub-mast">
+        {seal ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img className="pub-mast-seal" src={"/api/media/" + seal.id} alt="Assembly seal" />
+        ) : null}
+        <div className="pub-mast-words">
+          <span className="mast-line1">YOUTH DESK</span>
+          <span className="mast-line2">NEW JUABEN SOUTH · MUNICIPAL ASSEMBLY</span>
+        </div>
+        <span className="pub-mast-no">EST. MUNICIPAL SERVICE<br/>COMPLAINTS · PROGRAMMES · RECORDS</span>
+      </div>
+      <div className="pub-rule" />
+
+      {/* Hero - the notice-board field, with the case slip as the artefact */}
+      <div className="pub-hero">
+        <div className="pub-hero-left">
+          <h1>{heroTitle}</h1>
+          <p>{heroSub}</p>
+          <div className="pub-hero-links">
+            <a href="/report">Report an issue <span aria-hidden="true">→</span></a>
+            <a href="/track">Track a case <span aria-hidden="true">→</span></a>
           </div>
         </div>
-        <div className="hero-right" aria-label="Life at the Youth Desk">
-          {imgs.length > 0 ? (
-            <div className="hero-shot">
+        <div className="pub-hero-right">
+          {imgs.length > 0 && (
+            <div className="pub-photo">
               <Slideshow images={imgs.map((i) => i.id)} alt="" priority={true} />
+              <div className="pub-photo-cap">AT THE DESK — {new Date().getFullYear()}</div>
             </div>
-          ) : (
-            seal ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={"/api/media/" + seal.id} alt="Assembly seal" style={{ width: 180, height: 180, objectFit: "contain", borderRadius: "50%", boxShadow: "0 6px 20px rgba(0,0,0,.25)" }} />
-            ) : (
-              <div className="hero-shot" style={{ opacity: 0.35 }} />
-            )
           )}
+          <div className="pub-slip">
+            <div className="slip-head">YOUTH DESK · CASE SLIP</div>
+            <div className="slip-row"><span>NO.</span><b>YD-2026-0001</b></div>
+            <div className="slip-row"><span>STATUS</span><b>RECEIVED</b></div>
+            <div className="slip-row"><span>AREA</span><b>ADWESO</b></div>
+            <div className="slip-stamp">RECEIVED<br/>YOUTH DESK<span>{new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span></div>
+          </div>
         </div>
       </div>
       {news.length > 0 && (
         <NewsTicker items={(news.filter((n) => n.important).length > 0 ? news.filter((n) => n.important) : news).slice(0, 6).map((n) => ({ id: n.id, title: n.title }))} />
       )}
-      {/* THREE ACTION CARDS */}
-      <div className="tiles3">
-        {tiles.map((t) => (
-          <div key={t.href} className="tile3" style={{ borderTopColor: t.top }}>
-            <div className="tile3-ico">
-              {t.icon === "clipboard" && (
-                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" /><rect x="9" y="3" width="6" height="4" rx="1" /></svg>
-              )}
-              {t.icon === "magnifier" && (
-                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.35-4.35" /></svg>
-              )}
-              {t.icon === "check" && (
-                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="3" /><path d="m8 12 3 3 5-6" /></svg>
-              )}
-            </div>
-            <h3>{t.title}</h3>
-            <p>{t.body}</p>
-            <a href={t.href}>{t.cta} &rsaquo;</a>
-          </div>
+
+      {/* Numbered services ledger */}
+      <div className="pub-services">
+        {rows.map((r) => (
+          <a key={r.href} href={r.href} className="svc-row">
+            <span className="svc-n">{r.n}</span>
+            <span className="svc-body"><b>{r.t}</b><span>{r.d}</span></span>
+            <span className="svc-cta">{r.a} <i aria-hidden="true">→</i></span>
+          </a>
         ))}
       </div>
+
       {news.length > 0 && (
         <section className="main newssection" id="news">
           <h2 className="newsh">Latest news</h2>
@@ -102,21 +107,21 @@ export default async function Home() {
             {news.slice(0, 3).map((n) => (
               <article key={n.id} style={{ margin: 0 }}>
                 {n.images.length > 1 ? (
-                  <div style={{ height: 170, overflow: "hidden", borderRadius: "12px 12px 0 0" }}>
+                  <div style={{ height: 170, overflow: "hidden", borderRadius: "0 0 0 0" }}>
                     <Slideshow images={n.images.filter((im) => String(im.mime).startsWith("image/")).map((im) => im.id)} alt={n.title} srcPrefix="/api/news-image" />
                   </div>
                 ) : n.images[0] && String(n.images[0].mime).startsWith("image/") ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={`/api/news-image/${n.images[0].id}`} alt="" loading="lazy" style={{ width: "100%", height: 170, objectFit: "cover", borderRadius: "12px 12px 0 0", display: "block" }} />
+                  <img src={`/api/news-image/${n.images[0].id}`} alt="" loading="lazy" style={{ width: "100%", height: 170, objectFit: "cover", display: "block" }} />
                 ) : null}
-                <div style={{ background: "#fff", border: "1px solid var(--line)", borderLeft: "3px solid var(--gold)", borderRadius: n.images[0] ? "0 0 12px 12px" : 12, padding: "14px 16px", position: "relative" }}>
+                <div style={{ background: "#fff", borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)", padding: "14px 16px", position: "relative" }}>
                   {officer && (
                     <div style={{ position: "absolute", top: 10, right: 12 }}>
                       <NewsRemoveButton id={n.id} title={n.title} />
                     </div>
                   )}
-                  <div style={{ fontSize: 11.5, color: "var(--muted)", letterSpacing: 0.5, paddingRight: officer ? 70 : 0 }}>{new Date(n.created).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</div>
-                  <h3 style={{ margin: "6px 0 6px", fontSize: 16, color: "var(--ink)" }}>{n.title}</h3>
+                  <div style={{ fontSize: 11, color: "var(--muted)", letterSpacing: 0.6, paddingRight: officer ? 70 : 0, textTransform: "uppercase" }}>{new Date(n.created).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</div>
+                  <h3 style={{ margin: "6px 0 6px", fontSize: 16.5, color: "var(--ink)", fontFamily: "Georgia, serif" }}>{n.title}</h3>
                   <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.6, color: "var(--text)" }}>{n.body}</p>
                 </div>
               </article>
@@ -125,11 +130,9 @@ export default async function Home() {
         </section>
       )}
       <ProgrammesOpen />
-      <footer className="main" style={{ paddingBottom: 30 }}>
-        <div className="foot-strip">
-          <b>Youth Desk NJSMA</b>
-          <span>A service of the New Juaben South Municipal Assembly · Every case gets a number; nothing is lost.</span>
-        </div>
+      <footer className="pub-foot">
+        <div><b>Youth Desk NJSMA</b> — New Juaben South Municipal Assembly</div>
+        <div>Every case gets a number; nothing is lost.</div>
       </footer>
     </>
   );
