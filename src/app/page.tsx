@@ -35,8 +35,8 @@ export default async function Home() {
   // Three action cards (Design 1 - modern civic): Report / Track / Programmes.
   // Titles and bodies follow the officer's Content-tab words (c1t/c1b etc).
   const tiles: { href: string; icon: string; top: string; title: string; body: string; cta: string }[] = [
-    { href: "/report", icon: "\U0001F4CB", top: "var(--navy)", title: w.c1t || "Report an issue", body: w.c1b || "Walk-in or from your phone, anonymous or with your name. You receive a case number instantly.", cta: "Start a report" },
-    { href: "/track", icon: "\U0001F50D", top: "var(--gold)", title: w.c2t || "Track your case", body: w.c2b || "See exactly where your case has gotten to: received, in progress, forwarded or resolved.", cta: "Track a case" },
+    { href: "/report", icon: "📋", top: "var(--navy)", title: w.c1t || "Report an issue", body: w.c1b || "Walk-in or from your phone, anonymous or with your name. You receive a case number instantly.", cta: "Start a report" },
+    { href: "/track", icon: "🔍", top: "var(--gold)", title: w.c2t || "Track your case", body: w.c2b || "See exactly where your case has gotten to: received, in progress, forwarded or resolved.", cta: "Track a case" },
     { href: "/programs", icon: "\u2713", top: "var(--navy-800, var(--navy))", title: w.c3t || "About & opportunities", body: w.c3b || "Departments and services of the Assembly, plus training, jobs and scholarships announced by the desk.", cta: "Open programmes" },
   ];
   return (
@@ -118,7 +118,7 @@ export default async function Home() {
       <footer className="main" style={{ paddingBottom: 30 }}>
         <div className="foot-strip">
           <b>Youth Desk NJSMA</b>
-          <span>A service of the New Juaben South Municipal Assembly \u00b7 Every case gets a number; nothing is lost.</span>
+          <span>A service of the New Juaben South Municipal Assembly · Every case gets a number; nothing is lost.</span>
         </div>
       </footer>
     </>
