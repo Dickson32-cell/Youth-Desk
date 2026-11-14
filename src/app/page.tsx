@@ -31,38 +31,60 @@ export default async function Home() {
   const heroSub =
     w.hero_sub ||
     "One place for the municipality's young people: report an issue, get a case number, track it until it is resolved, and find training and job opportunities.";
-  const choices: [string, string, string][] = [
-    ["/report", w.c1t || "Report an issue", w.c1b || "Walk-in or from your phone - anonymous or with your name. You receive a case number instantly."],
-    ["/track", w.c2t || "Track your case", w.c2b || "Enter your case number to see whether it is received, in progress, resolved, or forwarded."],
-    ["/programs", w.c3t || "About & opportunities", w.c3b || "Departments and services of the Assembly, plus training, jobs and scholarships announced by the desk."],
-  ];
   const firstHero = imgs[0]?.id;
+  // Three action cards (Design 1 - modern civic): Report / Track / Programmes.
+  // Titles and bodies follow the officer's Content-tab words (c1t/c1b etc).
+  const tiles: { href: string; icon: string; top: string; title: string; body: string; cta: string }[] = [
+    { href: "/report", icon: "\U0001F4CB", top: "var(--navy)", title: w.c1t || "Report an issue", body: w.c1b || "Walk-in or from your phone, anonymous or with your name. You receive a case number instantly.", cta: "Start a report" },
+    { href: "/track", icon: "\U0001F50D", top: "var(--gold)", title: w.c2t || "Track your case", body: w.c2b || "See exactly where your case has gotten to: received, in progress, forwarded or resolved.", cta: "Track a case" },
+    { href: "/programs", icon: "\u2713", top: "var(--navy-800, var(--navy))", title: w.c3t || "About & opportunities", body: w.c3b || "Departments and services of the Assembly, plus training, jobs and scholarships announced by the desk.", cta: "Open programmes" },
+  ];
   return (
     <>
       {firstHero && (
         <link rel="preload" as="image" href={`/api/media/${firstHero}`} fetchPriority="high" />
       )}
       <TopBar />
-      <div className={"landing-band" + (imgs.length > 0 ? " hero-w-bg" : "")}>
-        {imgs.length > 0 && (
-          <div className="hero-bg" aria-hidden="true">
-            <Slideshow images={imgs.map((i) => i.id)} alt="" priority={true} />
+      {/* SPLIT HERO (Design 1): left = words + actions, right = the officer slideshow */}
+      <div className="hero-wrap">
+        <div className="hero-left">
+          <div className="hero-eyebrow">YOUTH DESK NJSMA</div>
+          <h1 className="hero-h1">{heroTitle}</h1>
+          <p className="hero-sub">{heroSub}</p>
+          <div className="hero-cta">
+            <a href="/report" className="hero-btn-solid">Report an issue</a>
+            <a href="/track" className="hero-btn-ghost">Track a case</a>
           </div>
-        )}
-        <div className="hero" style={{ maxWidth: 1100, margin: "0 auto" }}>
-          {seal && (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={"/api/media/" + seal.id} alt="New Juaben South Municipal Assembly seal" width={104} height={104}
-              style={{ width: 104, height: 104, objectFit: "contain", display: "block", margin: "0 auto 10px", filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))", borderRadius: "50%" }} />
+        </div>
+        <div className="hero-right" aria-label="Life at the Youth Desk">
+          {imgs.length > 0 ? (
+            <div className="hero-shot">
+              <Slideshow images={imgs.map((i) => i.id)} alt="" priority={true} />
+            </div>
+          ) : (
+            seal ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img src={"/api/media/" + seal.id} alt="Assembly seal" style={{ width: 180, height: 180, objectFit: "contain", borderRadius: "50%", boxShadow: "0 6px 20px rgba(0,0,0,.25)" }} />
+            ) : (
+              <div className="hero-shot" style={{ opacity: 0.35 }} />
+            )
           )}
-          <h1>{heroTitle}</h1>
-          <p>{heroSub}</p>
-          <a href="/report" className="btn btn-primary" style={{ background: "#fff", color: "#1c3f6e" }}>Report an issue</a>
         </div>
       </div>
       {news.length > 0 && (
         <NewsTicker items={(news.filter((n) => n.important).length > 0 ? news.filter((n) => n.important) : news).slice(0, 6).map((n) => ({ id: n.id, title: n.title }))} />
       )}
+      {/* THREE ACTION CARDS */}
+      <div className="tiles3">
+        {tiles.map((t) => (
+          <div key={t.href} className="tile3" style={{ borderTopColor: t.top }}>
+            <div className="tile3-ico">{t.icon}</div>
+            <h3>{t.title}</h3>
+            <p>{t.body}</p>
+            <a href={t.href}>{t.cta} &rsaquo;</a>
+          </div>
+        ))}
+      </div>
       {news.length > 0 && (
         <section className="main newssection" id="news">
           <h2 className="newsh">Latest news</h2>
@@ -74,18 +96,18 @@ export default async function Home() {
                     <Slideshow images={n.images.filter((im) => String(im.mime).startsWith("image/")).map((im) => im.id)} alt={n.title} srcPrefix="/api/news-image" />
                   </div>
                 ) : n.images[0] && String(n.images[0].mime).startsWith("image/") ? (
-                  // eslint-disable-next-line @next/next/no-img-element
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img src={`/api/news-image/${n.images[0].id}`} alt="" loading="lazy" style={{ width: "100%", height: 170, objectFit: "cover", borderRadius: "12px 12px 0 0", display: "block" }} />
                 ) : null}
-                <div style={{ background: "#fff", border: "1px solid #e3e9f2", borderTop: n.images[0] ? "none" : undefined, borderRadius: n.images[0] ? "0 0 12px 12px" : 12, padding: "14px 16px", position: "relative" }}>
+                <div style={{ background: "#fff", border: "1px solid var(--line)", borderLeft: "3px solid var(--gold)", borderRadius: n.images[0] ? "0 0 12px 12px" : 12, padding: "14px 16px", position: "relative" }}>
                   {officer && (
                     <div style={{ position: "absolute", top: 10, right: 12 }}>
                       <NewsRemoveButton id={n.id} title={n.title} />
                     </div>
                   )}
-                  <div style={{ fontSize: 11.5, color: "#8fa2bd", letterSpacing: 0.5, paddingRight: officer ? 70 : 0 }}>{new Date(n.created).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</div>
-                  <h3 style={{ margin: "6px 0 6px", fontSize: 16, color: "#12294a" }}>{n.title}</h3>
-                  <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.6, color: "#3c5170" }}>{n.body}</p>
+                  <div style={{ fontSize: 11.5, color: "var(--muted)", letterSpacing: 0.5, paddingRight: officer ? 70 : 0 }}>{new Date(n.created).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</div>
+                  <h3 style={{ margin: "6px 0 6px", fontSize: 16, color: "var(--ink)" }}>{n.title}</h3>
+                  <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.6, color: "var(--text)" }}>{n.body}</p>
                 </div>
               </article>
             ))}
@@ -93,16 +115,12 @@ export default async function Home() {
         </section>
       )}
       <ProgrammesOpen />
-      <main className="main">
-        <div className="card">
-          <h2>What you can do here</h2>
-          <div className="choice">
-            {choices.map(([href, title, body]) => (
-              <a key={href} href={href}><b>{title}</b><span>{body}</span></a>
-            ))}
-          </div>
+      <footer className="main" style={{ paddingBottom: 30 }}>
+        <div className="foot-strip">
+          <b>Youth Desk NJSMA</b>
+          <span>A service of the New Juaben South Municipal Assembly \u00b7 Every case gets a number; nothing is lost.</span>
         </div>
-      </main>
+      </footer>
     </>
   );
 }
