@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import TopBar from "@/components/Shell";
+import PaperHead from "@/components/PaperHead";
 import AboutGallery from "@/components/AboutGallery";
 
 // Live municipal data: render per request (cacheComponents-compatible).
@@ -40,7 +40,7 @@ export default async function Programs() {
     : SERVICES;
   return (
     <main>
-      <TopBar on="programs" />
+      <PaperHead active="ABOUT & PROGRAMMES" />
       <div className="main">
         <div className="card">
           <h2>About the Assembly</h2>
@@ -78,6 +78,11 @@ export default async function Programs() {
           ))}
         </div>
       </div>
-    </main>
+    
+      <footer className="paper-foot">
+        <span><b>Youth Desk NJSMA</b> &mdash; New Juaben South Municipal Assembly</span>
+        <span>Every case gets a number; nothing is lost.</span>
+      </footer>
+</main>
   );
 }

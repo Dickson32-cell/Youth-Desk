@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import TopBar from "@/components/Shell";
+import PaperHead from "@/components/PaperHead";
 import { prepareFilesForUpload } from "@/lib/imgPrepare";
 
 const TYPES = [
@@ -58,7 +58,7 @@ export default function Report() {
   if (done) {
     return (
       <>
-      <TopBar on="report" />
+      <PaperHead active="REPORT AN ISSUE" />
       <main className="main" style={{ maxWidth: 560 }}>
         <div className="card" style={{ textAlign: "center" }}>
           <h2>Case received</h2>
@@ -91,7 +91,7 @@ export default function Report() {
 
   return (
     <>
-    <TopBar on="report" />
+    <PaperHead active="REPORT AN ISSUE" />
     <main className="main" style={{ maxWidth: 640 }}>
       <form className="card" onSubmit={go}>
         <h2>Report an issue</h2>
@@ -143,6 +143,11 @@ export default function Report() {
         <button className="btn btn-primary w-full" disabled={busy}>{busy ? "Sending…" : "Send to the Youth Desk"}</button>
       </form>
     </main>
-    </>
+    
+      <footer className="paper-foot">
+        <span><b>Youth Desk NJSMA</b> &mdash; New Juaben South Municipal Assembly</span>
+        <span>Every case gets a number; nothing is lost.</span>
+      </footer>
+</>
   );
 }

@@ -5,8 +5,7 @@ import NewsRemoveButton from "@/components/NewsRemoveButton";
 import NewsTicker from "@/components/NewsTicker";
 import ProgrammesOpen from "@/components/ProgrammesOpen";
 import Slideshow from "@/components/Slideshow";
-import ThemeToggle from "@/components/ThemeToggle";
-import { getSeal } from "@/lib/seal";
+import PaperHead from "@/components/PaperHead";
 
 // Live municipal data: render per request (cacheComponents-compatible).
 export const instant = false;
@@ -14,7 +13,6 @@ export const instant = false;
 export default async function Home() {
   // Officer-only inline controls: the officer can remove news from the main page.
   const officer = !!verifySession((await cookies()).get(SESSION_COOKIE)?.value);
-  const seal = await getSeal();
   const [imgs, words, newsRaw] = await Promise.all([
     prisma.siteImage.findMany({ where: { slot: "hero" }, orderBy: { sort: "asc" }, select: { id: true } }).catch(() => [] as { id: number }[]),
     prisma.siteText.findMany({ select: { key: true, value: true } }).catch(() => [] as { key: string; value: string }[]),
@@ -35,30 +33,7 @@ export default async function Home() {
     <>
       {firstHero && <link rel="preload" as="image" href={`/api/media/${firstHero}`} fetchPriority="high" />}
 
-      {/* Hairline top rule: region left, theme + officer right */}
-      <div className="paper-top">
-        <span>KOFORIDUA &middot; EASTERN REGION &middot; GHANA</span>
-        <span className="paper-top-r">
-          <ThemeToggle />
-          {officer ? null : <a href="/office/login" className="paper-login">OFFICER SIGN IN</a>}
-        </span>
-      </div>
-
-      {/* Centered letterhead masthead */}
-      <div className="paper-mast">
-        {seal ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img src={"/api/media/" + seal.id} alt="Assembly seal" />
-        ) : null}
-        <h1>{heroTitle}</h1>
-        <p>NEW JUABEN SOUTH &middot; MUNICIPAL ASSEMBLY</p>
-      </div>
-
-      {/* Ruled navigation strip */}
-      <nav className="paper-nav">
-        <a href="/">HOME</a><a href="/news">NEWS</a><a href="/report">REPORT AN ISSUE</a><a href="/track">TRACK A CASE</a><a href="/programs">PROGRAMMES</a>
-      </nav>
-      <div className="paper-rule" />
+      <PaperHead active="HOME" />
 
       {/* Lower deck: lede / photo / how-it-works */}
       <div className="paper-deck">

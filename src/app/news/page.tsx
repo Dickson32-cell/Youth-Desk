@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import TopBar from "@/components/Shell";
+import PaperHead from "@/components/PaperHead";
 import NewsTicker from "@/components/NewsTicker";
 import Slideshow from "@/components/Slideshow";
 
@@ -19,7 +19,7 @@ export default async function News() {
 
   return (
     <main>
-      <TopBar on="news" />
+      <PaperHead active="NEWS" />
       {tickerItems.length > 0 && <NewsTicker items={tickerItems} />}
       <div className="main" style={{ maxWidth: 900 }}>
         <div className="card" style={{ background: "transparent", border: "none", padding: "16px 0 4px" }}>
@@ -68,6 +68,11 @@ export default async function News() {
           </article>
         ))}
       </div>
-    </main>
+    
+      <footer className="paper-foot">
+        <span><b>Youth Desk NJSMA</b> &mdash; New Juaben South Municipal Assembly</span>
+        <span>Every case gets a number; nothing is lost.</span>
+      </footer>
+</main>
   );
 }

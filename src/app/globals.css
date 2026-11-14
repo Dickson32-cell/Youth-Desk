@@ -365,3 +365,8 @@ tr.rownew > td { animation: rownewbg 2.5s ease; }
   .paper-feat img { height: 190px; }
   .paper-top { font-size: 9px; letter-spacing: 1.2px; }
 }
+
+/* PaperHead active tab + public tabbar on paper pages */
+.paper-nav a.pon { color: var(--ink); font-weight: 800; border-bottom: 2px solid var(--gold); padding-bottom: 3px; }
+.paper-mast img { width: 58px; height: 58px; }
+.tabbar .tab { flex-direction: column; gap: 2px; }
