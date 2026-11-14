@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import TopBar from "@/components/Shell";
 
+import PaperHead from "@/components/PaperHead";
 const LABEL: Record<string, string> = {
   NEW: "Received — waiting for the officer",
   IN_PROGRESS: "In progress — the officer is on it",
@@ -64,7 +64,8 @@ export default function TrackInner() {
   ] : [];
 
   return (
-    <><TopBar on="track" /><main className="main" style={{ maxWidth: 560 }}>
+    <><PaperHead active="TRACK A CASE" />
+      <main className="main" style={{ maxWidth: 560 }}>
       <form className="card" onSubmit={(e) => { e.preventDefault(); go(); }}>
         <h2>Track your case</h2>
         <p className="sub">Both details are on your slip and in the SMS you received. Your case stays private — only these two together open it.</p>
@@ -114,6 +115,11 @@ export default function TrackInner() {
           </p>
         </div>
       )}
+
+    <footer className="paper-foot">
+      <span><b>Youth Desk NJSMA</b> &mdash; New Juaben South Municipal Assembly</span>
+      <span>Every case gets a number; nothing is lost.</span>
+    </footer>
     </main>
     </>
   );
