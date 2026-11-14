@@ -16,14 +16,16 @@ export async function GET(req: NextRequest) {
   if (req.nextUrl.searchParams.get("full") === "1") {
     const rows = await prisma.program.findMany({
       orderBy: { id: "desc" },
-      include: { registrations: { orderBy: { id: "asc" } }, _count: { select: { registrations: true } } },
+      select: { id: true, title: true, description: true, category: true, deadline: true, venue: true, seats: true, status: true, meetingDate: true, interventionId: true, registrations: { orderBy: { id: "asc" }, select: { id: true, name: true, phone: true, area: true, note: true, walkin: true, createdAt: true } }, _count: { select: { registrations: true } } },
     });
     return NextResponse.json({
       ok: true,
       rows: rows.map((r) => ({
         id: r.id, title: r.title, description: r.description, category: r.category,
         deadline: r.deadline, venue: r.venue, seats: r.seats, status: r.status,
-        registrations: r.registrations.map((g) => ({ id: g.id, name: g.name, phone: g.phone, area: g.area, note: g.note, createdAt: g.createdAt })),
+        meetingDate: r.meetingDate,
+      interventionId: r.interventionId,
+      registrations: r.registrations.map((g) => ({ id: g.id, name: g.name, phone: g.phone, area: g.area, note: g.note, walkin: g.walkin, createdAt: g.createdAt })),
       })),
     });
   }

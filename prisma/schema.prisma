@@ -100,6 +100,7 @@ model Intervention {
   note       String?
   officer    String // username of the recording officer
   createdAt  DateTime @default(now())
+  programs   Program[] // open sign-up posts created from (or linked to) this intervention
 
   @@index([date])
 }
@@ -115,6 +116,8 @@ model Program {
   seats       Int?     // planned participants (null = not stated)
   meetingDate String?  // the scheduled meeting/starting date announced to registrants
   postedBy    String   // officer username
+  interventionId Int?  // when this post came from a KPI intervention row
+  intervention   Intervention? @relation(fields: [interventionId], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
   registrations Registration[]
 
@@ -132,6 +135,7 @@ model Registration {
   phone     String?
   area      String?
   note           String?
+  walkin         Boolean  @default(false) // true = registered by the officer at the desk
   createdAt      DateTime @default(now())
   reminderSentAt DateTime? // set when the meeting-reminder SMS went to THIS registrant
 
