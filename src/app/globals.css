@@ -432,7 +432,7 @@ body:has(.wise-site) input[type="checkbox"] { accent-color: var(--navy); }
 body:has(.wise-site) .alert-ok { background: #e2f6d5; color: #163300; border-radius: 12px; }
 body:has(.wise-site) .alert-err { background: #fbeeed; color: #b3261e; border-radius: 12px; }
 body:has(.wise-site) .progcard { background: #fff; border-radius: 16px; box-shadow: 0 1px 5px -4px rgba(19,19,22,.7), 0 0 0 1px var(--navy), 0 4px 8px rgba(34,42,53,.05); }
-body:has(.wise-site) .paper-foot { background: #16180f; color: #cfd8c8; }
+body:has(.wise-site) .paper-foot { background: var(--navy); color: rgba(255,255,255,.92); }
 
 /* dark mode (public): near-black with mint voices */
 html[data-theme="dark"] body:has(.wise-site) { background: #101311; }
@@ -444,7 +444,7 @@ html[data-theme="dark"] body:has(.wise-site) input[type="text"], html[data-theme
 html[data-theme="dark"] body:has(.wise-site) textarea { background: #151a15; border-color: #33402f; color: #f0f4ec; }
 html[data-theme="dark"] body:has(.wise-site) input[type="file"] { background: #151a15; border-color: var(--navy); color: #a7b3a5; }
 html[data-theme="dark"] body:has(.wise-site) .progcard { background: #191e19; }
-html[data-theme="dark"] body:has(.wise-site) .paper-foot { background: #0b0d09; color: #9fb29b; }
+html[data-theme="dark"] body:has(.wise-site) .paper-foot { background: var(--navy); color: rgba(255,255,255,.92); }
 
 /* --- OFFICER CONSOLE (Wise) --- */
 body:has(.topbar) .card { background: #fff; border: none; border-radius: 16px; box-shadow: 0 1px 5px -4px rgba(19,19,22,.7), 0 0 0 1px rgba(34,42,53,.10), 0 4px 8px rgba(34,42,53,.05); }
@@ -590,9 +590,8 @@ body:has(.topbar) .statrow .st.on { color: #16180f; }
 
 /* NJSMA seal rides in the public header brand (every page) */
 .wise-top .brand .seal-img { width: 34px; height: 34px; border-radius: 50%; object-fit: contain; flex: 0 0 auto; }
-.foot-office { color: rgba(255,255,255,.75); font-size: 12px; text-decoration: underline; margin-left: 14px; }
-.foot-office:hover { color: #fff; }
-html[data-theme="dark"] .foot-office { color: #9fb29b; }
+
+
 
 /* Mobile + tablet: every navigation pill visible (wrap instead of scroll) */
 @media (max-width: 900px) {
@@ -600,3 +599,9 @@ html[data-theme="dark"] .foot-office { color: #9fb29b; }
   .wise-top .top-links { order: 3; flex: 1 0 100%; justify-content: center; flex-wrap: wrap; overflow-x: visible; gap: 5px; padding-bottom: 5px; }
   .wise-top .top-links a { padding: 8px 11px; font-size: 11px; }
 }
+
+/* Footer pins to the bottom of short pages (no floating band with dead space below).
+   body is one flex column: header -> main (grows) -> footer. Fixed tabbar/sheets unaffected. */
+main { display: flex; flex-direction: column; min-height: 100vh; flex: 1 0 auto; }
+body > .main, main > .main { flex: 1 0 auto; width: 100%; }
+main > footer.paper-foot { width: 100%; margin-top: auto; }

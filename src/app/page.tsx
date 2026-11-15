@@ -95,7 +95,6 @@ export default async function Home() {
       </div>
       <footer className="paper-foot">
         <span><b>Youth Desk NJSMA</b> &mdash; New Juaben South Municipal Assembly</span>
-        <a className="foot-office" href="/office/login">Officer sign in</a>
       </footer>
     </main>
   );
