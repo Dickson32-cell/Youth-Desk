@@ -593,3 +593,10 @@ body:has(.topbar) .statrow .st.on { color: #16180f; }
 .foot-office { color: rgba(255,255,255,.75); font-size: 12px; text-decoration: underline; margin-left: 14px; }
 .foot-office:hover { color: #fff; }
 html[data-theme="dark"] .foot-office { color: #9fb29b; }
+
+/* Mobile + tablet: every navigation pill visible (wrap instead of scroll) */
+@media (max-width: 900px) {
+  .wise-top { flex-wrap: wrap; row-gap: 5px; padding: 9px 14px 5px; }
+  .wise-top .top-links { order: 3; flex: 1 0 100%; justify-content: center; flex-wrap: wrap; overflow-x: visible; gap: 5px; padding-bottom: 5px; }
+  .wise-top .top-links a { padding: 8px 11px; font-size: 11px; }
+}

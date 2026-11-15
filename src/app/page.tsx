@@ -17,7 +17,7 @@ const EMPTY_NEWS: NewsRow[] = [];
 export default async function Home() {
   // Officer-only inline controls: the officer can remove news from the main page.
   const officer = !!verifySession((await cookies()).get(SESSION_COOKIE)?.value);
-  const [imgs, words, newsRaw, resolved, openCases, depts, progOpen] = await Promise.all([
+  const [imgs, words, newsRaw] = await Promise.all([
     prisma.siteImage.findMany({ where: { slot: "hero" }, orderBy: { sort: "asc" }, select: { id: true } }).catch(() => [] as { id: number }[]),
     prisma.siteText.findMany({ select: { key: true, value: true } }).catch(() => [] as { key: string; value: string }[]),
     prisma.news.findMany({
@@ -25,10 +25,6 @@ export default async function Home() {
       take: 8,
       select: { id: true, title: true, body: true, important: true, createdAt: true, images: { select: { id: true, mimeType: true }, orderBy: { sort: "asc" } } },
     }).catch(() => EMPTY_NEWS),
-    prisma.case.count({ where: { status: "RESOLVED" } }).catch(() => 0),
-    prisma.case.count({ where: { status: { not: "RESOLVED" } } }).catch(() => 0),
-    prisma.siteItem.count({ where: { kind: "department" } }).catch(() => 0),
-    prisma.program.count({ where: { status: "OPEN" } }).catch(() => 0),
   ]);
   const news = newsRaw.map((n) => ({ ...n, created: n.createdAt.toISOString() }));
   const w = Object.fromEntries(words.map((r) => [r.key, r.value]));
@@ -56,13 +52,6 @@ export default async function Home() {
           <div className="photoin">
             {imgs.length > 0 && <Slideshow images={imgs.map((i) => i.id)} alt="" priority={true} />}
           </div>
-        </section>
-
-        <section className="wise-stats">
-          <div className="st"><b>{resolved}</b><span>CASES RESOLVED</span></div>
-          <div className="st"><b>{openCases}</b><span>CASES IN PROGRESS</span></div>
-          <div className="st"><b>{depts}</b><span>ASSEMBLY DEPARTMENTS</span></div>
-          <div className="st"><b>{progOpen}</b><span>OPEN PROGRAMMES</span></div>
         </section>
 
         <section className="wise-links">
