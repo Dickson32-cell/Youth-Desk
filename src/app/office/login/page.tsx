@@ -61,7 +61,7 @@ export default function Login() {
 
         <div style={{ padding: "22px 22px 24px" }}>
           {err && (
-            <div style={{ background: "rgba(179,38,30,.08)", border: "1px solid rgba(179,38,30,.3)", color: "var(--danger)", borderRadius: 8, padding: "9px 12px", fontSize: 13, marginBottom: 14 }}>
+            <div style={{ background: "rgba(179,38,30,.08)", border: "1px solid rgba(179,38,30,.3)", color: "var(--danger)", borderRadius: 10, padding: "9px 12px", fontSize: 13, marginBottom: 14 }}>
               {err}
             </div>
           )}
@@ -86,7 +86,7 @@ export default function Login() {
           <button
             className="btn btn-primary w-full"
             disabled={busy}
-            style={{ minHeight: 46, fontWeight: 800, fontSize: 15, borderRadius: 8 }}
+            style={{ minHeight: 46, fontWeight: 800, fontSize: 15, borderRadius: 999 }}
           >
             {busy ? "Signing in…" : "Sign in"}
           </button>

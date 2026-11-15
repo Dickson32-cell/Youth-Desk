@@ -88,8 +88,10 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
   useEffect(() => {
     const html = document.documentElement;
     if (office) {
-      html.removeAttribute("data-theme");
-      setDark(false);
+      // The officer console remembers its own light/dark choice (separate key from the public site).
+      const own = localStorage.getItem("youthdesk-office-theme");
+      if (own === "dark") { html.setAttribute("data-theme", "dark"); setDark(true); }
+      else { html.removeAttribute("data-theme"); setDark(false); }
       return;
     }
     const stored = localStorage.getItem("youthdesk-theme");
@@ -100,9 +102,9 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
   function toggleTheme() {
     const html = document.documentElement;
     const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
-    if (next === "dark") { html.setAttribute("data-theme", "dark"); localStorage.setItem("youthdesk-theme", "dark"); setDark(true); }
-    else { html.removeAttribute("data-theme"); localStorage.setItem("youthdesk-theme", "light"); setDark(false); }
-    void html;
+    const store = office ? "youthdesk-office-theme" : "youthdesk-theme";
+    if (next === "dark") { html.setAttribute("data-theme", "dark"); localStorage.setItem(store, "dark"); setDark(true); }
+    else { html.removeAttribute("data-theme"); localStorage.setItem(store, "light"); setDark(false); }
   }
 
   useEffect(() => {
@@ -148,11 +150,9 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
               </Link>
             ))}
           </nav>
-          {!office && (
-            <button className="themetoggle" onClick={toggleTheme} title={dark ? "Switch to light mode" : "Switch to dark mode"} aria-label="Toggle dark mode">
-              {dark ? "\u2600 Light" : "\u263E Dark"}
-            </button>
-          )}
+          <button className="themetoggle" onClick={toggleTheme} title={dark ? "Switch to light mode" : "Switch to dark mode"} aria-label="Toggle dark mode">
+            {dark ? "\u2600 Light" : "\u263E Dark"}
+          </button>
           {office && (
             <span className="officer-chip">
               {me || "Officer"}
@@ -200,6 +200,10 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
                 <span className="sheet-note">{t.note}</span>
               </Link>
             ))}
+            <button className="sheet-row" onClick={toggleTheme}>
+              <span>{dark ? "Light mode" : "Dark mode"}</span>
+              <span className="sheet-note">Console appearance</span>
+            </button>
             <div className="sheet-sep" />
             <div className="sheet-id">Signed in as <b>{me || "Officer"}</b></div>
             <button className="sheet-row so" onClick={signOut}>Sign out</button>
