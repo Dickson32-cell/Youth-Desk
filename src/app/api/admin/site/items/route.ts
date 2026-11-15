@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   const b = await req.json().catch(() => ({}));
   const kind = b.kind === "service" ? "service" : "department";
   const title = typeof b.title === "string" ? b.title.trim().slice(0, 80) : "";
-  const body = typeof b.body === "string" ? b.body.trim().slice(0, 300) : "";
+  const body = typeof b.body === "string" ? b.body.trim().slice(0, 2000) : "";
   if (!title) return NextResponse.json({ error: "Type the name first" }, { status: 400 });
   const item = await prisma.siteItem.create({ data: { kind, title, body } });
   return NextResponse.json({ ok: true, item: { id: item.id, kind, title: item.title, body: item.body } });
@@ -33,7 +33,7 @@ export async function PATCH(req: NextRequest) {
   const b = await req.json().catch(() => ({}));
   const id = Number(b.id) || 0;
   const title = typeof b.title === "string" ? b.title.trim().slice(0, 80) : "";
-  const body = typeof b.body === "string" ? b.body.trim().slice(0, 300) : "";
+  const body = typeof b.body === "string" ? b.body.trim().slice(0, 2000) : "";
   if (!id || !title) return NextResponse.json({ error: "Type the name first" }, { status: 400 });
   const existing = await prisma.siteItem.findUnique({ where: { id } });
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });

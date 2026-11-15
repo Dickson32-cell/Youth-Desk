@@ -372,8 +372,8 @@ export default function ContentStudio() {
             <label className="fld"><span className="cap">Department name</span>
               <input value={newDept.title} onChange={(e) => setNewDept((s) => ({ ...s, title: e.target.value }))} placeholder="e.g. Physical Planning Department" />
             </label>
-            <label className="fld"><span className="cap">What it does (one line, optional)</span>
-              <input value={newDept.body} onChange={(e) => setNewDept((s) => ({ ...s, body: e.target.value }))} placeholder="e.g. Building permits and planning advice" />
+            <label className="fld"><span className="cap">What this department does (full description)</span>
+              <textarea rows={6} maxLength={2000} value={newDept.body} onChange={(e) => setNewDept((s) => ({ ...s, body: e.target.value }))} placeholder="Write what the department handles and how the public can use it. Visitors read this when they tap the department on the About page." />
             </label>
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -401,8 +401,8 @@ export default function ContentStudio() {
             <label className="fld"><span className="cap">Service name</span>
               <input value={newSvc.title} onChange={(e) => setNewSvc((s) => ({ ...s, title: e.target.value }))} placeholder="e.g. Business operating permits" />
             </label>
-            <label className="fld"><span className="cap">How it works (one line)</span>
-              <input value={newSvc.body} onChange={(e) => setNewSvc((s) => ({ ...s, body: e.target.value }))} placeholder="e.g. Apply at the Trade & Industry office" />
+            <label className="fld"><span className="cap">How it works (up to a short paragraph)</span>
+              <textarea rows={4} maxLength={2000} value={newSvc.body} onChange={(e) => setNewSvc((s) => ({ ...s, body: e.target.value }))} placeholder="e.g. Apply at the Trade & Industry office" />
             </label>
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>

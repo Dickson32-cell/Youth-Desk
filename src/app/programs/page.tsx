@@ -1,6 +1,11 @@
 import { prisma } from "@/lib/db";
+import Link from "next/link";
 import PaperHead from "@/components/PaperHead";
 import AboutGallery from "@/components/AboutGallery";
+
+// Long write-ups stay on the department page; the list shows a short preview line.
+const preview = (body: string) =>
+  body.length > 140 ? body.slice(0, 140).trimEnd() + "\u2026" : body;
 
 // Live municipal data: render per request (cacheComponents-compatible).
 export const instant = false;
@@ -40,9 +45,9 @@ export default async function Programs() {
     prisma.siteItem.findMany({ where: { kind: "service" }, orderBy: { id: "asc" }, select: { id: true, title: true, body: true } }),
     prisma.siteImage.findMany({ where: { slot: "about" }, orderBy: { sort: "asc" }, select: { id: true } }),
   ]);
-  const depts: [string, string][] = deptItems.length > 0
-    ? deptItems.map((d) => [d.title, d.body] as [string, string])
-    : DEPARTMENTS;
+  const depts: { id: number | null; title: string; body: string }[] = deptItems.length > 0
+    ? deptItems.map((d) => ({ id: d.id as number, title: d.title, body: d.body }))
+    : DEPARTMENTS.map(([title, body]) => ({ id: null, title, body }));
   const svcs: [string, string][] = svcItems.length > 0
     ? svcItems.map((d) => [d.title, d.body] as [string, string])
     : SERVICES;
@@ -68,13 +73,27 @@ export default async function Programs() {
 
         <div className="card">
           <h2>Departments of the Assembly</h2>
-          <p className="sub">Each department handles its own service for the public; the Youth Desk links you to the right one.</p>
-          {depts.map(([name, role]) => (
-            <div key={name} style={{ borderBottom: "1px solid #eef1f8", padding: "10px 0" }}>
-              <b style={{ fontSize: 14.5 }}>{name}</b>
-              {role && <div style={{ fontSize: 13, color: "#5b6b86", lineHeight: 1.5 }}>{role}</div>}
-            </div>
-          ))}
+          <p className="sub">Each department handles its own service for the public; the Youth Desk links you to the right one. Tap any department to read what it does.</p>
+          {depts.map((d) => {
+            const row = (
+              <>
+                <b style={{ fontSize: 14.5 }}>{d.title}</b>
+                {d.body && <div style={{ fontSize: 13, color: "#5b6b86", lineHeight: 1.5, marginTop: 2 }}>{preview(d.body)}</div>}
+              </>
+            );
+            const style = { borderBottom: "1px solid #eef1f8", padding: "10px 0", display: "block" } as const;
+            return d.id !== null ? (
+              <Link key={d.id} href={`/departments/${d.id}`} style={{ ...style, color: "inherit", textDecoration: "none" }}
+                title={`Open ${d.title}`}>
+                <span style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
+                  <span style={{ flex: 1 }}>{row}</span>
+                  <span aria-hidden="true" style={{ color: "var(--navy,#1c3f6e)", fontSize: 13, fontWeight: 700 }}>&rsaquo;</span>
+                </span>
+              </Link>
+            ) : (
+              <div key={d.title} style={style}>{row}</div>
+            );
+          })}
         </div>
 
         <div className="card">
@@ -83,7 +102,7 @@ export default async function Programs() {
           {svcs.map(([name, role]) => (
             <div key={name} style={{ borderBottom: "1px solid #eef1f8", padding: "10px 0" }}>
               <b style={{ fontSize: 14.5 }}>{name}</b>
-              {role && <div style={{ fontSize: 13, color: "#5b6b86", lineHeight: 1.5 }}>{role}</div>}
+              {role && <div style={{ fontSize: 13, color: "#5b6b86", lineHeight: 1.5, marginTop: 2 }}>{preview(role)}</div>}
             </div>
           ))}
         </div>

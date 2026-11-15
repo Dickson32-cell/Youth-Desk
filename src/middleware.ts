@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// PUBLIC: landing, login, public report/track/programs, printables (slip + referral form) and their APIs,
+// PUBLIC: landing, login, public report/track/programs, department read-ups, printables (slip + referral form) and their APIs,
 // plus the PWA shell files (manifest + service worker + offline fallback) — browsers fetch these before any login.
-const PUBLIC = ["/", "/report", "/track", "/news", "/programs", "/office/login", "/slip", "/forward", "/api/auth/login", "/api/public", "/api/media", "/api/seal", "/api/news-image", "/api/cron/programme-reminders", "/manifest.webmanifest", "/sw.js", "/offline.html"];
+const PUBLIC = ["/", "/report", "/track", "/news", "/programs", "/departments", "/office/login", "/slip", "/forward", "/api/auth/login", "/api/public", "/api/media", "/api/seal", "/api/news-image", "/api/cron/programme-reminders", "/manifest.webmanifest", "/sw.js", "/offline.html"];
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
