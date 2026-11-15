@@ -587,3 +587,9 @@ html[data-theme="dark"] body:has(.topbar) .statrow .st.on .big { color: #9fe870;
 html[data-theme="dark"] body:has(.topbar) .statrow .st.on .lbl { color: #cfe8c6; }
 /* gold active tile stays readable in light mode */
 body:has(.topbar) .statrow .st.on { color: #16180f; }
+
+/* NJSMA seal rides in the public header brand (every page) */
+.wise-top .brand .seal-img { width: 34px; height: 34px; border-radius: 50%; object-fit: contain; flex: 0 0 auto; }
+.foot-office { color: rgba(255,255,255,.75); font-size: 12px; text-decoration: underline; margin-left: 14px; }
+.foot-office:hover { color: #fff; }
+html[data-theme="dark"] .foot-office { color: #9fb29b; }

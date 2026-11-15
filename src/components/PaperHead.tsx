@@ -43,6 +43,9 @@ export default function PaperHead({ active = "" }: { active?: string }) {
     <div className="wise-site">
       <header className="wise-top noprint">
         <Link href="/" className="brand">
+          {/* The NJSMA Assembly seal rides with the brand on every public page. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/api/seal" alt="NJSMA seal" className="seal-img" />
           {deskLogo && (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img src={deskLogo} alt="Youth Desk" />
@@ -65,7 +68,6 @@ export default function PaperHead({ active = "" }: { active?: string }) {
           <svg className="sw-moon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z" /></svg>
           <span className="knob" />
         </button>
-        <Link href="/office/login" className="signin-pill">OFFICER SIGN IN</Link>
       </header>
     </div>
   );
