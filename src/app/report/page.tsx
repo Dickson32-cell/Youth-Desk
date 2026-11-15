@@ -71,7 +71,7 @@ export default function Report() {
             <p style={{ fontSize: 13, color: "#a2631f", fontWeight: 600, margin: "8px 0 0" }}>Note: {upNote} Your case was still received.</p>
           )}
           {doneKey && (
-            <div style={{ margin: "14px auto 0", padding: "10px 14px", border: "1px solid #ccd8ea", borderRadius: 8, maxWidth: 420, fontSize: 14 }}>
+            <div style={{ margin: "14px auto 0", padding: "10px 14px", border: "1.5px solid var(--navy)", borderRadius: 0, background: "var(--paper)", maxWidth: 420, fontSize: 14 }}>
               <b>Tracking key: {doneKey}</b>
               <div style={{ fontSize: 12.5, color: "#5b6b86", marginTop: 4 }}>Keep this PRIVATE. The case number alone cannot open your case — only the number plus this key can.</div>
             </div>
@@ -129,7 +129,7 @@ export default function Report() {
         {files.length > 0 && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
             {files.map((fl, i) => (
-              <span key={i} style={{ background: "#f4f7fc", border: "1px solid #ccd8ea", color: "#3c5170", padding: "4px 10px", borderRadius: 999, fontSize: 12.5, display: "inline-flex", gap: 6, alignItems: "center" }}>
+              <span key={i} style={{ background: "var(--paper)", border: "1px solid var(--navy)", color: "#3c5170", padding: "4px 10px", borderRadius: 2, fontSize: 12.5, display: "inline-flex", gap: 6, alignItems: "center" }}>
                 {fl.name.length > 28 ? fl.name.slice(0, 25) + "…" : fl.name} ({Math.round(fl.size / 1024)} KB)
                 <button type="button" onClick={() => setFiles((c) => c.filter((_, k) => k !== i))} style={{ border: 0, background: "transparent", cursor: "pointer", fontWeight: 800, color: "#8a3a3a", padding: 0 }}>×</button>
               </span>

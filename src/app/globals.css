@@ -394,3 +394,73 @@ html[data-theme="dark"] .paper-switch .sw-sun, html[data-theme="dark"] .paper-sw
 
 /* The Desk's own logo: quiet corner mark at the top of every public page */
 .paper-top-logo { width: auto; height: 30px; margin-right: 10px; flex: 0 0 auto; object-fit: contain; }
+
+/* ============================================================
+   ASSEMBLY PAPER RESKIN (Direction A - ruled paper language)
+   Public pages: warm paper, ruled write-on lines, double-rule
+   section heads, squared buttons. Officer console: the same
+   ruled language on cream cards. Printables (case slip,
+   referral) keep their approved look. Scoped so nothing else
+   inherits by accident.
+   ============================================================ */
+
+/* --- Shared: squared buttons everywhere (public + console) --- */
+.btn { border-radius: 0; }
+.btn-primary { background: var(--navy); border-top: 3px solid var(--gold); }
+.btn-primary:hover { background: var(--navy-800); }
+.btn-primary:disabled { background: #9db1c9; }
+.btn-ghost { background: transparent; border: 1.5px solid var(--navy); color: var(--navy); }
+.btn-ghost:hover { background: rgba(23, 42, 77, .07); }
+.btn-danger { background: transparent; border: 1.5px solid #b3261e; }
+.btn-danger:hover { background: #fbeeed; }
+.signout { border-radius: 0; }
+.tag { border-radius: 2px; }
+
+/* --- PUBLIC: paper surface + ruled write-on fields --- */
+body:has(.paper-mast) { background: #f7f4ec; }
+body:has(.paper-mast) .card { background: transparent; border: none; border-top: 3px double var(--navy); border-radius: 0; box-shadow: none; padding: 14px 0 8px; margin-bottom: 30px; }
+body:has(.paper-mast) .card h2 { font-family: Georgia, "Times New Roman", serif; font-size: 20px; color: var(--navy); }
+body:has(.paper-mast) .card .sub { color: #5b6b86; }
+body:has(.paper-mast) .form-grid { gap: 0 26px; }
+body:has(.paper-mast) label.fld { margin-bottom: 20px; }
+body:has(.paper-mast) label.fld .cap { font-size: 9.5px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--navy); font-weight: 700; margin-bottom: 7px; }
+body:has(.paper-mast) input[type="text"], body:has(.paper-mast) input[type="password"], body:has(.paper-mast) input[type="tel"], body:has(.paper-mast) input[type="date"], body:has(.paper-mast) input[type="email"], body:has(.paper-mast) select { background: transparent; border: none; border-bottom: 1.5px solid var(--navy); border-radius: 0; padding: 7px 2px 8px; }
+body:has(.paper-mast) input[type="text"]:focus, body:has(.paper-mast) input[type="password"]:focus, body:has(.paper-mast) input[type="tel"]:focus, body:has(.paper-mast) input[type="date"]:focus, body:has(.paper-mast) input[type="email"]:focus, body:has(.paper-mast) select:focus { outline: none; border-bottom: 2px solid var(--gold); box-shadow: none; }
+body:has(.paper-mast) textarea { border: 1.5px solid var(--navy); background: #fffdf7; border-radius: 0; padding: 12px; }
+body:has(.paper-mast) textarea:focus { outline: none; border-color: var(--gold); box-shadow: none; }
+body:has(.paper-mast) input[type="file"] { border: 1.5px dashed var(--navy); background: #fffdf7; border-radius: 0; padding: 13px; font-size: 12px; letter-spacing: 1px; color: #5b6b86; }
+body:has(.paper-mast) input[type="checkbox"] { accent-color: var(--navy); }
+body:has(.paper-mast) .progcard { background: transparent; border: none; border-top: 2px solid var(--navy); border-radius: 0; padding: 12px 2px 14px; }
+body:has(.paper-mast) .alert-ok, body:has(.paper-mast) .alert-err { border-radius: 0; }
+body:has(.paper-mast) input[type="file"]::-webkit-file-upload-button { background: var(--navy); color: #fffdf7; border: none; border-top: 2px solid var(--gold); font-family: inherit; font-size: 11px; font-weight: 800; letter-spacing: 1.5px; padding: 8px 14px; }
+
+/* --- PUBLIC dark mode: dark paper, same ruled language --- */
+html[data-theme="dark"] body:has(.paper-mast) { background: #14171c; }
+html[data-theme="dark"] body:has(.paper-mast) .card { border-top-color: #8fa2bd; }
+html[data-theme="dark"] body:has(.paper-mast) .card h2 { color: #e8e6da; }
+html[data-theme="dark"] body:has(.paper-mast) label.fld .cap { color: #cbd4e4; }
+html[data-theme="dark"] body:has(.paper-mast) input[type="text"], html[data-theme="dark"] body:has(.paper-mast) input[type="password"], html[data-theme="dark"] body:has(.paper-mast) input[type="tel"], html[data-theme="dark"] body:has(.paper-mast) input[type="date"], html[data-theme="dark"] body:has(.paper-mast) input[type="email"], html[data-theme="dark"] body:has(.paper-mast) select { background: transparent; border-bottom-color: #8fa2bd; color: #e8e6da; }
+html[data-theme="dark"] body:has(.paper-mast) textarea { background: #1d242d; border-color: #8fa2bd; color: #e8e6da; }
+html[data-theme="dark"] body:has(.paper-mast) input[type="file"] { background: #1d242d; border-color: #8fa2bd; color: #9aa7b8; }
+html[data-theme="dark"] body:has(.paper-mast) .progcard { border-top-color: #8fa2bd; }
+
+/* --- OFFICER CONSOLE: cream ruled cards on the same language --- */
+body:has(.topbar) .card { background: #fffdf7; border: 1px solid #ddd6c2; border-radius: 0; box-shadow: none; }
+body:has(.topbar) .card h2 { font-family: Georgia, "Times New Roman", serif; font-size: 17px; color: var(--navy); }
+body:has(.topbar) label.fld { margin-bottom: 16px; }
+body:has(.topbar) label.fld .cap { font-size: 9.5px; letter-spacing: 1.6px; text-transform: uppercase; color: #33415c; font-weight: 700; margin-bottom: 7px; }
+body:has(.topbar) input[type="text"], body:has(.topbar) input[type="password"], body:has(.topbar) input[type="tel"], body:has(.topbar) input[type="date"], body:has(.topbar) input[type="email"], body:has(.topbar) select { background: transparent; border: none; border-bottom: 1.5px solid var(--navy); border-radius: 0; padding: 7px 2px 7px; }
+body:has(.topbar) input[type="text"]:focus, body:has(.topbar) input[type="password"]:focus, body:has(.topbar) input[type="tel"]:focus, body:has(.topbar) input[type="date"]:focus, body:has(.topbar) input[type="email"]:focus, body:has(.topbar) select:focus { outline: none; border-bottom: 2px solid var(--gold); box-shadow: none; }
+body:has(.topbar) textarea { border: 1.5px solid var(--navy); background: #fffdf7; border-radius: 0; padding: 11px 12px; }
+body:has(.topbar) textarea:focus { outline: none; border-color: var(--gold); box-shadow: none; }
+body:has(.topbar) input[type="file"] { border: 1.5px dashed var(--navy); background: #fffdf7; border-radius: 0; padding: 12px; color: #5b6b86; }
+body:has(.topbar) .topbar { box-shadow: none; }
+body:has(.topbar) .statrow .st { border-radius: 0; border: 1px solid #c9d4e4; border-top: 3px solid var(--navy); box-shadow: none; background: #fffdf7; }
+body:has(.topbar) .statrow .st.on { border-top-color: var(--gold); box-shadow: none; }
+body:has(.topbar) .tbl th { background: transparent; border-bottom: 2px solid var(--navy); text-transform: uppercase; letter-spacing: 1.3px; font-size: 10px; }
+body:has(.topbar) .tbl td { border-bottom: 1px solid #e5e9f1; }
+body:has(.topbar) .alert-ok, body:has(.topbar) .alert-err { border-radius: 0; }
+body:has(.topbar) input[type="file"]::-webkit-file-upload-button { background: var(--navy); color: #fffdf7; border: none; border-top: 2px solid var(--gold); font-family: inherit; font-size: 11px; font-weight: 800; letter-spacing: 1.5px; padding: 8px 14px; }
+
+/* Officer login page (inline-styled single card): squared to match */
+body:has(.office-signin) .office-signin { border-radius: 0; box-shadow: none; border-color: #ddd6c2; }

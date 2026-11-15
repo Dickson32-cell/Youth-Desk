@@ -43,6 +43,7 @@ export default function Login() {
     >
       <form
         onSubmit={go}
+        className="office-signin"
         style={{
           width: "100%", maxWidth: 400, background: "#fff", border: "1px solid var(--line)",
           borderRadius: 14, overflow: "hidden", boxShadow: "0 10px 30px rgba(16,38,70,.12)",
