@@ -66,9 +66,9 @@ export default async function Home() {
         </section>
 
         <section className="wise-links">
-          <Link href="/report" className="lk"><img src="/api/seal" alt="" /><div><b>Report an issue</b><span>Tell the desk what happened. Anonymous is welcome.</span><em>Open the form &rarr;</em></div></Link>
-          <Link href="/track" className="lk"><img src="/api/seal" alt="" /><div><b>Track a case</b><span>Enter your case number and see where it stands today.</span><em>Track it &rarr;</em></div></Link>
-          <Link href="/programs" className="lk"><img src="/api/seal" alt="" /><div><b>Departments &amp; services</b><span>Every department of the Assembly, one tap each.</span><em>See them all &rarr;</em></div></Link>
+          <Link href="/report" className="lk"><div><b>Report an issue</b><span>Tell the desk what happened. Anonymous is welcome.</span><em>Open the form &rarr;</em></div></Link>
+          <Link href="/track" className="lk"><div><b>Track a case</b><span>Enter your case number and see where it stands today.</span><em>Track it &rarr;</em></div></Link>
+          <Link href="/programs" className="lk"><div><b>Departments &amp; services</b><span>Every department of the Assembly, one tap each.</span><em>See them all &rarr;</em></div></Link>
         </section>
 
         <NewsTicker items={(news.filter((n) => n.important).length > 0 ? news.filter((n) => n.important) : news).slice(0, 6).map((n) => ({ id: n.id, title: n.title }))} />
