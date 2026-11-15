@@ -5,15 +5,23 @@ import AboutGallery from "@/components/AboutGallery";
 // Live municipal data: render per request (cacheComponents-compatible).
 export const instant = false;
 
-// The Assembly's decentralised departments (draft list for Dickson to confirm/correct).
+// The Assembly's decentralised departments (official list — seeded in the officers console,
+// which stays the place to edit. This fallback only shows if the console list is emptied.)
 const DEPARTMENTS: [string, string][] = [
-  ["Central Administration", "Runs the day-to-day work of the Assembly - records, correspondence and general services."],
-  ["Finance Department", "Prepares and controls the budget, manages revenue and expenditure."],
-  ["Works Department", "Public buildings, roads and infrastructure maintenance."],
-  ["Physical Planning Department", "Town layout, planning advice and building permits."],
-  ["Food and Agriculture Department", "Extension services and support for farmers and growers."],
-  ["Social Welfare & Community Development", "Protection and support for vulnerable people; community programmes."],
-  ["Trade, Industry & Tourism", "Support for local businesses, artisans and the municipal markets."],
+  ["Central Administration", ""],
+  ["Department of Social Welfare and Community Development", ""],
+  ["Works Department", ""],
+  ["Physical Planning Department", ""],
+  ["Statistics Department", ""],
+  ["Human Resource Department", ""],
+  ["Department of Urban Roads", ""],
+  ["Finance Department", ""],
+  ["Department of Births and Deaths", ""],
+  ["Agric Department", ""],
+  ["Education Directorate", ""],
+  ["Health Directorate", ""],
+  ["Natural Resources Conservation and Forestry", ""],
+  ["Trade and Industry", ""],
 ];
 
 // What the Assembly and its Youth Desk render to the public.
@@ -64,7 +72,7 @@ export default async function Programs() {
           {depts.map(([name, role]) => (
             <div key={name} style={{ borderBottom: "1px solid #eef1f8", padding: "10px 0" }}>
               <b style={{ fontSize: 14.5 }}>{name}</b>
-              <div style={{ fontSize: 13, color: "#5b6b86", lineHeight: 1.5 }}>{role}</div>
+              {role && <div style={{ fontSize: 13, color: "#5b6b86", lineHeight: 1.5 }}>{role}</div>}
             </div>
           ))}
         </div>
@@ -75,7 +83,7 @@ export default async function Programs() {
           {svcs.map(([name, role]) => (
             <div key={name} style={{ borderBottom: "1px solid #eef1f8", padding: "10px 0" }}>
               <b style={{ fontSize: 14.5 }}>{name}</b>
-              <div style={{ fontSize: 13, color: "#5b6b86", lineHeight: 1.5 }}>{role}</div>
+              {role && <div style={{ fontSize: 13, color: "#5b6b86", lineHeight: 1.5 }}>{role}</div>}
             </div>
           ))}
         </div>

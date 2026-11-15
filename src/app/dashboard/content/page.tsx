@@ -32,6 +32,8 @@ export default function ContentStudio() {
   const [busy, setBusy] = useState(false);
   const [newDept, setNewDept] = useState({ title: "", body: "" });
   const [newSvc, setNewSvc] = useState({ title: "", body: "" });
+  const [editDept, setEditDept] = useState<number | null>(null);
+  const [editSvc, setEditSvc] = useState<number | null>(null);
   const [words, setWords] = useState<Record<string, string>>({});
 
   const note = (m: string) => { setMsg(m); setErr(""); };
@@ -183,14 +185,25 @@ export default function ContentStudio() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  async function addItem(kind: "department" | "service", form: { title: string; body: string }, reset: () => void) {
+  async function addItem(
+    kind: "department" | "service",
+    form: { title: string; body: string },
+    reset: () => void,
+    editId: number | null,
+    clearEdit: () => void,
+  ) {
     if (!form.title.trim()) return;
     setBusy(true);
     try {
-      const res = await fetch("/api/admin/site/items", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind, ...form }) });
+      const res = await fetch("/api/admin/site/items", {
+        method: editId ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editId ? { id: editId, ...form } : { kind, ...form }),
+      });
       const j = await res.json().catch(() => ({}));
-      if (!res.ok) fail(j.error || "Could not save");
-      else { note(`${kind === "department" ? "Department" : "Service"} added — live on the About page.`); reset(); await loadAll(); }
+      const label = kind === "department" ? "Department" : "Service";
+      if (!res.ok) fail(j.error || (editId ? `Could not save the ${label.toLowerCase()} change` : "Could not save"));
+      else { note(editId ? `${label} updated — live on the About page.` : `${label} added — live on the About page.`); reset(); clearEdit(); await loadAll(); }
     } finally { setBusy(false); }
   }
 
@@ -354,21 +367,25 @@ export default function ContentStudio() {
 
         <div className="card">
           <h2>Departments of the Assembly</h2>
-          <p className="sub">What you type here replaces the placeholder list on the public About page.</p>
+          <p className="sub">The official department list is here. Edit a name, write what it does, add or remove one — the public About page follows.</p>
           <div className="form-grid">
             <label className="fld"><span className="cap">Department name</span>
               <input value={newDept.title} onChange={(e) => setNewDept((s) => ({ ...s, title: e.target.value }))} placeholder="e.g. Physical Planning Department" />
             </label>
-            <label className="fld"><span className="cap">What it does (one line)</span>
+            <label className="fld"><span className="cap">What it does (one line, optional)</span>
               <input value={newDept.body} onChange={(e) => setNewDept((s) => ({ ...s, body: e.target.value }))} placeholder="e.g. Building permits and planning advice" />
             </label>
           </div>
-          <button className="btn btn-primary btn-sm" disabled={busy} onClick={() => addItem("department", newDept, () => setNewDept({ title: "", body: "" }))}>Add department</button>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button className="btn btn-primary btn-sm" disabled={busy} onClick={() => addItem("department", newDept, () => setNewDept({ title: "", body: "" }), editDept, () => setEditDept(null))}>{editDept !== null ? "Save changes" : "Add department"}</button>
+            {editDept !== null && <button className="btn btn-ghost btn-sm" onClick={() => { setEditDept(null); setNewDept({ title: "", body: "" }); }}>Cancel edit</button>}
+          </div>
           {departments.length > 0 && (
             <div style={{ marginTop: 12 }}>
               {departments.map((it) => (
                 <div key={it.id} className="listrow">
-                  <span style={{ flex: 1 }}><b>{it.title}</b>{it.body && <span style={{ color: "#5b6b86" }}> — {it.body}</span>}</span>
+                  <span style={{ flex: 1 }}><b>{it.title}</b>{it.body && <span style={{ color: "#5b6b86" }}> — {it.body}</span>}{editDept === it.id && <span style={{ color: "#8fa2bd", fontSize: 12 }}> · editing</span>}</span>
+                  <button className="btn btn-sm btn-ghost" onClick={() => { setNewDept({ title: it.title, body: it.body }); setEditDept(it.id); }}>Edit</button>
                   <button className="btn btn-sm btn-danger" onClick={() => delItem(it.id, "department")}>Remove</button>
                 </div>
               ))}
@@ -388,12 +405,16 @@ export default function ContentStudio() {
               <input value={newSvc.body} onChange={(e) => setNewSvc((s) => ({ ...s, body: e.target.value }))} placeholder="e.g. Apply at the Trade & Industry office" />
             </label>
           </div>
-          <button className="btn btn-primary btn-sm" disabled={busy} onClick={() => addItem("service", newSvc, () => setNewSvc({ title: "", body: "" }))}>Add service</button>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button className="btn btn-primary btn-sm" disabled={busy} onClick={() => addItem("service", newSvc, () => setNewSvc({ title: "", body: "" }), editSvc, () => setEditSvc(null))}>{editSvc !== null ? "Save changes" : "Add service"}</button>
+            {editSvc !== null && <button className="btn btn-ghost btn-sm" onClick={() => { setEditSvc(null); setNewSvc({ title: "", body: "" }); }}>Cancel edit</button>}
+          </div>
           {services.length > 0 && (
             <div style={{ marginTop: 12 }}>
               {services.map((it) => (
                 <div key={it.id} className="listrow">
-                  <span style={{ flex: 1 }}><b>{it.title}</b>{it.body && <span style={{ color: "#5b6b86" }}> — {it.body}</span>}</span>
+                  <span style={{ flex: 1 }}><b>{it.title}</b>{it.body && <span style={{ color: "#5b6b86" }}> — {it.body}</span>}{editSvc === it.id && <span style={{ color: "#8fa2bd", fontSize: 12 }}> · editing</span>}</span>
+                  <button className="btn btn-sm btn-ghost" onClick={() => { setNewSvc({ title: it.title, body: it.body }); setEditSvc(it.id); }}>Edit</button>
                   <button className="btn btn-sm btn-danger" onClick={() => delItem(it.id, "service")}>Remove</button>
                 </div>
               ))}

@@ -27,6 +27,21 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true, item: { id: item.id, kind, title: item.title, body: item.body } });
 }
 
+export async function PATCH(req: NextRequest) {
+  const s = verifySession(req.cookies.get(SESSION_COOKIE)?.value);
+  if (!s) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const b = await req.json().catch(() => ({}));
+  const id = Number(b.id) || 0;
+  const title = typeof b.title === "string" ? b.title.trim().slice(0, 80) : "";
+  const body = typeof b.body === "string" ? b.body.trim().slice(0, 300) : "";
+  if (!id || !title) return NextResponse.json({ error: "Type the name first" }, { status: 400 });
+  const existing = await prisma.siteItem.findUnique({ where: { id } });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  // The kind stays whatever it was (a department edit cannot drift into a service).
+  const item = await prisma.siteItem.update({ where: { id }, data: { title, body } });
+  return NextResponse.json({ ok: true, item: { id: item.id, kind: item.kind, title: item.title, body: item.body } });
+}
+
 export async function DELETE(req: NextRequest) {
   const s = verifySession(req.cookies.get(SESSION_COOKIE)?.value);
   if (!s) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
