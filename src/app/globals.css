@@ -619,3 +619,14 @@ main > footer.paper-foot { width: 100%; margin-top: auto; }
 .wise-hero.hasphotos .hero-cta .btn-ghost:hover { background: rgba(14,20,12,.42); }
 .wise-hero.hasphotos .dots { z-index: 2; }
 @media (max-width: 900px) { .wise-hero { display: block; } }
+
+/* Hero with photos: natural photo look (no green tint), photos fill the card,
+   headline in the NJSMA gold, intro in warm white for readability */
+.wise-hero.hasphotos .heroscrim { background: linear-gradient(180deg, rgba(10,14,8,.55), rgba(10,14,8,.74)); }
+.wise-hero.hasphotos .herotext h1 { color: var(--gold); text-shadow: 0 2px 18px rgba(0,0,0,.5); }
+.wise-hero.hasphotos .herosub { color: rgba(255,255,255,.95); text-shadow: 0 1px 10px rgba(0,0,0,.45); }
+.wise-hero.hasphotos .slides, .wise-hero .herobg .slide { background: #0e140e; }
+.wise-hero .herobg .slide { width: 100%; height: 100%; min-height: 100%; object-fit: cover; }
+
+/* The hero slideshow spans the whole card: news-gallery width caps don't apply here */
+.wise-hero .herobg .slideshow { position: absolute; inset: 0; max-width: none; margin: 0; height: 100%; }
