@@ -230,6 +230,9 @@ export default function ContentStudio() {
     ["hero_title", "Main page heading"],
     ["hero_sub", "Main page introduction"],
     ["c2t", "Track link - label"],
+    ["card1_t", "Card 1 - title"], ["card1_d", "Card 1 - text"], ["card1_c", "Card 1 - action words"],
+    ["card2_t", "Card 2 - title"], ["card2_d", "Card 2 - text"], ["card2_c", "Card 2 - action words"],
+    ["card3_t", "Card 3 - title"], ["card3_d", "Card 3 - text"], ["card3_c", "Card 3 - action words"],
   ];
   async function saveWords() {
     setBusy(true);

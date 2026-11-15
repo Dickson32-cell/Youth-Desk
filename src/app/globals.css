@@ -630,3 +630,9 @@ main > footer.paper-foot { width: 100%; margin-top: auto; }
 
 /* The hero slideshow spans the whole card: news-gallery width caps don't apply here */
 .wise-hero .herobg .slideshow { position: absolute; inset: 0; max-width: none; margin: 0; height: 100%; }
+
+/* PC view: the hero card gets real height so the slideshow photos fill it */
+@media (min-width: 901px) {
+  .wise-hero { min-height: 460px; display: flex; align-items: center; padding: 48px 54px; }
+  .wise-hero .herotext { width: 100%; }
+}

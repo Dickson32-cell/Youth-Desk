@@ -58,9 +58,9 @@ export default async function Home() {
         </section>
 
         <section className="wise-links">
-          <Link href="/report" className="lk"><div><b>Report an issue</b><span>Tell the desk what happened. Anonymous is welcome.</span><em>Open the form &rarr;</em></div></Link>
-          <Link href="/track" className="lk"><div><b>Track a case</b><span>Enter your case number and see where it stands today.</span><em>Track it &rarr;</em></div></Link>
-          <Link href="/programs" className="lk"><div><b>Departments &amp; services</b><span>Every department of the Assembly, one tap each.</span><em>See them all &rarr;</em></div></Link>
+          <Link href="/report" className="lk"><div><b>{w.card1_t || "Report an issue"}</b><span>{w.card1_d || "Tell the desk what happened. Anonymous is welcome."}</span><em>{w.card1_c || "Open the form"} &rarr;</em></div></Link>
+          <Link href="/track" className="lk"><div><b>{w.card2_t || "Track a case"}</b><span>{w.card2_d || "Enter your case number and see where it stands today."}</span><em>{w.card2_c || "Track it"} &rarr;</em></div></Link>
+          <Link href="/programs" className="lk"><div><b>{w.card3_t || "Departments &amp; services"}</b><span>{w.card3_d || "Every department of the Assembly, one tap each."}</span><em>{w.card3_c || "See them all"} &rarr;</em></div></Link>
         </section>
 
         <NewsTicker items={(news.filter((n) => n.important).length > 0 ? news.filter((n) => n.important) : news).slice(0, 6).map((n) => ({ id: n.id, title: n.title }))} />
