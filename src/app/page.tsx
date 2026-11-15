@@ -28,10 +28,10 @@ export default async function Home() {
   ]);
   const news = newsRaw.map((n) => ({ ...n, created: n.createdAt.toISOString() }));
   const w = Object.fromEntries(words.map((r) => [r.key, r.value]));
-  const heroTitle = w.hero_title || "One desk for the municipality's young people";
+  const heroTitle = w.hero_title || "Speak up. Track it. Get results.";
   const heroSub =
     w.hero_sub ||
-    "Report an issue, get a case number, track it until it is resolved, and find training and job opportunities.";
+    "The Youth Desk connects young people in New Juaben South to the Assembly, from reporting an issue to seeing it resolved.";
   const firstHero = imgs[0]?.id;
   return (
     <main>
