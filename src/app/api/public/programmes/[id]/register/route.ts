@@ -32,9 +32,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
     return NextResponse.json({ ok: true, name, smsQueued: !!phone, message: "You are registered. The desk officer will contact you with the next steps." });
   } catch (e: unknown) {
-    // unique (programId, phone) => already registered with that number
-    const msg = String((e as Error)?.message || "");
-    if (msg.includes("P2002")) {
+    // unique (programId, phone) => already registered with that number.
+    // Prisma carries the uniqueness code in err.code (the message only names
+    // the constraint), so accept both spellings.
+    const err = e as { code?: string; message?: string };
+    const msg = String(err?.message || "");
+    if (msg.includes("P2002") || err?.code === "P2002") {
       return NextResponse.json({ ok: true, already: true, message: "This number is already registered for this programme." });
     }
     return NextResponse.json({ error: "Could not register now. Try again." }, { status: 500 });
