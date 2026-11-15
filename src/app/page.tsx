@@ -42,7 +42,6 @@ export default async function Home() {
           <p>{heroSub}</p>
           <a href="/report">Report an issue <i aria-hidden="true">&rarr;</i></a>
           <a href="/track">{w.c2t || "Track a case"} <i aria-hidden="true">&rarr;</i></a>
-          <a href="/programs">{w.c3t || "Open programmes"} <i aria-hidden="true">&rarr;</i></a>
         </div>
         <div className="paper-photo">
           <div className="paper-photo-in">

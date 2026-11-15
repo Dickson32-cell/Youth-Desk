@@ -229,9 +229,7 @@ export default function ContentStudio() {
     ["brand_sub", "Top bar name (small, under it)"],
     ["hero_title", "Main page heading"],
     ["hero_sub", "Main page introduction"],
-    ["c1t", "Box 1 - title"], ["c1b", "Box 1 - description"],
-    ["c2t", "Box 2 - title"], ["c2b", "Box 2 - description"],
-    ["c3t", "Box 3 - title"], ["c3b", "Box 3 - description"],
+    ["c2t", "Track link - label"],
   ];
   async function saveWords() {
     setBusy(true);
