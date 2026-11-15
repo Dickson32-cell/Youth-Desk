@@ -42,27 +42,40 @@ export default function ContentStudio() {
   const loadAll = useCallback(async () => {
     const r = await fetch("/api/admin/auth");
     if (!r.ok) { window.location.href = "/office/login"; return; }
-    const [h, l, a, d, s, t, w, nw] = await Promise.all([
-      fetch("/api/admin/site/images?slot=hero").then((x) => x.json()).catch(() => null),
-      fetch("/api/admin/site/images?slot=logo").then((x) => x.json()).catch(() => null),
-      fetch("/api/admin/news").then((x) => x.json()).catch(() => null),
-      fetch("/api/admin/site/images?slot=about").then((x) => x.json()).catch(() => null),
-      fetch("/api/admin/site/items?kind=department").then((x) => x.json()).catch(() => null),
-      fetch("/api/admin/site/items?kind=service").then((x) => x.json()).catch(() => null),
-      fetch("/api/admin/site/theme").then((x) => x.json()).catch(() => null),
-      fetch("/api/admin/site/text").then((x) => x.json()).catch(() => null),
+    // One failed list fetch used to leave the console empty until the next
+    // action retried it silently. Now every load retries once on its own.
+    const q = async (url: string) => {
+      const one = () => fetch(url).then((x) => (x.ok ? x.json() : null)).catch(() => null);
+      const first = await one();
+      return first !== null && first !== undefined ? first : await new Promise<typeof first>((res) => setTimeout(() => res(one()), 1200));
+    };
+    // Named results - the old positional destructure was shifted by two slots
+    // (news landed in the about slot and vice versa), which left the posted
+    // news list, the about gallery, words and theme loading from the wrong
+    // responses forever.
+    const [heroResp, logoResp, newsResp, aboutResp, deptResp, svcResp, themeResp, textResp] = await Promise.all([
+      q("/api/admin/site/images?slot=hero"),
+      q("/api/admin/site/images?slot=logo"),
+      q("/api/admin/news"),
+      q("/api/admin/site/images?slot=about"),
+      q("/api/admin/site/items?kind=department"),
+      q("/api/admin/site/items?kind=service"),
+      q("/api/admin/site/theme"),
+      q("/api/admin/site/text"),
     ]);
-    setHeroImgs(h?.images || []);
-    setLogoImgs(l?.images || []);
-    setNewsRows(nw?.news || []);
-    setAboutImgs(a?.images || []);
-    setDepartments(d?.items || []);
-    setServices(s?.items || []);
-    if (t?.theme) setTheme({ primary: t.theme.primary, accent: t.theme.accent });
-    setWords(w?.texts || {});
+    setHeroImgs(heroResp?.images || []);
+    setLogoImgs(logoResp?.images || []);
+    setNewsRows(newsResp?.news || []);
+    setAboutImgs(aboutResp?.images || []);
+    setDepartments(deptResp?.items || []);
+    setServices(svcResp?.items || []);
+    if (themeResp?.theme) setTheme({ primary: themeResp.theme.primary, accent: themeResp.theme.accent });
+    setWords(textResp?.texts || {});
   }, []);
 
-  useEffect(() => { loadAll(); }, [loadAll]);
+  // Self-refresh: if a load fetch was eaten by a network flap, this heals it
+  // within 15 seconds without the officer having to do anything.
+  useEffect(() => { loadAll(); const iv = setInterval(() => { loadAll(); }, 15000); return () => clearInterval(iv); }, [loadAll]);
 
   async function uploadLogoWithIcons(target: HTMLInputElement) {
     const files = target.files;
@@ -305,7 +318,7 @@ export default function ContentStudio() {
         </div>
         <div className="card">
           <h2>{newsForm.id ? `Edit news (#${newsForm.id})` : "Municipal news"}</h2>
-          <p className="sub">Post updates from the Assembly. The latest items appear on the main page: a scrolling newsflash line plus the newest three as photo cards.</p>
+          <p className="sub">Post updates from the Assembly. Delete or edit any posted item in the list under this form. The latest items appear on the main page: a scrolling newsflash line plus the newest three as photo cards.</p>
           <form onSubmit={submitNews}>
             <label className="fld"><span className="cap">Title *</span>
               <input value={newsForm.title} onChange={(e) => setNewsForm((f) => ({ ...f, title: e.target.value }))} required maxLength={120} placeholder="e.g. Furniture handed over to 11 schools" />

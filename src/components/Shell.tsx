@@ -133,6 +133,9 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
       <header className="topbar noprint">
         <div className="bar">
           <Link href={office ? "/dashboard" : "/"} className="brand">
+            {/* The NJSMA seal rides with the console brand, same as the main page */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/api/seal" alt="NJSMA seal" className="seal-img" />
             {logo && <img src={logo} alt="" className="logo-img" />}
             <span className="logo-t">{brand.main}</span>
             <span className="logo-s">{office ? "OFFICER CONSOLE" : brand.sub}</span>
@@ -150,9 +153,10 @@ export function NavBar({ mode = "public", on: _on }: { mode?: "public" | "office
               </Link>
             ))}
           </nav>
-          <button className="themetoggle" onClick={toggleTheme} title={dark ? "Switch to light mode" : "Switch to dark mode"} aria-label="Toggle dark mode">
-            {dark ? "\u2600 Light" : "\u263E Dark"}
-          </button>
+          <label className="ui-switch" title={dark ? "Switch to light mode" : "Switch to dark mode"} aria-label="Toggle dark mode">
+            <input type="checkbox" checked={dark} onChange={toggleTheme} aria-label="Toggle dark mode" />
+            <div className="slider"><div className="circle" /></div>
+          </label>
           {office && (
             <span className="officer-chip">
               {me || "Officer"}

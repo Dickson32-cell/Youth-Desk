@@ -2,7 +2,6 @@ import { prisma } from "@/lib/db";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { verifySession, SESSION_COOKIE } from "@/lib/auth";
-import NewsRemoveButton from "@/components/NewsRemoveButton";
 import NewsTicker from "@/components/NewsTicker";
 import ProgrammesOpen from "@/components/ProgrammesOpen";
 import Slideshow from "@/components/Slideshow";
@@ -78,7 +77,6 @@ export default async function Home() {
                   <b className="serif">{news[0].title}</b>
                   {news[0].body?.trim() && <p>{news[0].body.length > 260 ? news[0].body.slice(0, 257).trimEnd() + "..." : news[0].body}</p>}
                   <div className="paper-feat-date">{new Date(news[0].created).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</div>
-                  {officer && <div className="paper-remove-in"><NewsRemoveButton id={news[0].id} title={news[0].title} /></div>}
                 </div>
               )}
               <div className="paper-col">
@@ -86,7 +84,6 @@ export default async function Home() {
                   <div key={n.id} className="paper-col-it">
                     <span>{new Date(n.created).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }).toUpperCase()}</span>
                     <b className="serif">{n.title}</b>
-                    {officer && <div className="paper-remove-in"><NewsRemoveButton id={n.id} title={n.title} /></div>}
                   </div>
                 ))}
               </div>
