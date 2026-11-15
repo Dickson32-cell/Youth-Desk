@@ -45,13 +45,15 @@ export default async function Programs() {
         <div className="card">
           <h2>About the Assembly</h2>
           <p style={{ fontSize: 14, lineHeight: 1.65 }}>
-            The Municipal Assembly is the local government of our municipality - the body that plans,
-            regulates and provides public services for residents and businesses. It works through
-            decentralised departments, each responsible for a specific service to the public.
+            The New Juaben South Municipal Assembly is the local government authority for our
+            municipality, responsible for planning, regulating and delivering public services to
+            residents and businesses. It operates through decentralized departments, each charged
+            with a specific area of service to the public.
           </p>
           <p style={{ fontSize: 14, lineHeight: 1.65, marginTop: 8 }}>
-            The <b>Youth Desk</b> is the Assembly&apos;s front door for young people: one office where youth
-            walk in, are heard, and their matters are taken up with the right department and followed to resolution.
+            The <b>Youth Desk</b> is the Assembly&rsquo;s front door for young people: a single point
+            of contact where youth can walk in, be heard, and have their concerns taken up with the
+            appropriate department and followed through to resolution.
           </p>
           {aboutImgs.length > 0 && <AboutGallery images={aboutImgs} />}
         </div>
