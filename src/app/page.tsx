@@ -40,17 +40,20 @@ export default async function Home() {
       <PaperHead active="HOME" />
 
       <div className="main">
-        <section className="wise-hero">
-          <div>
+        <section className={"wise-hero" + (imgs.length > 0 ? " hasphotos" : "")}>
+          {imgs.length > 0 && (
+            <div className="herobg" aria-hidden="true">
+              <Slideshow images={imgs.map((i) => i.id)} alt="" priority={true} />
+              <div className="heroscrim" />
+            </div>
+          )}
+          <div className="herotext">
             <h1>{heroTitle}</h1>
             <p className="herosub">{heroSub}</p>
             <div className="hero-cta">
               <Link href="/report" className="btn btn-primary">Report an issue</Link>
               <Link href="/track" className="btn btn-ghost">Track a case</Link>
             </div>
-          </div>
-          <div className="photoin">
-            {imgs.length > 0 && <Slideshow images={imgs.map((i) => i.id)} alt="" priority={true} />}
           </div>
         </section>
 

@@ -605,3 +605,17 @@ body:has(.topbar) .statrow .st.on { color: #16180f; }
 main { display: flex; flex-direction: column; min-height: 100vh; flex: 1 0 auto; }
 body > .main, main > .main { flex: 1 0 auto; width: 100%; }
 main > footer.paper-foot { width: 100%; margin-top: auto; }
+
+/* Hero slideshow renders BEHIND the masthead text (Assembly-green scrim, white text) */
+.wise-hero { display: block; position: relative; overflow: hidden; }
+.wise-hero .herobg { position: absolute; inset: 0; z-index: 0; }
+.wise-hero .herobg .slideshow { position: absolute; inset: 0; height: 100%; }
+.wise-hero .herobg .slide { width: 100%; height: 100%; object-fit: cover; }
+.wise-hero .heroscrim { position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, color-mix(in srgb, var(--navy) 70%, transparent), color-mix(in srgb, var(--navy) 84%, transparent)); }
+.wise-hero .herotext { position: relative; z-index: 2; }
+.wise-hero.hasphotos .herotext h1 { color: #fff; text-shadow: 0 1px 14px rgba(10,20,10,.25); }
+.wise-hero.hasphotos .herosub { color: rgba(255,255,255,.92); }
+.wise-hero.hasphotos .hero-cta .btn-ghost { color: #fff; background: rgba(14,20,12,.28); box-shadow: 0 0 0 1.5px rgba(255,255,255,.6); }
+.wise-hero.hasphotos .hero-cta .btn-ghost:hover { background: rgba(14,20,12,.42); }
+.wise-hero.hasphotos .dots { z-index: 2; }
+@media (max-width: 900px) { .wise-hero { display: block; } }
