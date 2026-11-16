@@ -71,7 +71,12 @@ export default async function News() {
     
       <footer className="paper-foot">
         <span><b>Youth Desk NJSMA</b> &mdash; New Juaben South Municipal Assembly</span>
-              </footer>
+                <span className="footrow" style={{ display: "block", marginTop: 6, fontSize: 12 }}>
+    <a href="/privacy" style={{ color: "inherit", textDecoration: "underline" }}>Privacy</a>
+    {" "}&middot;{" "}
+    <a href="/terms" style={{ color: "underline", textDecoration: "underline" }}>Terms</a>
+  </span>
+</footer>
 </main>
   );
 }

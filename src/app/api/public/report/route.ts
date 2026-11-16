@@ -4,8 +4,14 @@ import { nextSerialKey, caseFormat } from "@/lib/auth";
 import { normalizeGhPhone, sendCaseSms, smsConfigured } from "@/lib/sms";
 import { saveAttachments } from "@/lib/attachments";
 import { newTrackKey } from "@/lib/trackKey";
+import { reportAllowed, ipOf, allow as floodAllow } from "@/lib/flood";
 
 export async function POST(req: NextRequest) {
+  try {
+    const ip = ipOf(req);
+    // Cheap per-IP cap on ALL report attempts (with or without a phone).
+    if (!floodAllow("report-attempt:" + (ip || "anon").slice(0, 60), 12, 60 * 60_000))
+      return NextResponse.json({ error: "Too many reports from this device. Please try again later or walk into the Youth Desk office." }, { status: 429 });
   const ct = req.headers.get("content-type") || "";
   const files: File[] = [];
   let name = "", phone = "", area = "", type = "", description = "", anonymous = false;
@@ -34,6 +40,11 @@ export async function POST(req: NextRequest) {
   if (!description || description.length < 10)
     return NextResponse.json({ error: "Describe the issue (at least 10 characters)" }, { status: 400 });
   anonymous = anonymous || !name;
+  const phoneNorm = normalizeGhPhone(phone);
+  // SMS-bombing / wallet-drain guard: at most 3 confirmation SMS per phone
+  // per 15 minutes, plus a per-IP cap for all attempts.
+  if (!reportAllowed(ip, phoneNorm))
+    return NextResponse.json({ error: "Too many reports for this phone number right now. Try again later or call the Youth Desk office." }, { status: 429 });
   const caseNumber = await nextSerialKey(
     prisma,
     "case",
@@ -74,4 +85,9 @@ export async function POST(req: NextRequest) {
     });
   }
   return NextResponse.json({ ok: true, caseNumber, trackKey, smsQueued, warning, message: "Keep this number AND your tracking key to track the case." });
+  } catch (e) {
+    // The flood guard wrapped the whole intake; unexpected errors report plainly.
+    if (e instanceof SyntaxError) throw e;
+    return NextResponse.json({ error: "Could not file the report. Try again in a moment." }, { status: 500 });
+  }
 }

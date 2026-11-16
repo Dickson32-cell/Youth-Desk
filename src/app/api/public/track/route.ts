@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { trackAllowed, ipOf } from "@/lib/flood";
 
 // Confidential case lookup: the tracking NUMBER alone is not enough.
 // Reporters hold a private KEY (SMS + slip). A wrong or missing key is
@@ -10,6 +11,8 @@ import { prisma } from "@/lib/db";
 export async function GET(req: NextRequest) {
   const num = req.nextUrl.searchParams.get("caseNumber")?.trim().toUpperCase() || "";
   const key = req.nextUrl.searchParams.get("key")?.trim().toUpperCase() || "";
+  if (!trackAllowed(ipOf(req)))
+    return NextResponse.json({ error: "Too many lookups. Wait a few minutes and try again." }, { status: 429 });
   if (!/^YD-\d{4}-\d+$/.test(num)) return NextResponse.json({ error: "Enter a case number like YD-2026-0001 and the tracking key from your SMS." }, { status: 400 });
   const c = await prisma.case.findUnique({
     where: { caseNumber: num },
