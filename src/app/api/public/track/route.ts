@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   if (!/^YD-\d{4}-\d+$/.test(num)) return NextResponse.json({ error: "Enter a case number like YD-2026-0001 and the tracking key from your SMS." }, { status: 400 });
   const c = await prisma.case.findUnique({
     where: { caseNumber: num },
-    select: { id: true, caseNumber: true, status: true, type: true, area: true, createdAt: true, updatedAt: true, trackKey: true, resolution: true },
+    select: { caseNumber: true, status: true, type: true, area: true, createdAt: true, updatedAt: true, trackKey: true, resolution: true },
   });
   if (!c) return NextResponse.json({ error: "We could not find that case. Use the case number AND the tracking key from your SMS or slip." }, { status: 404 });
   if (c.trackKey && c.trackKey !== key) {
@@ -26,18 +26,10 @@ export async function GET(req: NextRequest) {
     prisma.smsLog.findFirst({ where: { caseNumber: c.caseNumber, kind: "STATUS_IN_PROGRESS", status: "SENT" }, orderBy: { createdAt: "desc" } }),
     prisma.smsLog.findFirst({ where: { caseNumber: c.caseNumber, kind: "STATUS_RESOLVED", status: "SENT" }, orderBy: { createdAt: "desc" } }),
   ]);
-  // The officer's case notes go to the client too (their trail of what was
-  // done). Usernames stay internal - the client sees the text and the time.
-  const notes = await prisma.caseNote.findMany({
-    where: { caseId: c.id },
-    orderBy: { id: "asc" },
-    select: { body: true, createdAt: true },
-  });
-  const { id: _id, trackKey: _tk, ...safe } = c; // never ship the key or the row id back to the browser
+  const { trackKey: _tk, ...safe } = c; // never ship the key back to the browser
   return NextResponse.json({
     ...safe,
     inProgressAt: inProgLog?.createdAt || null,
     resolvedAt: resolvedLog?.createdAt || null,
-    updates: notes.map((n) => ({ body: n.body, at: n.createdAt })),
   });
 }

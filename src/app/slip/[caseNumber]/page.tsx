@@ -10,20 +10,38 @@ export const instant = false;
 
 export default async function Slip({ params }: { params: Promise<{ caseNumber: string }> }) {
   const { caseNumber } = await params;
-  let officerName = "";
-  try {
-    const ck = await cookies();
-    const sj = verifySession(ck.get(SESSION_COOKIE)?.value);
-    if (sj) {
-      const o = await prisma.officer.findUnique({ where: { username: sj.u }, select: { fullName: true } });
-      officerName = o?.fullName || "";
-    }
-  } catch { /* anonymous open still works */ }
+  // Confidentiality law: the number ALONE must open nothing. This printable
+  // carries notes and personal details, so only a signed-in officer may open it.
+  const ck = await cookies();
+  const sj = verifySession(ck.get(SESSION_COOKIE)?.value);
+  const o = sj ? await prisma.officer.findUnique({ where: { username: sj.u }, select: { fullName: true } }) : null;
+  const officerName = o?.fullName || "";
   const c = await prisma.case.findUnique({
     where: { caseNumber: caseNumber.toUpperCase() },
     include: { notes: { orderBy: { id: "asc" } } },
   });
-  if (!c) notFound();
+  // notFound() is deliberately NOT used here: Next 16 serves a prerendered
+  // not-found shell per URL for minutes, which once poisoned fresh cases
+  // (the officer's own print right after intake looked like a dead link).
+  if (!sj)
+    return (
+      <main className="main" style={{ maxWidth: 560 }}>
+        <div className="card">
+          <div style={{ fontWeight: 800, fontSize: 16, color: "#122447", marginBottom: 6 }}>Officers only</div>
+          <p style={{ fontSize: 14, lineHeight: 1.6 }}>This printable carries case details. Sign in from the officer console to print the case slip.</p>
+          <a href="/office/login" className="btn btn-ghost btn-sm">Officer sign in</a>
+        </div>
+      </main>
+    );
+  if (!c)
+    return (
+      <main className="main" style={{ maxWidth: 560 }}>
+        <div className="card">
+          <div style={{ fontWeight: 800, fontSize: 16, color: "#122447", marginBottom: 6 }}>No such case</div>
+          <p style={{ fontSize: 14, lineHeight: 1.6 }}>The case number printed above does not exist. Check the number on the case record.</p>
+        </div>
+      </main>
+    );
   const seal = await getSeal();
   return (
     <main className="main" style={{ maxWidth: 620 }}>

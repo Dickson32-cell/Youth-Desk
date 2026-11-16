@@ -66,7 +66,7 @@ export default function TrackInner() {
   return (
     <><PaperHead active="TRACK A CASE" />
       <main className="main" style={{ maxWidth: 560 }}>
-      <form className="card" onSubmit={(e) => { e.preventDefault(); go(); }}>
+      <form className="card trackform noprint" onSubmit={(e) => { e.preventDefault(); go(); }}>
         <h2>Track your case</h2>
         <p className="sub">Both details are on your slip and in the SMS you received. Your case stays private — only these two together open it.</p>
         <label className="fld"><span className="cap">Case number</span>
@@ -79,10 +79,22 @@ export default function TrackInner() {
         {err && <div className="alert-err" style={{ marginTop: 10 }}>{err}</div>}
       </form>
       {c && (
-        <div className="card">
+        <div className="card ticketprint">
+          {/* Printed ticket head - visible on paper only */}
+          <div className="printhead" style={{ borderBottom: "2px solid #1c3f6e", paddingBottom: 10, marginBottom: 12 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/api/seal" alt="NJSMA seal" style={{ width: 58, height: 58, objectFit: "contain" }} />
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 17, color: "#122447" }}>NJSMA YOUTH DESK</div>
+              <div style={{ fontSize: 11, letterSpacing: 1, color: "#5b6b86" }}>CASE PROGRESS TICKET - PROOF THE CASE IS BEING WORKED ON</div>
+              <div style={{ fontSize: 10.5, color: "#8fa2bd" }}>Printed {new Date().toLocaleString("en-GB")} - New Juaben South Municipal Assembly</div>
+            </div>
+          </div>
           <div className="case-head">
             <span className="cn">{c.caseNumber}</span>
             <span className={"tag tag-" + c.status}>{c.status.replace("_", " ")}</span>
+            <span style={{ flex: 1 }} />
+            <button type="button" className="btn btn-primary btn-sm noprint" onClick={() => window.print()}>Print my case ticket</button>
           </div>
           {/* Where the case has gotten to: stage timeline (updates every 10 s) */}
           <div style={{ margin: "16px 0 4px", position: "relative" }}>
@@ -114,17 +126,6 @@ export default function TrackInner() {
             <div style={{ marginTop: 14, background: "#f2faf3", border: "1px solid #cfe8d6", borderRadius: 12, padding: "12px 14px" }}>
               <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: "#1f7a48", marginBottom: 4 }}>THE DESK'S RESOLUTION</div>
               <p style={{ whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.6, margin: 0, color: "#16281c" }}>{c.resolution}</p>
-            </div>
-          )}
-          {(c.updates || []).length > 0 && (
-            <div style={{ marginTop: 14 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: "#1C3F6E", marginBottom: 6 }}>UPDATES ON YOUR CASE</div>
-              {(c.updates || []).map((u: { body: string; at: string }, i: number) => (
-                <div key={i} style={{ background: "#f7f9fd", borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
-                  <div style={{ fontSize: 11, color: "#8fa2bd", marginBottom: 3 }}>{new Date(u.at).toLocaleString("en-GB")}</div>
-                  <div style={{ fontSize: 14, lineHeight: 1.55, whiteSpace: "pre-wrap", color: "#16294a" }}>{u.body}</div>
-                </div>
-              ))}
             </div>
           )}
         </div>

@@ -251,9 +251,9 @@ export default function Dashboard() {
                     const el = document.getElementById("res-txt") as HTMLTextAreaElement | null;
                     patch(open.id, { status: "RESOLVED", resolution: el && el.value.trim() ? el.value : open.resolution || "" });
                   }}>Mark resolved</button>
-                  <a href={`/forward/${open.caseNumber}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">Referral form (MCD)</a>
+                  <a href={`/forward/${open.caseNumber}?t=${Date.now()}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">Referral form (MCD)</a>
                   {(open.attachments || []).length > 0 && (
-                    <a href={`/evidence/${open.caseNumber}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">Evidence sheet (print)</a>
+                    <a href={`/evidence/${open.caseNumber}?t=${Date.now()}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">Evidence sheet (print)</a>
                   )}
                 </div>
                 <div className="filters">
@@ -298,7 +298,7 @@ export default function Dashboard() {
                   </div>
                 )}
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", marginTop: 14 }}>
-                  <a href={`/slip/${intakeDone.caseNumber}`} target="_blank" rel="noreferrer" className="btn btn-ghost">Print case slip</a>
+                  <a href={`/slip/${intakeDone.caseNumber}?t=${Date.now()}`} target="_blank" rel="noreferrer" className="btn btn-ghost">Print case slip</a>
                   <a href={`/forward/${intakeDone.caseNumber}`} target="_blank" rel="noreferrer" className="btn btn-ghost">Referral form (MCD)</a>
                   <button className="btn btn-ghost" onClick={() => { setIntakeDone(null); setIntakeForm({ name: "", phone: "", area: "", type: "EMPLOYMENT", description: "" }); setIntakeType(""); setIntakeYouth(null); }}>Log another</button>
                   <button className="btn btn-primary" onClick={() => { setIntakeOpen(false); load(filter, q); }}>Done</button>

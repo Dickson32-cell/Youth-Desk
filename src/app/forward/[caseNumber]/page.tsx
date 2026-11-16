@@ -10,16 +10,12 @@ export const instant = false;
 
 export default async function ReferralForm({ params }: { params: Promise<{ caseNumber: string }> }) {
   const { caseNumber } = await params;
-  // The officer's full name (saved in Account) stamps the FROM line and signatures.
-  let officerName = "";
-  try {
-    const ck = await cookies();
-    const sj = verifySession(ck.get(SESSION_COOKIE)?.value);
-    if (sj) {
-      const o = await prisma.officer.findUnique({ where: { username: sj.u }, select: { fullName: true } });
-      officerName = o?.fullName || "";
-    }
-  } catch { /* anonymous open still works */ }
+  // Confidentiality law: the number ALONE must open nothing. This printable
+  // carries case details, so only a signed-in officer may open it.
+  const ck = await cookies();
+  const sj = verifySession(ck.get(SESSION_COOKIE)?.value);
+  const o = sj ? await prisma.officer.findUnique({ where: { username: sj.u }, select: { fullName: true } }) : null;
+  const officerName = o?.fullName || "";
   const c = await prisma.case.findUnique({
     where: { caseNumber: caseNumber.toUpperCase() },
     include: {
@@ -27,8 +23,26 @@ export default async function ReferralForm({ params }: { params: Promise<{ caseN
       attachments: { select: { id: true, fileName: true, mimeType: true }, orderBy: { id: "asc" } },
     },
   });
+  if (!sj)
+    return (
+      <main className="main" style={{ maxWidth: 560 }}>
+        <div className="card">
+          <div style={{ fontWeight: 800, fontSize: 16, color: "#122447", marginBottom: 6 }}>Officers only</div>
+          <p style={{ fontSize: 14, lineHeight: 1.6 }}>This referral form carries case details. Sign in from the officer console to prepare it.</p>
+          <a href="/office/login" className="btn btn-ghost btn-sm">Officer sign in</a>
+        </div>
+      </main>
+    );
+  if (!c)
+    return (
+      <main className="main" style={{ maxWidth: 560 }}>
+        <div className="card">
+          <div style={{ fontWeight: 800, fontSize: 16, color: "#122447", marginBottom: 6 }}>No such case</div>
+          <p style={{ fontSize: 14, lineHeight: 1.6 }}>The case number printed above does not exist. Check the number on the case record.</p>
+        </div>
+      </main>
+    );
   const seal = await getSeal();
-  if (!c) notFound();
   const to = c.forwardedTo || "";
   return (
     <main className="main" style={{ maxWidth: 720 }}>

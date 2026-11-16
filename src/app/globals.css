@@ -695,3 +695,16 @@ html[data-theme="dark"] .ui-switch .slider { background: #2c3a2b; }
 /* Useful links band on the main page (officer-picked quick links) */
 .paper-links { margin: 30px 0 8px; }
 .paper-links .wise-links { margin-top: 14px; }
+
+/* Client case-progress ticket printing (/track, key-gated view) */
+.printhead { display: none; }
+.printhead img { margin-bottom: 6px; }
+@media print {
+  body:has(.ticketprint) .paper-head,
+  body:has(.ticketprint) .paper-foot,
+  body:has(.ticketprint) .trackform,
+  body:has(.ticketprint) .noprint { display: none !important; }
+  body:has(.ticketprint) .printhead { display: block !important; }
+  body:has(.ticketprint) .ticketprint { background: #fff !important; color: #16180f !important; border: 1px solid #c9d2df !important; box-shadow: none !important; }
+  body:has(.ticketprint) .ticketprint * { color: inherit; }
+}
