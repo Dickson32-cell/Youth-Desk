@@ -96,7 +96,7 @@ export default async function Home() {
 
         {linkRows.length > 0 && (
           <section className="paper-links" id="links">
-            <h3 className="paper-sect">Useful links <span>OFFICER-PICKED</span></h3>
+            <h3 className="paper-sect">Useful links</h3>
             <div className="wise-links">
               {linkRows.map((l) => (
                 <a key={l.id} href={l.body} target="_blank" rel="noopener noreferrer nofollow" className="lk">
