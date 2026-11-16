@@ -24,10 +24,12 @@ export async function POST(req: NextRequest) {
     if (!clean || clean.length > 40) continue;
     const v = value.trim();
     if (!v) continue; // empty = back to default (handled by DELETE)
+    // Policy documents (officer-edited Privacy / Terms) carry whole documents.
+    const cap = clean.startsWith("policy") ? 8000 : 400;
     await prisma.siteText.upsert({
       where: { key: clean },
-      update: { value: v.slice(0, 400) },
-      create: { key: clean, value: v.slice(0, 400) },
+      update: { value: v.slice(0, cap) },
+      create: { key: clean, value: v.slice(0, cap) },
     });
     saved.push(clean);
   }

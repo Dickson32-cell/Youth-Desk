@@ -483,6 +483,18 @@ export default function ContentStudio() {
         </div>
 
         <div className="card">
+          <h2>Privacy &amp; Terms</h2>
+          <p className="sub">The two public policy pages. Write your own text; a line in CAPITALS becomes a subheading. Clear a box to go back to the standard document.</p>
+          <label className="fld"><span className="cap">Privacy Policy (what we collect, who sees it, how long we keep it)</span>
+            <textarea rows={10} maxLength={7900} value={words.policy_privacy_body ?? ""} onChange={(e) => setWords((st) => ({ ...st, policy_privacy_body: e.target.value }))} placeholder="Leave empty to keep the standard Privacy Policy." />
+          </label>
+          <label className="fld"><span className="cap">Terms of Use (what the desk does, tracking key, fair use)</span>
+            <textarea rows={10} maxLength={7900} value={words.policy_terms_body ?? ""} onChange={(e) => setWords((st) => ({ ...st, policy_terms_body: e.target.value }))} placeholder="Leave empty to keep the standard Terms of Use." />
+          </label>
+          <button className="btn btn-primary" disabled={busy} onClick={saveWords}>Save Privacy &amp; Terms</button>
+        </div>
+
+        <div className="card">
           <h2>Site colors</h2>
           <p className="sub">Tap a color and press Save — the top bar, buttons and the homepage band change everywhere.</p>
           <div style={{ marginBottom: 12 }}>
