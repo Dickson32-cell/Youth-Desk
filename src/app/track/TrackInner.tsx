@@ -116,9 +116,6 @@ export default function TrackInner() {
               <p style={{ whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.6, margin: 0, color: "#16281c" }}>{c.resolution}</p>
             </div>
           )}
-          <p style={{ fontSize: 12, color: "#8fa2bd", marginTop: 10 }}>
-            This view refreshes itself every 10 seconds — the stage moves as the officer works. Nothing else shares this page: only your number and key.
-          </p>
         </div>
       )}
 
