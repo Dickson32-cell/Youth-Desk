@@ -26,6 +26,7 @@ export default function ContentStudio() {
   const [aboutImgs, setAboutImgs] = useState<Img[]>([]);
   const [departments, setDepartments] = useState<Item[]>([]);
   const [services, setServices] = useState<Item[]>([]);
+  const [links, setLinks] = useState<Item[]>([]);
   const [theme, setTheme] = useState<Theme>({ primary: "#1C3F6E", accent: "#B88721" });
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
@@ -34,6 +35,8 @@ export default function ContentStudio() {
   const [newSvc, setNewSvc] = useState({ title: "", body: "" });
   const [editDept, setEditDept] = useState<number | null>(null);
   const [editSvc, setEditSvc] = useState<number | null>(null);
+  const [newLink, setNewLink] = useState({ title: "", body: "" });
+  const [editLink, setEditLink] = useState<number | null>(null);
   const [words, setWords] = useState<Record<string, string>>({});
 
   const note = (m: string) => { setMsg(m); setErr(""); };
@@ -53,13 +56,14 @@ export default function ContentStudio() {
     // (news landed in the about slot and vice versa), which left the posted
     // news list, the about gallery, words and theme loading from the wrong
     // responses forever.
-    const [heroResp, logoResp, newsResp, aboutResp, deptResp, svcResp, themeResp, textResp] = await Promise.all([
+    const [heroResp, logoResp, newsResp, aboutResp, deptResp, svcResp, linkResp, themeResp, textResp] = await Promise.all([
       q("/api/admin/site/images?slot=hero"),
       q("/api/admin/site/images?slot=logo"),
       q("/api/admin/news"),
       q("/api/admin/site/images?slot=about"),
       q("/api/admin/site/items?kind=department"),
       q("/api/admin/site/items?kind=service"),
+      q("/api/admin/site/items?kind=link"),
       q("/api/admin/site/theme"),
       q("/api/admin/site/text"),
     ]);
@@ -69,6 +73,7 @@ export default function ContentStudio() {
     setAboutImgs(aboutResp?.images || []);
     setDepartments(deptResp?.items || []);
     setServices(svcResp?.items || []);
+    setLinks(linkResp?.items || []);
     if (themeResp?.theme) setTheme({ primary: themeResp.theme.primary, accent: themeResp.theme.accent });
     setWords(textResp?.texts || {});
   }, []);
@@ -199,7 +204,7 @@ export default function ContentStudio() {
   }
 
   async function addItem(
-    kind: "department" | "service",
+    kind: "department" | "service" | "link",
     form: { title: string; body: string },
     reset: () => void,
     editId: number | null,
@@ -214,15 +219,15 @@ export default function ContentStudio() {
         body: JSON.stringify(editId ? { id: editId, ...form } : { kind, ...form }),
       });
       const j = await res.json().catch(() => ({}));
-      const label = kind === "department" ? "Department" : "Service";
+      const label = kind === "department" ? "Department" : kind === "link" ? "Quick link" : "Service";
       if (!res.ok) fail(j.error || (editId ? `Could not save the ${label.toLowerCase()} change` : "Could not save"));
-      else { note(editId ? `${label} updated — live on the About page.` : `${label} added — live on the About page.`); reset(); clearEdit(); await loadAll(); }
+      else { note(editId ? `${label} updated — live on the site.` : `${label} added — live on the site.`); reset(); clearEdit(); await loadAll(); }
     } finally { setBusy(false); }
   }
 
   async function delItem(id: number, kind: string) {
     const res = await fetch(`/api/admin/site/items?id=${id}`, { method: "DELETE" });
-    if (res.ok) { note(`${kind === "department" ? "Department" : "Service"} removed.`); await loadAll(); }
+    if (res.ok) { note(`${kind === "department" ? "Department" : kind === "link" ? "Quick link" : "Service"} removed.`); await loadAll(); }
   }
 
   async function saveTheme(patch: Partial<Theme>) {
@@ -435,6 +440,35 @@ export default function ContentStudio() {
             </div>
           )}
           {services.length === 0 && <p style={{ fontSize: 13, color: "#5b6b86", marginTop: 8 }}>Nothing typed yet — the public page shows the placeholder list until you add the real services.</p>}
+        </div>
+
+        <div className="card">
+          <h2>Quick links</h2>
+          <p className="sub">Useful links for young people (for example Social Welfare, DVVVSU, job portals, school portals). They appear as pills on the main page, under the programmes. The officer picks and edits them here.</p>
+          <div className="form-grid">
+            <label className="fld"><span className="cap">Link name</span>
+              <input value={newLink.title} onChange={(e) => setNewLink((s) => ({ ...s, title: e.target.value }))} placeholder="e.g. Department of Social Welfare" />
+            </label>
+            <label className="fld"><span className="cap">Web address</span>
+              <input value={newLink.body} onChange={(e) => setNewLink((s) => ({ ...s, body: e.target.value }))} placeholder="e.g. mofep.gov.gh or https://ghana.gov.gh" />
+            </label>
+          </div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button className="btn btn-primary btn-sm" disabled={busy} onClick={() => addItem("link", newLink, () => setNewLink({ title: "", body: "" }), editLink, () => setEditLink(null))}>{editLink !== null ? "Save changes" : "Add link"}</button>
+            {editLink !== null && <button className="btn btn-ghost btn-sm" onClick={() => { setEditLink(null); setNewLink({ title: "", body: "" }); }}>Cancel edit</button>}
+          </div>
+          {links.length > 0 && (
+            <div style={{ marginTop: 12 }}>
+              {links.map((it) => (
+                <div key={it.id} className="listrow">
+                  <span style={{ flex: 1, minWidth: 0 }}><b>{it.title}</b><span style={{ color: "#5b6b86" }}> — <span style={{ wordBreak: "break-all" }}>{it.body}</span></span>{editLink === it.id && <span style={{ color: "#8fa2bd", fontSize: 12 }}> · editing</span>}</span>
+                  <button className="btn btn-sm btn-ghost" onClick={() => { setNewLink({ title: it.title, body: it.body }); setEditLink(it.id); }}>Edit</button>
+                  <button className="btn btn-sm btn-danger" onClick={() => delItem(it.id, "link")}>Remove</button>
+                </div>
+              ))}
+            </div>
+          )}
+          {links.length === 0 && <p style={{ fontSize: 13, color: "#5b6b86", marginTop: 8 }}>No quick links yet — the main page hides this section until you add one.</p>}
         </div>
 
         <div className="card">

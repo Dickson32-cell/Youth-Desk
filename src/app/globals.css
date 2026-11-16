@@ -691,3 +691,7 @@ html[data-theme="dark"] .ui-switch .slider { background: #2c3a2b; }
 
 /* console topbar: NJSMA seal, same as the main page brand */
 .topbar .brand .seal-img { width: 30px; height: 30px; border-radius: 50%; object-fit: contain; flex: 0 0 auto; margin-right: 2px; }
+
+/* Useful links band on the main page (officer-picked quick links) */
+.paper-links { margin: 30px 0 8px; }
+.paper-links .wise-links { margin-top: 14px; }
