@@ -116,6 +116,17 @@ export default function TrackInner() {
               <p style={{ whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.6, margin: 0, color: "#16281c" }}>{c.resolution}</p>
             </div>
           )}
+          {(c.updates || []).length > 0 && (
+            <div style={{ marginTop: 14 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: "#1C3F6E", marginBottom: 6 }}>UPDATES ON YOUR CASE</div>
+              {(c.updates || []).map((u: { body: string; at: string }, i: number) => (
+                <div key={i} style={{ background: "#f7f9fd", borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, color: "#8fa2bd", marginBottom: 3 }}>{new Date(u.at).toLocaleString("en-GB")}</div>
+                  <div style={{ fontSize: 14, lineHeight: 1.55, whiteSpace: "pre-wrap", color: "#16294a" }}>{u.body}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
