@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   if (!/^YD-\d{4}-\d+$/.test(num)) return NextResponse.json({ error: "Enter a case number like YD-2026-0001 and the tracking key from your SMS." }, { status: 400 });
   const c = await prisma.case.findUnique({
     where: { caseNumber: num },
-    select: { caseNumber: true, status: true, type: true, area: true, createdAt: true, updatedAt: true, trackKey: true },
+    select: { caseNumber: true, status: true, type: true, area: true, createdAt: true, updatedAt: true, trackKey: true, resolution: true },
   });
   if (!c) return NextResponse.json({ error: "We could not find that case. Use the case number AND the tracking key from your SMS or slip." }, { status: 404 });
   if (c.trackKey && c.trackKey !== key) {

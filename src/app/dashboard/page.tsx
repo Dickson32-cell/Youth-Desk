@@ -14,6 +14,7 @@ type Case = {
   forwardedTo: string | null;
   createdAt: string;
   updatedAt: string;
+  resolution?: string | null;
   notes: { id: number; body: string; author: string; createdAt: string }[];
   attachments: { id: number; fileName: string; mimeType: string; size: number; createdAt: string }[];
 };
@@ -233,10 +234,23 @@ export default function Dashboard() {
                 </div>
               )}
 
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const el = (e.target as HTMLFormElement).querySelector("textarea") as HTMLTextAreaElement;
+                patch(open.id, { resolution: el.value }).then(() => { el.blur(); });
+              }} style={{ marginTop: 12 }}>
+                <div className="sub">Resolution for the client</div>
+                <textarea id="res-txt" rows={4} maxLength={3000} placeholder="Write the resolution the youth will read on their tracking page (what was done, where to collect, what happens next)…" defaultValue={open.resolution || ""} style={{ marginBottom: 8 }} />
+                <button className="btn btn-primary btn-sm">Save resolution</button>
+              </form>
+
               <div className="noprint">
                 <div className="filters">
                   <button className="btn btn-sm btn-ghost" onClick={() => patch(open.id, { status: "IN_PROGRESS", note: "Started working on it." })}>Start working</button>
-                  <button className="btn btn-sm btn-ghost" onClick={() => patch(open.id, { status: "RESOLVED" })}>Mark resolved</button>
+                  <button className="btn btn-sm btn-ghost" onClick={() => {
+                    const el = document.getElementById("res-txt") as HTMLTextAreaElement | null;
+                    patch(open.id, { status: "RESOLVED", resolution: el && el.value.trim() ? el.value : open.resolution || "" });
+                  }}>Mark resolved</button>
                   <a href={`/forward/${open.caseNumber}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">Referral form (MCD)</a>
                   {(open.attachments || []).length > 0 && (
                     <a href={`/evidence/${open.caseNumber}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">Evidence sheet (print)</a>

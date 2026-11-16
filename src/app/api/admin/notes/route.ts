@@ -18,6 +18,9 @@ export async function PATCH(req: NextRequest) {
     data.status = body.status;
   if (typeof body.forwardedTo === "string")
     data.forwardedTo = body.forwardedTo.trim().slice(0, 80);
+  // The officer's resolution: sent to the client's confidential tracking page.
+  if (typeof body.resolution === "string")
+    data.resolution = body.resolution.trim().slice(0, 3000);
   if (Object.keys(data).length) await prisma.case.update({ where: { id }, data });
   if (typeof body.note === "string" && body.note.trim()) {
     await prisma.caseNote.create({ data: { caseId: id, body: body.note.trim().slice(0, 1000), author: s.u } });

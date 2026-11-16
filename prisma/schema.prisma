@@ -50,6 +50,7 @@ model Case {
   description  String
   status       String      @default("NEW") // NEW | IN_PROGRESS | RESOLVED | FORWARDED
   forwardedTo  String?
+  resolution   String? // the officer's resolution text - the client reads it on the tracking page
   youthId      Int? // links a walk-in youth account
   youth        Youth?     @relation(fields: [youthId], references: [id])
   trackKey     String?     @unique // private tracking key: number alone cannot open the case

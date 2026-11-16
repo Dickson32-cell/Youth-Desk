@@ -110,6 +110,12 @@ export default function TrackInner() {
             <dt>Last update</dt><dd>{new Date(c.updatedAt).toLocaleString()}</dd>
             <dt>What it means</dt><dd>{LABEL[c.status] || c.status}</dd>
           </div>
+          {c.resolution && c.resolution.trim() !== "" && (
+            <div style={{ marginTop: 14, background: "#f2faf3", border: "1px solid #cfe8d6", borderRadius: 12, padding: "12px 14px" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: "#1f7a48", marginBottom: 4 }}>THE DESK'S RESOLUTION</div>
+              <p style={{ whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.6, margin: 0, color: "#16281c" }}>{c.resolution}</p>
+            </div>
+          )}
           <p style={{ fontSize: 12, color: "#8fa2bd", marginTop: 10 }}>
             This view refreshes itself every 10 seconds — the stage moves as the officer works. Nothing else shares this page: only your number and key.
           </p>
