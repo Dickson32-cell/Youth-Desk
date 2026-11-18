@@ -180,6 +180,13 @@ model SiteText {
   value String
 }
 
+model ProgrammeAlert {
+  programmeId Int
+  youthId     Int
+  sentAt      DateTime @default(now())
+  @@unique([programmeId, youthId])
+}
+
 model SmsLog {
   id          Int      @id @default(autoincrement())
   kind        String   // CASE_CONFIRM

@@ -138,6 +138,14 @@ export async function sendCaseSms(caseNumber: string, phone: string, trackKey: s
   }
 }
 
+// New-programme SMS alert to REGISTERED youth (walk-in + online) - the officer
+// presses "Alert registered youth" on a posted programme. The web link comes
+// from the officer-editable SiteText override sms_web_link (falls back to env).
+export function programmeAlertSmsText(title: string, link: string): string {
+  const t = `Youth Desk NJSMA: New programme "${title}" is on our website. See details and register: ${link} Or visit the desk office.`;
+  return t.length <= 320 ? t : t.slice(0, 320);
+}
+
 // Fire-and-forget programme confirmation SMS (deferred via after()).
 export async function sendProgramSms(programId: number, name: string, phone: string, title: string, deadline?: string | null, venue?: string | null): Promise<void> {
   const to = normalizeGhPhone(phone);

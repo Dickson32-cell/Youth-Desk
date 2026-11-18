@@ -51,6 +51,8 @@ export default function Programmes() {
   const [showPostForm, setShowPostForm] = useState(false);
   const [pf, setPf] = useState({ title: "", category: "TRAINING", categoryOther: "", description: "", deadline: "", venue: "", seats: "", meetingDate: "" });
   const [remBusy, setRemBusy] = useState<number | null>(null);
+  const [alertBusy, setAlertBusy] = useState<number | null>(null);
+  const [alertDue, setAlertDue] = useState<Record<number, number>>({});
   const [regFor, setRegFor] = useState<{ id: number; title: string } | null>(null);
   const [regs, setRegs] = useState<RegRow[]>([]);
   const [pubFull, setPubFull] = useState<PubFullRow[]>([]);
@@ -130,6 +132,8 @@ export default function Programmes() {
     setWalk({ name: "", phone: "", area: "", note: "" });
     const lst = await fetch("/api/admin/programmes-post/walkin?id=" + link.id).then((x) => x.json()).catch(() => null);
     setWalkList(lst && lst.rows ? lst.rows : []);
+    const due = await fetch("/api/admin/programmes-post/youth-alert?id=" + link.id).then((x) => x.json()).catch(() => null);
+    if (due && typeof due.due === "number") setAlertDue((m) => ({ ...m, [link.id]: due.due }));
   }
   async function saveWalk() {
     if (!walkRow) return;
@@ -160,6 +164,20 @@ export default function Programmes() {
     const lst = await fetch("/api/admin/programmes-post/walkin?id=" + id).then((x) => x.json()).catch(() => null);
     setWalkList(lst && lst.rows ? lst.rows : []);
     setMsg("Meeting date saved: " + date); loadRows(); loadPosts();
+  }
+  async function alertYouth(id: number) {
+    setAlertBusy(id); setErr(""); setMsg("");
+    const r = await fetch("/api/admin/programmes-post/youth-alert", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { setAlertBusy(null); return fail(j.error || "Could not send the alert."); }
+    setMsg(j.sent > 0
+      ? `Alert sent to ${j.sent} registered youth${j.failed ? " (" + j.failed + " failed - they get it on the next press)" : ""}. ${j.remaining} still to go${j.remaining ? " - press the button again for the next batch." : "."}`
+      : "Everyone registered already has this alert (or has no phone on file).");
+    setAlertBusy(null); loadPosts();
+  }
+  async function loadAlertDue(programId: number) {
+    const r = await fetch("/api/admin/programmes-post/youth-alert?id=" + programId).then((x) => x.json()).catch(() => null);
+    if (r && typeof r.due === "number") setAlertDue((m) => ({ ...m, [programId]: r.due }));
   }
   async function sendReminder(id: number, title: string) {
     const r0 = await fetch("/api/admin/programmes-post?registrants=" + id);
@@ -384,6 +402,9 @@ export default function Programmes() {
                       <button type="button" className="btn btn-sm btn-ghost" onClick={() => { const d = window.prompt("Set the meeting date (e.g: 20 Dec 2026):", prog.meetingDate || ""); if (d) setMeeting(prog.id, d); }}>{prog.meetingDate ? "Change date" : "Set date"}</button>
                       <button type="button" className="btn btn-sm btn-primary" disabled={remBusy === prog.id} onClick={() => sendReminder(prog.id, prog.title)} style={{ padding: "3px 10px", fontSize: 12 }}>
                         {remBusy === prog.id ? "Sending…" : "Remind all (" + (prog.registrations - prog.reminded) + " to go)"}
+                      </button>
+                      <button type="button" className="btn btn-sm btn-primary" disabled={alertBusy === prog.id} onClick={() => alertYouth(prog.id)} style={{ padding: "3px 10px", fontSize: 12 }}>
+                        {alertBusy === prog.id ? "Sending…" : "Alert registered youth (" + (typeof alertDue[prog.id] === "number" ? alertDue[prog.id] : "..") + " to go)"}
                       </button>
                       {prog.reminded > 0 && (
                         <button type="button" className="btn btn-sm btn-ghost" disabled={remBusy === prog.id} onClick={async () => {

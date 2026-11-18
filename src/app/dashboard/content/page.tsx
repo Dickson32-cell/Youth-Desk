@@ -246,6 +246,7 @@ export default function ContentStudio() {
     ["brand_main", "Top bar name (main)"],
     ["brand_sub", "Top bar name (small, under it)"],
     ["hero_title", "Main page heading"],
+    ["sms_web_link", "Web link in SMS alerts (the website address that goes into programme SMS)"],
     ["hero_sub", "Main page introduction"],
     ["c2t", "Track link - label"],
     ["card1_t", "Card 1 - title"], ["card1_d", "Card 1 - text"], ["card1_c", "Card 1 - action words"],
