@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     orderBy: { serial: "asc" },
     select: {
       serial: true, name: true, phone: true, area: true, dateOfBirth: true,
-      education: true, skills: true, ghanaCard: true, createdAt: true,
+      education: true, skills: true, ghanaCard: true, createdAt: true, source: true,
     },
   });
 
@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
     { header: "Skills", key: "skills", width: 28 },
     { header: "Ghana Card", key: "ghanaCard", width: 20 },
     { header: "Registered", key: "createdAt", width: 18 },
+    { header: "Source", key: "source", width: 12 },
   ];
   ws.getRow(1).font = { bold: true, color: { argb: "FF122447" } };
   ws.addRow({}).values = [];
@@ -44,9 +45,10 @@ export async function GET(req: NextRequest) {
       skills: y.skills || "",
       ghanaCard: y.ghanaCard || "",
       createdAt: new Date(y.createdAt).toLocaleString("en-GB"),
+      source: y.source === "ONLINE" ? "Online" : "Walk-in",
     });
   }
-  ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: 9 } };
+  ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: 10 } };
   ws.views = [{ state: "frozen", ySplit: 1 }];
 
   const buf = await wb.xlsx.writeBuffer();

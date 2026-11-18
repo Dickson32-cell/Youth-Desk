@@ -103,7 +103,7 @@ export default function Report() {
           <label className="fld"><span className="cap">Your name (optional)</span>
             <input type="text" value={anon ? "" : f.name} disabled={anon} onChange={set("name")} placeholder={anon ? "Anonymous" : "e.g. Kwame Mensah"} />
           </label>
-          <label className="fld"><span className="cap">Phone for updates (optional)</span>
+          <label className="fld"><span className="cap">Phone for updates (optional - SMS goes here)</span>
             <input type="tel" value={f.phone} onChange={set("phone")} placeholder="e.g. 0240000000" />
           </label>
         </div>
@@ -136,10 +136,22 @@ export default function Report() {
             ))}
           </div>
         )}
-        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, marginBottom: 16, cursor: "pointer" }}>
+        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, marginBottom: 12, cursor: "pointer" }}>
           <input type="checkbox" checked={anon} onChange={(e) => setAnon(e.target.checked)} style={{ width: 18, height: 18 }} />
           Send this anonymously
         </label>
+        {anon && (
+          <div style={{ border: "1.5px solid var(--navy)", borderRadius: 2, background: "var(--paper)", padding: "12px 14px", marginBottom: 16 }}>
+            <b style={{ fontSize: 14 }}>Would the officer like to reach you?</b>
+            <p style={{ fontSize: 12.5, color: "#5b6b86", margin: "4px 0 8px" }}>
+              Your name stays hidden either way. If you leave your number, the officer can call or text you about the case - this is optional.
+            </p>
+            <label className="fld" style={{ marginBottom: 0 }}><span className="cap">Your number (optional, so we can reach you)</span>
+              <input type="tel" value={f.phone} onChange={set("phone")} placeholder="e.g. 0240000000" />
+            </label>
+            <p style={{ fontSize: 12, color: "#5b6b86", margin: "6px 0 0" }}>If you leave it, an SMS with your case number comes to this line.</p>
+          </div>
+        )}
         <button className="btn btn-primary w-full" disabled={busy}>{busy ? "Sending…" : "Send to the Youth Desk"}</button>
       </form>
     </main>

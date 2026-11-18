@@ -5,7 +5,7 @@ import TopBar from "@/components/Shell";
 type Youth = {
   id: number; serial: string; name: string; phone: string | null;
   area: string | null; dateOfBirth: string | null; education: string | null;
-  skills: string | null; ghanaCard: string | null; createdAt: string;
+  skills: string | null; ghanaCard: string | null; createdAt: string; source?: string;
 };
 
 export default function YouthRegister() {
@@ -86,7 +86,7 @@ export default function YouthRegister() {
       <div className="main">
         <div className="card">
           <h2>Walk-in youth register</h2>
-          <p className="sub">Everyone who visits the desk gets a card with their serial. Search by name, serial or area on the left.</p>
+          <p className="sub">Everyone who visits the desk gets a card with their serial. Online registrations from the website land here too (ONLINE tag). Search by name, serial or area on the left.</p>
           {editing && (
             <div className="alert-ok" style={{ marginBottom: 10 }}>
               Editing <b>{editing.serial} - {editing.name}</b>{" "}
@@ -144,7 +144,12 @@ export default function YouthRegister() {
               {list.map((y) => (
                 <tr key={y.id} style={{ cursor: "pointer" }} title="Click to take this youth's complaint" onClick={() => takeComplaint({ id: y.id, serial: y.serial, name: y.name, phone: y.phone || "", area: y.area || "" })}>
                   <td className="serial">{y.serial}</td>
-                  <td style={{ fontWeight: 600 }}>{y.name}</td>
+                  <td style={{ fontWeight: 600 }}>
+                    {y.name}
+                    {y.source === "ONLINE" ? (
+                      <span style={{ marginLeft: 6, fontSize: 10.5, fontWeight: 800, letterSpacing: 0.4, padding: "2px 7px", borderRadius: 999, border: "1px solid var(--gold)", color: "#a2631f", verticalAlign: "1px" }}>ONLINE</span>
+                    ) : null}
+                  </td>
                   <td>{y.area || "—"}</td>
                   <td>{y.phone || "—"}</td>
                   <td>{y.skills || "—"}</td>

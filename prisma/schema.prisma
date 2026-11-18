@@ -36,6 +36,7 @@ model Youth {
   education  String?
   skills     String?
   ghanaCard  String?
+  source     String @default("WALKIN")
   createdAt  DateTime @default(now())
   cases      Case[]
 }
