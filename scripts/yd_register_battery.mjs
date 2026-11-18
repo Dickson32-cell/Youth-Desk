@@ -3,7 +3,7 @@
 import { PrismaClient } from "@prisma/client";
 import ExcelJS from "exceljs";
 
-const BASE = process.env.YD_BASE || "https://youth-desk-kxsh95jz0-abdul-rashid-dicksons-projects.vercel.app";
+const BASE = process.env.YD_BASE || "https://youth-desk-eqjbl5gs7-abdul-rashid-dicksons-projects.vercel.app";
 const OFFICER = process.env.YD_OFFICER || "officer";
 const PASS = process.env.YD_PASS || "Desk2026pw";
 const SMS_PHONE = "0595726252"; // Dickson's line (paid lane, ~2 credits) - live proof
@@ -47,7 +47,7 @@ const stamp = Date.now().toString().slice(-6);
 const PROBE = "YDProbe " + stamp;
 let regRes;
 {
-  regRes = await j("/api/public/youth/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: PROBE, phone: SMS_PHONE, area: "Battery Area" }) });
+  regRes = await j("/api/public/youth/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: PROBE, phone: SMS_PHONE, area: "Battery Area", dateOfBirth: "2004-05-17", education: "Battery Educ Test", skills: "Battery Skill Test", ghanaCard: "GHA-666" + stamp }) });
   check("public register 200", regRes.status === 200 && typeof regRes.body.serial === "string", JSON.stringify(regRes.body).slice(0, 120));
 }
 const yserial = regRes.body.serial || "";
@@ -62,6 +62,7 @@ let row = null;
   const r = await j("/api/admin/cases/youth?q=" + encodeURIComponent(yserial));
   row = (r.body.youth || []).find((x) => x.serial === yserial) || null;
   check("officer sees online row", !!row && row.source === "ONLINE", row ? row.serial : "missing");
+  check("online row carries walk-in fields", !!row && row.dateOfBirth?.startsWith("2004-05-17") && row.education === "Battery Educ Test" && row.skills === "Battery Skill Test" && row.ghanaCard?.startsWith("GHA-666"), row ? (row.dateOfBirth + "/" + row.ghanaCard) : "?");
 }
 
 // 5) SMS ledger for the probe

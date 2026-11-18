@@ -3,7 +3,7 @@ import { useState } from "react";
 import PaperHead from "@/components/PaperHead";
 
 export default function RegisterPage() {
-  const [f, setF] = useState({ name: "", phone: "", area: "" });
+  const [f, setF] = useState({ name: "", phone: "", area: "", dateOfBirth: "", education: "", skills: "", ghanaCard: "" });
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<{ serial: string; smsQueued: boolean; phone: string } | null>(null);
@@ -15,7 +15,7 @@ export default function RegisterPage() {
     try {
       const res = await fetch("/api/public/youth/register", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: f.name, phone: f.phone, area: f.area }),
+        body: JSON.stringify({ name: f.name, phone: f.phone, area: f.area, dateOfBirth: f.dateOfBirth, education: f.education, skills: f.skills, ghanaCard: f.ghanaCard }),
       });
       const j = await res.json().catch(() => ({}));
       if (!res.ok) setErr(j.error || "Could not save. Try again.");
@@ -63,6 +63,18 @@ export default function RegisterPage() {
             </label>
             <label className="fld"><span className="cap">Area / community (optional)</span>
               <input type="text" value={f.area} onChange={set("area")} placeholder="e.g. Osabene" maxLength={60} />
+            </label>
+            <label className="fld"><span className="cap">Date of birth (optional)</span>
+              <input type="date" value={f.dateOfBirth} onChange={set("dateOfBirth")} />
+            </label>
+            <label className="fld"><span className="cap">Education (optional)</span>
+              <input type="text" value={f.education} onChange={set("education")} placeholder="e.g. SHS completed" maxLength={60} />
+            </label>
+            <label className="fld"><span className="cap">Skills (optional)</span>
+              <input type="text" value={f.skills} onChange={set("skills")} placeholder="e.g. barbering, driving" maxLength={200} />
+            </label>
+            <label className="fld"><span className="cap">Ghana Card number (optional)</span>
+              <input type="text" value={f.ghanaCard} onChange={set("ghanaCard")} placeholder="GHA-XXXXXXXXX-X" maxLength={20} />
             </label>
             <p style={{ fontSize: 12.5, color: "#5b6b86", margin: "0 0 14px" }}>
               Only the name is required. The office sees every registered person in one list.

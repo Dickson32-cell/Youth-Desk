@@ -16,6 +16,10 @@ export async function POST(req: NextRequest) {
     const name = typeof b.name === "string" ? b.name.trim().slice(0, 80) : "";
     const phone = typeof b.phone === "string" ? b.phone.trim().slice(0, 15) : "";
     const area = typeof b.area === "string" ? b.area.trim().slice(0, 60) : "";
+    const dob = typeof b.dateOfBirth === "string" ? b.dateOfBirth.trim().slice(0, 12) : "";
+    const education = typeof b.education === "string" ? b.education.trim().slice(0, 60) : "";
+    const skills = typeof b.skills === "string" ? b.skills.trim().slice(0, 200) : "";
+    const ghanaCard = typeof b.ghanaCard === "string" ? b.ghanaCard.trim().slice(0, 20) : "";
     if (!name) return NextResponse.json({ error: "Name is required" }, { status: 400 });
     const phoneNorm = phone ? normalizeGhPhone(phone) : null;
     // Any phone-bearing registration costs a confirmation SMS - reuse the
@@ -29,7 +33,16 @@ export async function POST(req: NextRequest) {
       async (candidate) => !!(await prisma.youth.findUnique({ where: { serial: candidate }, select: { id: true } })),
     );
     const youth = await prisma.youth.create({
-      data: { serial, name, phone: phoneNorm || (phone || null), area: area || null, source: "ONLINE" },
+      data: {
+        serial, name,
+        phone: phoneNorm || (phone || null),
+        area: area || null,
+        dateOfBirth: dob || null,
+        education: education || null,
+        skills: skills || null,
+        ghanaCard: ghanaCard || null,
+        source: "ONLINE",
+      },
     });
     let smsQueued = false;
     if (phoneNorm && smsConfigured()) {
