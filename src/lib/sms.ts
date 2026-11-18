@@ -26,6 +26,15 @@ export function normalizeGhPhone(raw: string | null | undefined): string | null 
   return "+233" + national;
 }
 
+// The web link that rides EVERY outgoing SMS. One editable link: when the
+// custom domain is bought the officer types it once (Content page) and every
+// SMS template - confirmations, updates, reminders, alerts - follows it.
+export async function getSmsLink(): Promise<string> {
+  const t = await prisma.siteText.findUnique({ where: { key: "sms_web_link" }, select: { value: true } });
+  if (t && t.value.trim()) return t.value.trim().slice(0, 120);
+  return process.env.YOUTHDESK_WEB_LINK || process.env.NEXT_PUBLIC_APP_URL || "https://youth-desk-abdul-rashid-dicksons-projects.vercel.app";
+}
+
 // The ONLY SMS the system sends of this kind (fixed template, edit here).
 // Confidentiality: every case gets a private tracking KEY - the number alone
 // no longer opens the case, so a leaked/guessed number reveals nothing.
@@ -63,6 +72,7 @@ export function statusSmsText(caseNumber: string, status: "IN_PROGRESS" | "RESOL
 }
 
 export async function sendStatusSms(caseNumber: string, phone: string | null, status: "IN_PROGRESS" | "RESOLVED"): Promise<void> {
+  const link = await getSmsLink();
   const to = normalizeGhPhone(phone);
   const base = { kind: "STATUS_" + status, caseNumber, phone: to || String(phone ?? "").slice(0, 20) };
   if (!to) {
@@ -79,7 +89,9 @@ export async function sendStatusSms(caseNumber: string, phone: string | null, st
       headers: { "api-key": String(process.env.ARKESEL_API_KEY), "Content-Type": "application/json", "User-Agent": UA },
       body: JSON.stringify({
         sender: process.env.ARKESEL_SENDER || "YOUTHDSK",
-        message: statusSmsText(caseNumber, status),
+        message: status === "RESOLVED"
+          ? `Youth Desk: Update on case ${caseNumber}: your case has been resolved. Thank you for using the Youth Desk. See your outcome on the website: ${link}`
+          : `Youth Desk: Update on case ${caseNumber}: the officer has started working on your case. Track it here: ${link}`,
         recipients: [to],
       }),
       signal: AbortSignal.timeout(20000),
@@ -101,6 +113,7 @@ export async function sendStatusSms(caseNumber: string, phone: string | null, st
 }
 
 export async function sendCaseSms(caseNumber: string, phone: string, trackKey: string): Promise<void> {
+  const link = await getSmsLink();
   const to = normalizeGhPhone(phone);
   const base = { kind: "CASE_CONFIRM", caseNumber, phone: to || String(phone ?? "").slice(0, 20) };
   if (!to) {
@@ -117,7 +130,7 @@ export async function sendCaseSms(caseNumber: string, phone: string, trackKey: s
       headers: { "api-key": String(process.env.ARKESEL_API_KEY), "Content-Type": "application/json", "User-Agent": UA },
       body: JSON.stringify({
         sender: process.env.ARKESEL_SENDER || "YOUTHDSK",
-        message: caseSmsText(caseNumber, trackKey),
+        message: `Youth Desk: Case ${caseNumber} received. Your tracking key: ${trackKey}. Track it here: ${link}. Keep this key private.`, 
         recipients: [to],
       }),
       signal: AbortSignal.timeout(20000),
@@ -148,6 +161,7 @@ export function programmeAlertSmsText(title: string, link: string): string {
 
 // Fire-and-forget programme confirmation SMS (deferred via after()).
 export async function sendProgramSms(programId: number, name: string, phone: string, title: string, deadline?: string | null, venue?: string | null): Promise<void> {
+  const link = await getSmsLink();
   const to = normalizeGhPhone(phone);
   const base = { kind: "PROGRAM_CONFIRM", caseNumber: "PGM-" + programId, phone: to || String(phone ?? "").slice(0, 20) };
   if (!to) {
@@ -162,7 +176,7 @@ export async function sendProgramSms(programId: number, name: string, phone: str
     const res = await fetch(ENDPOINT, {
       method: "POST",
       headers: { "api-key": String(process.env.ARKESEL_API_KEY), "Content-Type": "application/json", "User-Agent": UA },
-      body: JSON.stringify({ sender: process.env.ARKESEL_SENDER || "YOUTHDSK", message: programSmsText(programId, name, title, deadline, venue), recipients: [to] }),
+      body: JSON.stringify({ sender: process.env.ARKESEL_SENDER || "YOUTHDSK", message: programSmsText(programId, name, title, deadline, venue) + ` Details on our website: ${link}`, recipients: [to] }),
       signal: AbortSignal.timeout(20000),
     });
     const j = await res.json().catch(() => ({}));
@@ -177,6 +191,7 @@ export async function sendProgramSms(programId: number, name: string, phone: str
 
 // Fire-and-forget online registration confirmation (deferred via after()).
 export async function sendYouthRegisterSms(serial: string, phone: string): Promise<void> {
+  const link = await getSmsLink();
   const to = normalizeGhPhone(phone);
   const base = { kind: "YOUTH_REGISTER", caseNumber: serial, phone: to || String(phone ?? "").slice(0, 20) };
   if (!to) {
@@ -191,7 +206,7 @@ export async function sendYouthRegisterSms(serial: string, phone: string): Promi
     const res = await fetch(ENDPOINT, {
       method: "POST",
       headers: { "api-key": String(process.env.ARKESEL_API_KEY), "Content-Type": "application/json", "User-Agent": UA },
-      body: JSON.stringify({ sender: process.env.ARKESEL_SENDER || "YOUTHDSK", message: youthRegisterSmsText(serial), recipients: [to] }),
+      body: JSON.stringify({ sender: process.env.ARKESEL_SENDER || "YOUTHDSK", message: youthRegisterSmsText(serial) + ` Youth Desk website: ${link}`, recipients: [to] }),
       signal: AbortSignal.timeout(20000),
     });
     const j = await res.json().catch(() => ({}));

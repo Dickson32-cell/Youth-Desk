@@ -1,15 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifySession, SESSION_COOKIE } from "@/lib/auth";
-import { normalizeGhPhone, programmeAlertSmsText, smsConfigured } from "@/lib/sms";
-
-// Web link for SMS alerts. Override lives in the officer-editable SiteText key
-// sms_web_link (Content page); falls back to env, then the current URL.
-export async function resolveAlertLink(): Promise<string> {
-  const t = await prisma.siteText.findUnique({ where: { key: "sms_web_link" }, select: { value: true } });
-  if (t && t.value.trim()) return t.value.trim().slice(0, 120);
-  return process.env.YOUTHDESK_WEB_LINK || process.env.NEXT_PUBLIC_APP_URL || "https://youth-desk-abdul-rashid-dicksons-projects.vercel.app";
-}
+import { normalizeGhPhone, programmeAlertSmsText, smsConfigured, getSmsLink } from "@/lib/sms";
 
 // GET ?id= : how many registered youth still need the alert for that programme
 export async function GET(req: NextRequest) {
@@ -49,7 +41,7 @@ export async function POST(req: NextRequest) {
   });
   const targets = youths.filter((y) => !doneSet.has(y.id)).slice(0, 40);
 
-  const link = await resolveAlertLink();
+  const link = await getSmsLink();
   let sent = 0, failed = 0;
   for (const y of targets) {
     const to = normalizeGhPhone(y.phone);

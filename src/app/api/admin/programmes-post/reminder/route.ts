@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifySession, SESSION_COOKIE } from "@/lib/auth";
-import { normalizeGhPhone } from "@/lib/sms";
-import { sendProgramSms } from "@/lib/sms";
+import { normalizeGhPhone, sendProgramSms, getSmsLink } from "@/lib/sms";
 
 // Meeting reminder for a published programme: sends ONE reminder SMS to every
 // registrant who has not received it yet (never-twice via reminderSentAt).
@@ -40,6 +39,7 @@ export async function POST(req: NextRequest) {
   // fire each reminder (fire-and-forget pattern is for after(); here we await
   // so the officer gets honest counts - capped at 300 per press, batched)
   let sent = 0;
+  const link = await getSmsLink();
   const title = current?.title || "";
   for (const g of targets) {
     const to = normalizeGhPhone(g.phone);
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
         headers: { "api-key": String(process.env.ARKESEL_API_KEY), "Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 YouthDesk/1.0" },
         body: JSON.stringify({
           sender: process.env.ARKESEL_SENDER || "YOUTHDSK",
-          message: `Youth Desk: Reminder. "${title}"${current?.meetingDate ? ` holds on ${current.meetingDate}` : ""}${current?.venue ? ` at ${current.venue}` : ""}. Please come on time. - Youth Desk NJSMA`,
+          message: `Youth Desk: Reminder. "${title}"${current?.meetingDate ? ` holds on ${current.meetingDate}` : ""}${current?.venue ? ` at ${current.venue}` : ""}. Details: ${link} Please come on time. - Youth Desk NJSMA`,
           recipients: [to],
         }),
         signal: AbortSignal.timeout(20000),
